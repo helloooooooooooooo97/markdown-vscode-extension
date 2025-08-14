@@ -1,0 +1,16 @@
+{
+  "name": "@supernode/shared",
+  "version": "1.0.0",
+  "description": "共享类型和常量",
+  "main": "index.ts",
+  "types": "index.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4",
+    "rimraf": "^5.0.0"
+  }
+}

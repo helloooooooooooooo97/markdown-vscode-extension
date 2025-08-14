@@ -1,0 +1,54 @@
+{
+  "name": "@supernode/extension",
+  "version": "1.0.0",
+  "description": "VSCode 扩展核心",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rimraf dist"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "dependencies": {
+    "@supernode/shared": "file:../shared"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.74.0",
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.0"
+  },
+  "publisher": "supernode",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:supernode.openPreview"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "supernode.openPreview",
+        "title": "打开 Markdown 预览",
+        "category": "Supernode"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "supernode.openPreview",
+          "when": "editorLangId == markdown || editorLangId == mdx"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "supernode.openPreview",
+          "when": "editorLangId == markdown || editorLangId == mdx",
+          "group": "navigation"
+        }
+      ]
+    }
+  }
+}

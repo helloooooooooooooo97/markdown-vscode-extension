@@ -1,0 +1,30 @@
+{
+  "name": "supernode-vscode-extension-new",
+  "version": "1.0.0",
+  "description": "重构后的 VSCode 扩展，具有更好的架构设计",
+  "private": true,
+  "scripts": {
+    "build": "npm run build:shared && npm run build:extension && npm run build:webview",
+    "build:shared": "cd shared && npm run build",
+    "build:extension": "cd extension && npm run build",
+    "build:webview": "cd webview && npm run build",
+    "dev": "concurrently \"npm run dev:extension\" \"npm run dev:webview\"",
+    "dev:extension": "cd extension && npm run watch",
+    "dev:webview": "cd webview && npm run build:watch",
+    "clean": "npm run clean:shared && npm run clean:extension && npm run clean:webview",
+    "clean:shared": "cd shared && npm run clean",
+    "clean:extension": "cd extension && npm run clean",
+    "clean:webview": "cd webview && npm run clean",
+    "install:all": "npm install && npm run install:shared && npm run install:extension && npm run install:webview",
+    "install:shared": "cd shared && npm install",
+    "install:extension": "cd extension && npm install",
+    "install:webview": "cd webview && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}
