@@ -136,6 +136,10 @@ class BlockParser {
     ): { element: React.ReactNode; nextIndex: number } | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith("```")) {
+            // 提取语言标识符
+            const languageMatch = line.trim().match(/^```(\w+)?/);
+            const language = languageMatch ? languageMatch[1] : undefined;
+
             const codeLines: string[] = [];
             let i = startIndex + 1;
 
@@ -154,6 +158,7 @@ class BlockParser {
                     <BlockCode
                         key={`codeblock-${startIndex}`}
                         code={codeLines.join("\n")}
+                        language={language}
                     />
                 ),
                 nextIndex: i,
