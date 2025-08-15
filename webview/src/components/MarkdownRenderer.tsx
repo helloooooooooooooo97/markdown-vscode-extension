@@ -1,5 +1,5 @@
 import React from "react";
-import MarkdownParser from "./Parser";
+import MarkdownParser from "../utils/blockParser";
 
 interface MarkdownRendererProps {
   content: string;

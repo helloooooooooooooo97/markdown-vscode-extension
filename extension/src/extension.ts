@@ -43,6 +43,10 @@ export function activate(context: vscode.ExtensionContext) {
           document.languageId === "markdown" ||
           document.languageId === "mdx"
         ) {
+          // 保存当前 Markdown 文档路径
+          MarkdownWebviewProvider.lastActiveMarkdownPath = document.fileName;
+          console.log("保存 Markdown 文档路径:", document.fileName);
+
           const message: UpdateMarkdownMessage = {
             command: "updateMarkdownContent",
             content: document.getText(),
@@ -94,6 +98,8 @@ export function activate(context: vscode.ExtensionContext) {
 class MarkdownWebviewProvider {
   public static currentPanel: MarkdownWebviewProvider | undefined;
   public static readonly viewType = "markdownPreview";
+  // 保存上一次活跃的 Markdown 文档路径
+  public static lastActiveMarkdownPath: string | undefined;
 
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
@@ -141,10 +147,17 @@ class MarkdownWebviewProvider {
     // 处理来自webview的消息
     this._panel.webview.onDidReceiveMessage(
       (message: WebviewMessage) => {
+        console.log("收到webview消息:", message);
         switch (message.command) {
           case "showMessage":
             vscode.window.showInformationMessage(message.text);
             return;
+          case "openLocalFile":
+            console.log("处理本地文件打开请求:", message.path);
+            this.handleOpenLocalFile(message.path);
+            return;
+          default:
+            console.log("未知消息类型:", message.command);
         }
       },
       null,
@@ -166,6 +179,73 @@ class MarkdownWebviewProvider {
 
   public sendMessage(message: WebviewMessage): void {
     this._panel.webview.postMessage(message);
+  }
+
+  private handleOpenLocalFile(relativePath: string): void {
+    try {
+      console.log("开始处理本地文件打开请求，相对路径:", relativePath);
+
+      // 优先使用保存的 Markdown 文档路径
+      let basePath: string | undefined;
+
+      if (MarkdownWebviewProvider.lastActiveMarkdownPath) {
+        basePath = path.dirname(MarkdownWebviewProvider.lastActiveMarkdownPath);
+        console.log("使用保存的 Markdown 文档路径:", MarkdownWebviewProvider.lastActiveMarkdownPath);
+        console.log("基准目录:", basePath);
+      } else {
+        // 如果没有保存的路径，尝试获取当前活动文档
+        const currentEditor = vscode.window.activeTextEditor;
+        if (currentEditor) {
+          basePath = path.dirname(currentEditor.document.fileName);
+          console.log("使用当前活动文档路径:", currentEditor.document.fileName);
+        } else {
+          // 最后尝试使用工作区根目录
+          const workspaceFolders = vscode.workspace.workspaceFolders;
+          if (workspaceFolders && workspaceFolders.length > 0) {
+            basePath = workspaceFolders[0].uri.fsPath;
+            console.log("使用工作区根目录:", basePath);
+          } else {
+            vscode.window.showErrorMessage("无法获取基准路径");
+            return;
+          }
+        }
+      }
+
+      // 解析相对路径
+      const targetPath = path.resolve(basePath, relativePath);
+      console.log("解析后的目标路径:", targetPath);
+
+      // 检查文件是否存在
+      const fs = require("fs");
+      if (!fs.existsSync(targetPath)) {
+        console.log("文件不存在:", targetPath);
+        vscode.window.showErrorMessage(`文件不存在: ${targetPath}`);
+        return;
+      }
+
+      console.log("文件存在，准备打开:", targetPath);
+
+      // 打开文件
+      vscode.workspace.openTextDocument(targetPath).then(
+        (document) => {
+          console.log("文档已加载，准备显示");
+          vscode.window.showTextDocument(document, {
+            viewColumn: vscode.ViewColumn.One,
+            preview: false
+          }).then(() => {
+            console.log("文件已成功打开");
+            vscode.window.showInformationMessage(`已打开文件: ${path.basename(targetPath)}`);
+          });
+        },
+        (error) => {
+          console.error("无法打开文件:", error);
+          vscode.window.showErrorMessage(`无法打开文件: ${error.message}`);
+        }
+      );
+    } catch (error) {
+      console.error("打开本地文件失败:", error);
+      vscode.window.showErrorMessage(`打开本地文件失败: ${error}`);
+    }
   }
 
   private checkCurrentMarkdownFile(): void {
