@@ -1,0 +1,52 @@
+{
+    "totalFiles": 5,
+    "totalSize": 15420,
+    "filesByExtension": {
+        ".md": 4,
+        ".mdx": 1
+    },
+    "files": [
+        {
+            "fileName": "api-reference.md",
+            "filePath": "/Users/username/project/docs/api-reference.md",
+            "relativePath": "docs/api-reference.md",
+            "size": 3240,
+            "lastModified": "2024-01-15T10:30:00.000Z",
+            "languageId": "markdown"
+        },
+        {
+            "fileName": "getting-started.md",
+            "filePath": "/Users/username/project/docs/getting-started.md",
+            "relativePath": "docs/getting-started.md",
+            "size": 2150,
+            "lastModified": "2024-01-14T14:20:00.000Z",
+            "languageId": "markdown"
+        },
+        {
+            "fileName": "README.md",
+            "filePath": "/Users/username/project/README.md",
+            "relativePath": "README.md",
+            "size": 1890,
+            "lastModified": "2024-01-16T09:15:00.000Z",
+            "languageId": "markdown"
+        },
+        {
+            "fileName": "tutorial.mdx",
+            "filePath": "/Users/username/project/docs/tutorial.mdx",
+            "relativePath": "docs/tutorial.mdx",
+            "size": 6540,
+            "lastModified": "2024-01-13T16:45:00.000Z",
+            "languageId": "mdx"
+        },
+        {
+            "fileName": "user-guide.md",
+            "filePath": "/Users/username/project/docs/user-guide.md",
+            "relativePath": "docs/user-guide.md",
+            "size": 1600,
+            "lastModified": "2024-01-12T11:30:00.000Z",
+            "languageId": "markdown"
+        }
+    ],
+    "scanTime": "2024-01-16T15:30:45.123Z",
+    "workspacePath": "/Users/username/project"
+}

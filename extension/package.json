@@ -53,6 +53,11 @@
         "command": "supernode.openPreview",
         "title": "打开 Markdown 预览",
         "category": "Supernode"
+      },
+      {
+        "command": "supernode.scanMarkdownFiles",
+        "title": "扫描 Markdown 文件",
+        "category": "Supernode"
       }
     ],
     "menus": {

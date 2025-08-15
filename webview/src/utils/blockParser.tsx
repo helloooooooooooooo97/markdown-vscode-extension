@@ -15,7 +15,7 @@ import {
 } from "../components/markdown";
 
 import InlineParser from "./inlineParser";
-import { Block, BlockType } from "../components/store/type";
+import { Block, BlockType } from "../store/markdown/type";
 
 /**
  * 块级解析器类

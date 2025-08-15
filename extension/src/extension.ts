@@ -1,448 +1,64 @@
 import * as vscode from "vscode";
-import * as path from "path";
-
-// 消息类型定义
-interface WebviewMessage {
-  command: string;
-  [key: string]: any;
-}
-
-interface UpdateMarkdownMessage extends WebviewMessage {
-  command: "updateMarkdownContent";
-  content: string;
-  fileName: string;
-}
+import { StatusBarManager } from "./managers/StatusBarManager";
+import { CommandManager } from "./commands/CommandManager";
+import { EventListeners } from "./listeners/EventListeners";
+import { AutoPreviewService } from "./services/AutoPreviewService";
+import { MarkdownWebviewProvider } from "./providers/MarkdownWebviewProvider";
+import { MarkdownFileScannerService } from "./services/MarkdownFileScannerService";
+import { UpdateMarkdownMessage } from "./types/messages";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("Supernode Markdown Extension is now active!");
 
-  // 创建状态栏图标
-  const statusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right,
-    100
-  );
-  statusBarItem.text = "$(eye) 预览";
-  statusBarItem.tooltip = "点击打开 Markdown 预览";
-  statusBarItem.command = "supernode.openPreview";
-  statusBarItem.show();
+  // 初始化各个管理器和服务
+  const statusBarManager = StatusBarManager.getInstance();
+  const commandManager = CommandManager.getInstance();
+  const eventListeners = EventListeners.getInstance();
+  const autoPreviewService = AutoPreviewService.getInstance();
+  const markdownScannerService = MarkdownFileScannerService.getInstance();
 
-  // 注册打开 Markdown 预览面板的命令
-  const openPreviewCommand = vscode.commands.registerCommand(
-    "supernode.openPreview",
-    () => {
-      MarkdownWebviewProvider.createOrShow();
-    }
-  );
+  // 注册命令
+  const commandDisposables = commandManager.registerCommands();
 
-  // 监听文件选择变化
-  const fileChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
-    (editor) => {
-      if (editor && MarkdownWebviewProvider.currentPanel) {
-        const document = editor.document;
-        if (
-          document.languageId === "markdown" ||
-          document.languageId === "mdx"
-        ) {
-          // 保存当前 Markdown 文档路径
-          MarkdownWebviewProvider.lastActiveMarkdownPath = document.fileName;
-          console.log("保存 Markdown 文档路径:", document.fileName);
-
-          const message: UpdateMarkdownMessage = {
-            command: "updateMarkdownContent",
-            content: document.getText(),
-            fileName: document.fileName,
-          };
-          MarkdownWebviewProvider.currentPanel.sendMessage(message);
-        } else {
-          // 如果不是markdown或mdx文件，清空内容
-          const clearMessage: UpdateMarkdownMessage = {
-            command: "updateMarkdownContent",
-            content: "",
-            fileName: "",
-          };
-          MarkdownWebviewProvider.currentPanel.sendMessage(clearMessage);
-        }
-      }
-    }
-  );
-
-  // 监听文档内容变化
-  const documentChangeDisposable = vscode.workspace.onDidChangeTextDocument(
-    (event) => {
+  // 注册事件监听器
+  const fileChangeDisposable = eventListeners.registerFileChangeListener(
+    (message: UpdateMarkdownMessage) => {
       if (MarkdownWebviewProvider.currentPanel) {
-        const document = event.document;
-        if (
-          (document.languageId === "markdown" ||
-            document.languageId === "mdx") &&
-          vscode.window.activeTextEditor?.document === document
-        ) {
-          const message: UpdateMarkdownMessage = {
-            command: "updateMarkdownContent",
-            content: document.getText(),
-            fileName: document.fileName,
-          };
-          MarkdownWebviewProvider.currentPanel.sendMessage(message);
-        }
+        MarkdownWebviewProvider.currentPanel.sendMessage(message);
       }
     }
   );
 
-  // 自动开启预览面板
-  const config = vscode.workspace.getConfiguration('supernode');
-  const autoOpenPreview = config.get<boolean>('autoOpenPreview', true);
-
-  if (autoOpenPreview) {
-    console.log("准备自动开启预览面板...");
-
-    // 智能开启逻辑
-    const openPreview = () => {
-      try {
-        MarkdownWebviewProvider.createOrShow();
-        console.log("预览面板创建成功");
-      } catch (error) {
-        console.error("创建预览面板时出错:", error);
+  const documentChangeDisposable = eventListeners.registerDocumentChangeListener(
+    (message: UpdateMarkdownMessage) => {
+      if (MarkdownWebviewProvider.currentPanel) {
+        MarkdownWebviewProvider.currentPanel.sendMessage(message);
       }
-    };
-
-    // 方法1: 如果当前有 Markdown 文件打开，立即创建
-    const activeEditor = vscode.window.activeTextEditor;
-    if (activeEditor && (activeEditor.document.languageId === "markdown" || activeEditor.document.languageId === "mdx")) {
-      console.log("检测到 Markdown 文件，立即创建预览面板");
-      openPreview();
-    } else {
-      // 方法2: 延迟创建，等待用户操作
-      setTimeout(() => {
-        console.log("延迟创建预览面板...");
-        openPreview();
-      }, 2000);
     }
-  }
+  );
 
+  // 启动自动预览服务
+  autoPreviewService.start();
+
+  // 启动时扫描Markdown文件并输出JSON
+  markdownScannerService.startScanAndExport().catch(error => {
+    console.error("启动时Markdown文件扫描失败:", error);
+  });
+
+  // 将所有可释放资源添加到上下文
   context.subscriptions.push(
-    openPreviewCommand,
+    ...commandDisposables,
     fileChangeDisposable,
     documentChangeDisposable,
-    statusBarItem
+    statusBarManager.getStatusBarItem()
   );
-}
-
-class MarkdownWebviewProvider {
-  public static currentPanel: MarkdownWebviewProvider | undefined;
-  public static readonly viewType = "markdownPreview";
-  // 保存上一次活跃的 Markdown 文档路径
-  public static lastActiveMarkdownPath: string | undefined;
-
-  private readonly _panel: vscode.WebviewPanel;
-  private _disposables: vscode.Disposable[] = [];
-
-  public static createOrShow() {
-    // 获取配置的预览位置
-    const config = vscode.workspace.getConfiguration('supernode');
-    const previewPosition = config.get<string>('previewPosition', 'beside');
-
-    let column: vscode.ViewColumn;
-    const activeEditor = vscode.window.activeTextEditor;
-
-    switch (previewPosition) {
-      case 'active':
-        // 在当前活动编辑器位置显示
-        column = activeEditor ? activeEditor.viewColumn! : vscode.ViewColumn.One;
-        break;
-      case 'second':
-        // 在第二个编辑器组显示
-        column = vscode.ViewColumn.Two;
-        break;
-      case 'beside':
-      default:
-        // 在活动编辑器旁边显示
-        if (activeEditor) {
-          column = activeEditor.viewColumn === vscode.ViewColumn.One
-            ? vscode.ViewColumn.Two
-            : vscode.ViewColumn.One;
-        } else {
-          column = vscode.ViewColumn.Two;
-        }
-        break;
-    }
-
-    // 如果已经有面板存在，就显示它
-    if (MarkdownWebviewProvider.currentPanel) {
-      MarkdownWebviewProvider.currentPanel._panel.reveal(column);
-      return;
-    }
-
-    // 否则，创建一个新的面板
-    const panel = vscode.window.createWebviewPanel(
-      MarkdownWebviewProvider.viewType,
-      "Markdown 预览",
-      column,
-      {
-        enableScripts: true,
-        retainContextWhenHidden: true,
-        localResourceRoots: [
-          vscode.Uri.file(path.join(__dirname, "../../webview/dist")),
-        ],
-      }
-    );
-
-    MarkdownWebviewProvider.currentPanel = new MarkdownWebviewProvider(panel);
-  }
-
-  private constructor(panel: vscode.WebviewPanel) {
-    this._panel = panel;
-
-    // 设置初始HTML内容
-    this._update();
-
-    // 检查当前是否有markdown文件被选中
-    this.checkCurrentMarkdownFile();
-
-    // 监听面板关闭事件
-    this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-
-    // 处理来自webview的消息
-    this._panel.webview.onDidReceiveMessage(
-      (message: WebviewMessage) => {
-        console.log("收到webview消息:", message);
-        switch (message.command) {
-          case "showMessage":
-            vscode.window.showInformationMessage(message.text);
-            return;
-          case "openLocalFile":
-            vscode.window.showInformationMessage(message.path);
-            this.handleOpenLocalFile(message.path);
-            return;
-          case "updateMarkdownContentFromWebview":
-            vscode.window.showInformationMessage(message.content);
-            this.handleUpdateMarkdownContentFromWebview(message.content);
-            return;
-          case "webviewError":
-            console.error("Webview 报告错误:", message.error);
-            if (message.stack) {
-              console.error("错误堆栈:", message.stack);
-            }
-            if (message.filename) {
-              console.error("错误文件:", message.filename, "行:", message.lineno, "列:", message.colno);
-            }
-            vscode.window.showErrorMessage(`预览错误: ${message.error}`);
-            return;
-          case "webviewReady":
-            console.log("Webview 已准备就绪");
-            return;
-          case "debugInfo":
-            console.log("Webview 调试信息:", message.info);
-            return;
-          default:
-            console.log("未知消息类型:", message.command);
-        }
-      },
-      null,
-      this._disposables
-    );
-  }
-
-  public dispose() {
-    MarkdownWebviewProvider.currentPanel = undefined;
-
-    // 清理资源
-    while (this._disposables.length) {
-      const x = this._disposables.pop();
-      if (x) {
-        x.dispose();
-      }
-    }
-  }
-
-  public sendMessage(message: WebviewMessage): void {
-    this._panel.webview.postMessage(message);
-  }
-
-  private handleOpenLocalFile(relativePath: string): void {
-    try {
-      console.log("开始处理本地文件打开请求，相对路径:", relativePath);
-
-      // 优先使用保存的 Markdown 文档路径
-      let basePath: string | undefined;
-
-      if (MarkdownWebviewProvider.lastActiveMarkdownPath) {
-        basePath = path.dirname(MarkdownWebviewProvider.lastActiveMarkdownPath);
-        console.log("使用保存的 Markdown 文档路径:", MarkdownWebviewProvider.lastActiveMarkdownPath);
-        console.log("基准目录:", basePath);
-      } else {
-        // 如果没有保存的路径，尝试获取当前活动文档
-        const currentEditor = vscode.window.activeTextEditor;
-        if (currentEditor) {
-          basePath = path.dirname(currentEditor.document.fileName);
-          console.log("使用当前活动文档路径:", currentEditor.document.fileName);
-        } else {
-          // 最后尝试使用工作区根目录
-          const workspaceFolders = vscode.workspace.workspaceFolders;
-          if (workspaceFolders && workspaceFolders.length > 0) {
-            basePath = workspaceFolders[0].uri.fsPath;
-            console.log("使用工作区根目录:", basePath);
-          } else {
-            vscode.window.showErrorMessage("无法获取基准路径");
-            return;
-          }
-        }
-      }
-
-      // 解析相对路径
-      const targetPath = path.resolve(basePath, relativePath);
-      console.log("解析后的目标路径:", targetPath);
-
-      // 检查文件是否存在
-      const fs = require("fs");
-      if (!fs.existsSync(targetPath)) {
-        console.log("文件不存在:", targetPath);
-        vscode.window.showErrorMessage(`文件不存在: ${targetPath}`);
-        return;
-      }
-
-      console.log("文件存在，准备打开:", targetPath);
-
-      // 打开文件
-      vscode.workspace.openTextDocument(targetPath).then(
-        (document) => {
-          console.log("文档已加载，准备显示");
-          vscode.window.showTextDocument(document, {
-            viewColumn: vscode.ViewColumn.One,
-            preview: false
-          }).then(() => {
-            console.log("文件已成功打开");
-            vscode.window.showInformationMessage(`已打开文件: ${path.basename(targetPath)}`);
-          });
-        },
-        (error) => {
-          console.error("无法打开文件:", error);
-          vscode.window.showErrorMessage(`无法打开文件: ${error.message}`);
-        }
-      );
-    } catch (error) {
-      console.error("打开本地文件失败:", error);
-      vscode.window.showErrorMessage(`打开本地文件失败: ${error}`);
-    }
-  }
-
-  private handleUpdateMarkdownContentFromWebview(content: string): void {
-    console.log("MarkdownWebviewProvider.lastActiveMarkdownPath:", MarkdownWebviewProvider.lastActiveMarkdownPath)
-    console.log("content:", content)
-
-    if (!MarkdownWebviewProvider.lastActiveMarkdownPath) {
-      console.log("没有活跃的 Markdown 文件路径");
-      vscode.window.showErrorMessage("没有找到活跃的 Markdown 文件");
-      return;
-    }
-
-    // 使用 VSCode API 打开文档并更新内容
-    vscode.workspace.openTextDocument(MarkdownWebviewProvider.lastActiveMarkdownPath).then(
-      (document) => {
-        const edit = new vscode.WorkspaceEdit();
-        const fullRange = new vscode.Range(
-          document.positionAt(0),
-          document.positionAt(document.getText().length)
-        );
-        edit.replace(document.uri, fullRange, content);
-
-        vscode.workspace.applyEdit(edit).then(
-          (success) => {
-            if (success) {
-              console.log("成功更新 Markdown 文件内容");
-              vscode.window.showInformationMessage("Markdown 文件已更新");
-            } else {
-              console.error("更新 Markdown 文件失败");
-              vscode.window.showErrorMessage("更新 Markdown 文件失败");
-            }
-          },
-          (error) => {
-            console.error("应用编辑失败:", error);
-            vscode.window.showErrorMessage(`更新失败: ${error.message}`);
-          }
-        );
-      },
-      (error) => {
-        console.error("无法打开文档:", error);
-        vscode.window.showErrorMessage(`无法打开文档: ${error.message}`);
-      }
-    );
-  }
-
-
-  private checkCurrentMarkdownFile(): void {
-    const editor: vscode.TextEditor | undefined =
-      vscode.window.activeTextEditor;
-    if (editor) {
-      const document: vscode.TextDocument = editor.document;
-      if (document.languageId === "markdown" || document.languageId === "mdx") {
-        const content: string = document.getText();
-        const message: UpdateMarkdownMessage = {
-          command: "updateMarkdownContent",
-          content: content,
-          fileName: document.fileName,
-        };
-        this.sendMessage(message);
-      }
-    }
-  }
-
-  private _update() {
-    this._panel.title = "Markdown 预览";
-    this._panel.webview.html = this._getHtmlForWebview();
-  }
-
-  private _getHtmlForWebview() {
-    // 读取HTML文件内容
-    const htmlPath = path.join(__dirname, "../../webview/dist/index.html");
-
-    try {
-      let htmlContent = require("fs").readFileSync(htmlPath, "utf8");
-
-      // 替换资源路径为webview URI
-      const scriptUri = this._panel.webview.asWebviewUri(
-        vscode.Uri.file(
-          path.join(__dirname, "../../webview/dist/assets/index.js")
-        )
-      );
-      const styleUri = this._panel.webview.asWebviewUri(
-        vscode.Uri.file(
-          path.join(__dirname, "../../webview/dist/assets/index.css")
-        )
-      );
-
-      htmlContent = htmlContent
-        .replace("/assets/index.js", scriptUri.toString())
-        .replace("/assets/index.css", styleUri.toString());
-
-      return htmlContent;
-    } catch (error) {
-      // 如果文件读取失败，返回一个简单的HTML
-      return `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Markdown 预览</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: var(--vscode-editor-background);
-      color: var(--vscode-editor-foreground);
-    }
-  </style>
-</head>
-<body>
-  <div id="root">
-    <h1>Markdown 预览</h1>
-    <p>加载中...</p>
-  </div>
-</body>
-</html>`;
-    }
-  }
 }
 
 export function deactivate() {
   console.log("Supernode Markdown Extension is now deactivated!");
+
+  // 清理资源
+  StatusBarManager.getInstance().dispose();
+  CommandManager.getInstance().dispose();
+  EventListeners.getInstance().dispose();
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MarkdownParser from "../utils/blockParser";
-import { useMarkdownStore } from "../components/store/store";
+import { useMarkdownStore } from "../store/markdown/store";
 
 interface MarkdownRendererProps {
   content: string;
