@@ -15,6 +15,7 @@ import {
 } from "../components/markdown";
 
 import InlineParser from "./inlineParser";
+import { Block, BlockType } from "../components/store/type";
 
 /**
  * 块级解析器类
@@ -22,10 +23,26 @@ import InlineParser from "./inlineParser";
 class BlockParser {
     lines: string[];
     elements: React.ReactNode[];
+    blocks: Block[];
 
     constructor(text: string) {
         this.lines = text.split("\n");
         this.elements = [];
+        this.blocks = [];
+    }
+
+    /**
+     * 创建block并生成id
+     */
+    createBlock(lines: string[], startIndex: number, endIndex: number, type: BlockType): Block {
+        const id = `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const block: Block = {
+            id,
+            lines: lines.slice(startIndex, endIndex + 1),
+            type: type
+        };
+        this.blocks.push(block);
+        return block;
     }
 
     /**
@@ -64,10 +81,13 @@ class BlockParser {
                 rows.push(rowCells);
                 i++;
             }
+            // 创建block
+            const block = this.createBlock(this.lines, startIndex, i - 1, BlockType.Table);
+
             return {
                 element: (
                     <BlockTable
-                        key={`table-${startIndex}`}
+                        key={block.id}
                         headers={headerCells}
                         rows={rows}
                     />
@@ -104,8 +124,11 @@ class BlockParser {
                     break;
                 }
             }
+            // 创建block
+            const block = this.createBlock(this.lines, startIndex, j - 1, BlockType.List);
+
             return {
-                element: <BlockList key={`list-${startIndex}`} items={items} />,
+                element: <BlockList key={block.id} items={items} />,
                 nextIndex: j - 1,
             };
         }
@@ -119,8 +142,11 @@ class BlockParser {
         const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
         if (headingMatch) {
             const level = headingMatch[1].length;
+            // 创建block
+            const block = this.createBlock(this.lines, index, index, BlockType.Heading);
+
             return (
-                <BlockHeading key={`heading-${index}`} level={level}>
+                <BlockHeading key={block.id} level={level}>
                     {headingMatch[2]}
                 </BlockHeading>
             );
@@ -153,10 +179,14 @@ class BlockParser {
                 i++;
             }
 
+            // 创建block
+            const block = this.createBlock(this.lines, startIndex, i, BlockType.Code);
+
             return {
                 element: (
                     <BlockCode
-                        key={`codeblock-${startIndex}`}
+                        key={block.id}
+                        blockId={block.id}
                         code={codeLines.join("\n")}
                         language={language}
                     />
@@ -198,10 +228,13 @@ class BlockParser {
                             maxExpand: 1000,
                         });
 
+                        // 创建block
+                        const block = this.createBlock(this.lines, startIndex, i, BlockType.Latex);
+
                         return {
                             element: (
                                 <BlockLatex
-                                    key={`latex-block-${startIndex}`}
+                                    key={block.id}
                                     html={html}
                                     index={startIndex}
                                 />
@@ -210,10 +243,13 @@ class BlockParser {
                         };
                     } catch (error) {
                         console.error("LaTeX Rendering Error:", error);
+                        // 创建block
+                        const block = this.createBlock(this.lines, startIndex, i, BlockType.Latex);
+
                         return {
                             element: (
                                 <BlockLatexError
-                                    key={`latex-block-${startIndex}`}
+                                    key={block.id}
                                     latex={latexLines.join("\n")}
                                     index={startIndex}
                                 />
@@ -261,8 +297,11 @@ class BlockParser {
                 );
             });
 
+            // 创建block
+            const block = this.createBlock(this.lines, startIndex, i, BlockType.Alert);
+
             return {
-                element: <BlockAlert key={`info-block-${startIndex}`} type={type}>{parsedContent}</BlockAlert>,
+                element: <BlockAlert key={block.id} type={type}>{parsedContent}</BlockAlert>,
                 nextIndex: i,
             };
         }
@@ -286,10 +325,13 @@ class BlockParser {
                 const heightMatch = line.match(/height=["']([^"']+)["']/);
                 const sandboxMatch = line.match(/sandbox=["']([^"']+)["']/);
 
+                // 创建block
+                const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Iframe);
+
                 return {
                     element: (
                         <BlockIframe
-                            key={`iframe-${startIndex}`}
+                            key={block.id}
                             src={src}
                             width={widthMatch ? widthMatch[1] : undefined}
                             height={heightMatch ? heightMatch[1] : undefined}
@@ -334,8 +376,11 @@ class BlockParser {
                 frontmatterData = { error: "Failed to parse frontmatter" };
             }
 
+            // 创建block
+            const block = this.createBlock(this.lines, startIndex, i, BlockType.FrontMatter);
+
             return {
-                element: <BlockFrontMatter key={`frontmatter-${startIndex}`} data={frontmatterData} />,
+                element: <BlockFrontMatter key={block.id} data={frontmatterData} />,
                 nextIndex: i,
             };
         }
@@ -346,6 +391,9 @@ class BlockParser {
      * 主解析流程
      */
     parse(): React.ReactNode[] {
+        // 清空之前的blocks
+        this.blocks = [];
+
         // 遍历每一行，逐步解析
         for (let i = 0; i < this.lines.length; i++) {
             let line: string = this.lines[i];
@@ -424,18 +472,30 @@ class BlockParser {
             if (typeof line === "string") {
                 const inlineParts = InlineParser.parseInlineElements(line);
                 if (inlineParts.length > 0) {
+                    // 创建block
+                    const block = this.createBlock(this.lines, i, i, BlockType.Paragraph);
                     this.elements.push(
-                        <BlockParagraph key={`para-${i}`}>{inlineParts}</BlockParagraph>
+                        <BlockParagraph key={block.id}>{inlineParts}</BlockParagraph>
                     );
                 }
                 continue;
             }
-
             // 兜底：如果不是字符串，直接原样包裹
-            this.elements.push(<BlockParagraph key={`para-${i}`}>{line}</BlockParagraph>);
+            // 创建block
+            const block = this.createBlock(this.lines, i, i, BlockType.Paragraph);
+            this.elements.push(<BlockParagraph key={block.id}>{line}</BlockParagraph>);
         }
+
+
         // 返回解析后的所有元素
         return this.elements;
+    }
+
+    /**
+     * 获取解析过程中创建的blocks
+     */
+    getBlocks(): Block[] {
+        return this.blocks;
     }
 }
 

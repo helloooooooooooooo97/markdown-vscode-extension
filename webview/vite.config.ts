@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  logLevel: 'error', // 只显示错误信息，抑制警告
   build: {
     outDir: "dist",
     watch: {
@@ -14,6 +15,18 @@ export default defineConfig({
         entryFileNames: "assets/[name].js",
         chunkFileNames: "assets/[name].js",
         assetFileNames: "assets/[name].[ext]",
+      },
+      onwarn(warning, warn) {
+        // 忽略 "use client" 指令的警告
+        if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && String(warning.message).indexOf('"use client"') !== -1) {
+          return;
+        }
+        // 忽略其他无用的警告
+        if (warning.code === 'UNUSED_EXTERNAL_IMPORT') {
+          return;
+        }
+        // 显示其他重要警告
+        warn(warning);
       },
     },
   },

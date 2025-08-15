@@ -24,9 +24,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onCommand:supernode.openPreview"
-  ],
   "contributes": {
     "commands": [
       {

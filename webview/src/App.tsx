@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import MarkdownRenderer from "./components/MarkdownRenderer";
+import MarkdownRenderer from "./page/MarkdownRenderer";
 import "./App.css";
-
 declare global {
   interface Window {
     acquireVsCodeApi: () => {
@@ -79,6 +78,19 @@ function App() {
     }
   };
 
+  const testUpdateMarkdownContent = () => {
+    if (vscode) {
+      console.log("发送更新Markdown内容测试消息...");
+      vscode.postMessage({
+        command: "updateMarkdownContentFromWebview",
+        content: "Hello, World!",
+        fileName: "test.md"
+      });
+    } else {
+      console.error("VSCode API 未初始化");
+    }
+  };
+
   return (
     <div className="app">
       {/* 测试按钮区域 */}
@@ -116,6 +128,19 @@ function App() {
         >
           测试本地文件链接
         </button>
+        <button
+          onClick={testUpdateMarkdownContent}
+          style={{
+            padding: "8px 16px",
+            background: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          测试更新Markdown内容
+        </button>
         <div style={{ marginTop: "10px", fontSize: "12px", color: "#666" }}>
           VSCode API 状态: {vscode ? "✅ 已初始化" : "❌ 未初始化"}
         </div>
@@ -126,7 +151,9 @@ function App() {
           <p>正在加载 Markdown 内容...</p>
         </div>
       ) : (
-        <MarkdownRenderer content={content} />
+        <>
+          <MarkdownRenderer content={content} />
+        </>
       )}
     </div>
   );

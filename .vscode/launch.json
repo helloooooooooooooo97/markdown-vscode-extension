@@ -3,7 +3,38 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "运行扩展",
+            "name": "🚀 快速启动扩展",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}/extension",
+                "--disable-extensions" // 禁用其他扩展，加快启动
+            ],
+            "outFiles": [
+                "${workspaceFolder}/extension/dist/**/*.js"
+            ],
+            "sourceMaps": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "⚡ 超快速启动（跳过构建）",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}/extension",
+                "--disable-extensions",
+                "--disable-gpu" // 禁用GPU加速
+            ],
+            "outFiles": [
+                "${workspaceFolder}/extension/dist/**/*.js"
+            ],
+            "sourceMaps": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "🔧 开发模式（自动构建）",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",

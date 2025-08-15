@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
-import { EditorView } from '@codemirror/view';
-import { EditorState } from '@codemirror/state';
-import { basicSetup } from 'codemirror';
-import { javascript } from '@codemirror/lang-javascript';
+import React, { useCallback } from 'react';
+import CodeMirror from "@uiw/react-codemirror";
+import { markdown } from "@codemirror/lang-markdown";
+import { json } from "@codemirror/lang-json";
+import { javascript } from "@codemirror/lang-javascript";
 import { python } from '@codemirror/lang-python';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
@@ -12,15 +12,15 @@ import { php } from '@codemirror/lang-php';
 import { sql } from '@codemirror/lang-sql';
 import { html } from '@codemirror/lang-html';
 import { css } from '@codemirror/lang-css';
-import { json } from '@codemirror/lang-json';
-import { markdown } from '@codemirror/lang-markdown';
 import { xml } from '@codemirror/lang-xml';
 import { yaml } from '@codemirror/lang-yaml';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { oneDark } from "@codemirror/theme-one-dark";
+import { useMarkdownStore } from '../store/store';
 
 interface CodeBlockProps {
     code: string;
     language?: string;
+    blockId: string;
 }
 
 const getLanguageExtension = (language?: string) => {
@@ -55,49 +55,31 @@ const getLanguageExtension = (language?: string) => {
     return langMap[language.toLowerCase()] || javascript();
 };
 
-export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language }) => {
-    const editorRef = useRef<HTMLDivElement>(null);
-    const viewRef = useRef<EditorView | null>(null);
-
-    useEffect(() => {
-        if (editorRef.current && !viewRef.current) {
-            const state = EditorState.create({
-                doc: code,
-                extensions: [
-                    basicSetup,
-                    getLanguageExtension(language),
-                    oneDark,
-                    EditorView.updateListener.of((update: any) => {
-                        // 禁用编辑
-                        if (update.docChanged) {
-                            // 可以在这里添加只读逻辑
-                        }
-                    }),
-                ],
-            });
-
-            const view = new EditorView({
-                state,
-                parent: editorRef.current,
-            });
-
-            viewRef.current = view;
-        }
-
-        return () => {
-            if (viewRef.current) {
-                viewRef.current.destroy();
-                viewRef.current = null;
-            }
-        };
-    }, [code, language]);
-
+export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, blockId }) => {
+    const { updateBlock } = useMarkdownStore();
+    const handleChange = useCallback((value: string) => {
+        const newCode = `\`\`\`${language}\n${value}\n\`\`\``;
+        const newLines = newCode.split('\n');
+        updateBlock(blockId, newLines);
+    }, [blockId, updateBlock]);
     return (
-        <div
-            ref={editorRef}
-            className="border rounded-lg overflow-hidden my-4"
-            style={{ fontSize: '14px' }}
-        />
+        <div className="border rounded-lg overflow-hidden my-4 border-gray-300">
+            <CodeMirror
+                value={code}
+                onChange={handleChange}
+                theme={oneDark}
+                extensions={[getLanguageExtension(language)]}
+                basicSetup={{
+                    lineNumbers: true,
+                    highlightActiveLine: true,
+                    foldGutter: true,
+                    highlightActiveLineGutter: true,
+                }}
+                style={{
+                    fontSize: '14px',
+                }}
+            />
+        </div>
     );
 };
 

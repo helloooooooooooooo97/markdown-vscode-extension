@@ -153,8 +153,12 @@ class MarkdownWebviewProvider {
             vscode.window.showInformationMessage(message.text);
             return;
           case "openLocalFile":
-            console.log("处理本地文件打开请求:", message.path);
+            vscode.window.showInformationMessage(message.path);
             this.handleOpenLocalFile(message.path);
+            return;
+          case "updateMarkdownContentFromWebview":
+            vscode.window.showInformationMessage(message.content);
+            this.handleUpdateMarkdownContentFromWebview(message.content);
             return;
           default:
             console.log("未知消息类型:", message.command);
@@ -247,6 +251,50 @@ class MarkdownWebviewProvider {
       vscode.window.showErrorMessage(`打开本地文件失败: ${error}`);
     }
   }
+
+  private handleUpdateMarkdownContentFromWebview(content: string): void {
+    console.log("MarkdownWebviewProvider.lastActiveMarkdownPath:", MarkdownWebviewProvider.lastActiveMarkdownPath)
+    console.log("content:", content)
+
+    if (!MarkdownWebviewProvider.lastActiveMarkdownPath) {
+      console.log("没有活跃的 Markdown 文件路径");
+      vscode.window.showErrorMessage("没有找到活跃的 Markdown 文件");
+      return;
+    }
+
+    // 使用 VSCode API 打开文档并更新内容
+    vscode.workspace.openTextDocument(MarkdownWebviewProvider.lastActiveMarkdownPath).then(
+      (document) => {
+        const edit = new vscode.WorkspaceEdit();
+        const fullRange = new vscode.Range(
+          document.positionAt(0),
+          document.positionAt(document.getText().length)
+        );
+        edit.replace(document.uri, fullRange, content);
+
+        vscode.workspace.applyEdit(edit).then(
+          (success) => {
+            if (success) {
+              console.log("成功更新 Markdown 文件内容");
+              vscode.window.showInformationMessage("Markdown 文件已更新");
+            } else {
+              console.error("更新 Markdown 文件失败");
+              vscode.window.showErrorMessage("更新 Markdown 文件失败");
+            }
+          },
+          (error) => {
+            console.error("应用编辑失败:", error);
+            vscode.window.showErrorMessage(`更新失败: ${error.message}`);
+          }
+        );
+      },
+      (error) => {
+        console.error("无法打开文档:", error);
+        vscode.window.showErrorMessage(`无法打开文档: ${error.message}`);
+      }
+    );
+  }
+
 
   private checkCurrentMarkdownFile(): void {
     const editor: vscode.TextEditor | undefined =
