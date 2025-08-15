@@ -12,7 +12,6 @@ export const BlockLatex = ({
     />
 );
 
-
 export const BlockLatexError = ({
     latex,
     index,
