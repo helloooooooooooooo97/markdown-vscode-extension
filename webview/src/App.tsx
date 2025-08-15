@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { ConfigProvider, theme } from "antd";
 import MarkdownRenderer from "./page/MarkdownRenderer";
 import "./App.css";
 declare global {
@@ -143,84 +144,105 @@ function App() {
   };
 
   return (
-    <div className="app">
-      {/* 测试按钮区域 */}
-      <div style={{
-        padding: "10px",
-        borderBottom: "1px solid #ccc",
-        marginBottom: "10px",
-        background: "#f5f5f5"
+    <ConfigProvider
+      theme={{
+        algorithm: theme.darkAlgorithm,
+        token: {
+          colorBgContainer: '#1e1e1e',
+          colorBgElevated: '#252526',
+          colorBorder: '#404040',
+          colorText: '#cccccc',
+          colorTextSecondary: '#999999',
+          borderRadius: 6,
+        },
+      }}
+    >
+      <div className="app" style={{
+        backgroundColor: '#1e1e1e',
+        color: '#cccccc',
+        minHeight: '100vh',
+        padding: '20px'
       }}>
-        <h3>调试测试区域</h3>
-        <button
-          onClick={testCommunication}
-          style={{
-            marginRight: "10px",
-            padding: "8px 16px",
-            background: "#007acc",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          测试通信
-        </button>
-        <button
-          onClick={testLocalFileLink}
-          style={{
-            padding: "8px 16px",
-            background: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          测试本地文件链接
-        </button>
-        <button
-          onClick={testUpdateMarkdownContent}
-          style={{
-            marginRight: "10px",
-            padding: "8px 16px",
-            background: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          测试更新Markdown内容
-        </button>
-        <button
-          onClick={sendDebugInfo}
-          style={{
-            padding: "8px 16px",
-            background: "#ffc107",
-            color: "black",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer"
-          }}
-        >
-          发送调试信息
-        </button>
-        <div style={{ marginTop: "10px", fontSize: "12px", color: "#666" }}>
-          VSCode API 状态: {vscode ? "✅ 已初始化" : "❌ 未初始化"}
+        {/* 测试按钮区域 */}
+        <div style={{
+          padding: "15px",
+          borderBottom: "1px solid #404040",
+          marginBottom: "15px",
+          background: "#252526",
+          borderRadius: "8px"
+        }}>
+          <h3 style={{ color: '#cccccc', marginBottom: '10px' }}>调试测试区域</h3>
+          <button
+            onClick={testCommunication}
+            style={{
+              marginRight: "10px",
+              padding: "8px 16px",
+              background: "#007acc",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            测试通信
+          </button>
+          <button
+            onClick={testLocalFileLink}
+            style={{
+              marginRight: "10px",
+              padding: "8px 16px",
+              background: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            测试本地文件链接
+          </button>
+          <button
+            onClick={testUpdateMarkdownContent}
+            style={{
+              marginRight: "10px",
+              padding: "8px 16px",
+              background: "#28a745",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            测试更新Markdown内容
+          </button>
+          <button
+            onClick={sendDebugInfo}
+            style={{
+              padding: "8px 16px",
+              background: "#ffc107",
+              color: "black",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer"
+            }}
+          >
+            发送调试信息
+          </button>
+          <div style={{ marginTop: "10px", fontSize: "12px", color: "#999999" }}>
+            VSCode API 状态: {vscode ? "✅ 已初始化" : "❌ 未初始化"}
+          </div>
         </div>
-      </div>
 
-      {isLoading ? (
-        <div className="loading">
-          <p>正在加载 Markdown 内容...</p>
-        </div>
-      ) : (
-        <>
-          <MarkdownRenderer content={content} />
-        </>
-      )}
-    </div>
+        {isLoading ? (
+          <div className="loading" style={{ color: '#cccccc' }}>
+            <p>正在加载 Markdown 内容...</p>
+          </div>
+        ) : (
+          <>
+            <MarkdownRenderer content={content} />
+          </>
+        )}
+      </div>
+    </ConfigProvider>
   );
 }
 

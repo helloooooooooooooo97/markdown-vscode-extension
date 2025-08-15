@@ -7,7 +7,7 @@ interface MarkdownRendererProps {
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
-  const { docs, setDocument } = useMarkdownStore();
+  const { setDocument } = useMarkdownStore();
   const [parsedMarkdown, setParsedMarkdown] = useState<React.ReactNode[]>([]);
 
   useEffect(() => {
@@ -22,16 +22,34 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
 
   if (!content.trim()) {
     return (
-      <div className="markdown-renderer empty">
+      <div className="markdown-renderer empty" style={{
+        textAlign: 'center',
+        padding: '40px',
+        color: '#999999'
+      }}>
         <p>暂无内容</p>
       </div>
     );
   }
 
   return (
-    <div className="markdown-renderer">
+    <div className="markdown-renderer" style={{
+      backgroundColor: '#1e1e1e',
+      color: '#cccccc',
+      lineHeight: '1.6',
+      fontSize: '14px'
+    }}>
       {parsedMarkdown}
-      <pre>{JSON.stringify(docs, null, 2)}</pre>
+      {/* 调试信息 - 可以注释掉 */}
+      {/* <pre style={{ 
+        backgroundColor: '#252526', 
+        padding: '15px', 
+        borderRadius: '6px',
+        fontSize: '12px',
+        overflow: 'auto'
+      }}>
+        {JSON.stringify(docs, null, 2)}
+      </pre> */}
     </div>
   );
 };

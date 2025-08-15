@@ -1,69 +1,60 @@
-// 信息块组件
+import React from 'react';
+import { Alert } from 'antd';
+
+// 类型映射到 Ant Design Alert 的类型
+const getAlertType = (type: string): 'info' | 'warning' | 'error' | 'success' => {
+    const typeKey = type?.toLowerCase() || 'info';
+    switch (typeKey) {
+        case 'warning':
+            return 'warning';
+        case 'error':
+            return 'error';
+        case 'success':
+            return 'success';
+        case 'tip':
+            return 'info';
+        case 'info':
+        default:
+            return 'info';
+    }
+};
+
+// 获取标题
+const getTitle = (type: string): string => {
+    const typeKey = type?.toLowerCase() || 'info';
+    switch (typeKey) {
+        case 'warning':
+            return '警告';
+        case 'error':
+            return '错误';
+        case 'success':
+            return '成功';
+        case 'tip':
+            return '提示';
+        case 'info':
+        default:
+            return '信息';
+    }
+};
+
 export const AlertBlock: React.FC<{
     blockId: string;
     type: string;
     children: React.ReactNode;
 }> = ({ type, children }) => {
-    const getBlockStyle = (type: string) => {
-        const baseStyle = {
-            padding: "12px 16px",
-            margin: "16px 0",
-            borderRadius: "6px",
-            borderLeft: "4px solid",
-        };
-
-        switch (type.toLowerCase()) {
-            case "info":
-                return {
-                    ...baseStyle,
-                    backgroundColor: "#e3f2fd",
-                    borderLeftColor: "#2196f3",
-                    color: "#0d47a1",
-                };
-            case "warning":
-                return {
-                    ...baseStyle,
-                    backgroundColor: "#fff3e0",
-                    borderLeftColor: "#ff9800",
-                    color: "#e65100",
-                };
-            case "error":
-                return {
-                    ...baseStyle,
-                    backgroundColor: "#ffebee",
-                    borderLeftColor: "#f44336",
-                    color: "#c62828",
-                };
-            case "success":
-                return {
-                    ...baseStyle,
-                    backgroundColor: "#e8f5e8",
-                    borderLeftColor: "#4caf50",
-                    color: "#2e7d32",
-                };
-            case "tip":
-                return {
-                    ...baseStyle,
-                    backgroundColor: "#f3e5f5",
-                    borderLeftColor: "#9c27b0",
-                    color: "#6a1b9a",
-                };
-            default:
-                return {
-                    ...baseStyle,
-                    backgroundColor: "#f5f5f5",
-                    borderLeftColor: "#757575",
-                    color: "#424242",
-                };
-        }
-    };
+    const alertType = getAlertType(type);
+    const title = getTitle(type);
 
     return (
-        <div style={getBlockStyle(type)}>
-            <div style={{ fontWeight: "bold", marginBottom: "8px" }}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
-            </div>
-            <div>{children}</div>
+        <div className="my-4">
+            <Alert
+                message={title}
+                description={children}
+                type={alertType}
+                showIcon
+                closable={false}
+                className="border-0 shadow-sm"
+            />
         </div>
     );
 };
