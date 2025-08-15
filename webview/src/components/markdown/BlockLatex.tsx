@@ -7,6 +7,7 @@ export const BlockLatex = ({
 }: {
     html: string;
     index: number | string;
+    blockId: string;
 }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -52,4 +53,5 @@ export const BlockLatexError = ({
 }: {
     latex: string;
     index: number | string;
+    blockId: string;
 }) => <pre key={`latex-block-${index}`}>{latex}</pre>;

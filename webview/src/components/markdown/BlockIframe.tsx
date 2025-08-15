@@ -1,5 +1,3 @@
-
-// iframe 组件
 export const IframeComponent: React.FC<{
     src: string;
     width?: string;
@@ -7,6 +5,7 @@ export const IframeComponent: React.FC<{
     style?: React.CSSProperties;
     sandbox?: string;
     allowfullscreen?: boolean;
+    blockId: string;
 }> = ({
     src,
     width = "100%",

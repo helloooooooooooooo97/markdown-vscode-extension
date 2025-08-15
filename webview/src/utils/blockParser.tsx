@@ -87,6 +87,7 @@ class BlockParser {
             return {
                 element: (
                     <BlockTable
+                        blockId={block.id}
                         key={block.id}
                         headers={headerCells}
                         rows={rows}
@@ -128,7 +129,7 @@ class BlockParser {
             const block = this.createBlock(this.lines, startIndex, j - 1, BlockType.List);
 
             return {
-                element: <BlockList key={block.id} items={items} />,
+                element: <BlockList key={block.id} blockId={block.id} items={items} />,
                 nextIndex: j - 1,
             };
         }
@@ -146,7 +147,7 @@ class BlockParser {
             const block = this.createBlock(this.lines, index, index, BlockType.Heading);
 
             return (
-                <BlockHeading key={block.id} level={level}>
+                <BlockHeading key={block.id} blockId={block.id} level={level}>
                     {headingMatch[2]}
                 </BlockHeading>
             );
@@ -235,6 +236,7 @@ class BlockParser {
                             element: (
                                 <BlockLatex
                                     key={block.id}
+                                    blockId={block.id}
                                     html={html}
                                     index={startIndex}
                                 />
@@ -250,6 +252,7 @@ class BlockParser {
                             element: (
                                 <BlockLatexError
                                     key={block.id}
+                                    blockId={block.id}
                                     latex={latexLines.join("\n")}
                                     index={startIndex}
                                 />
@@ -287,21 +290,21 @@ class BlockParser {
                 infoBlockLines.push(currentLine);
                 i++;
             }
+            // 创建block
+            const block = this.createBlock(this.lines, startIndex, i, BlockType.Alert);
+
             // 解析信息块内的每一行内容
             const parsedContent = infoBlockLines.map((line, lineIndex) => {
                 const inlineParts = InlineParser.parseInlineElements(line);
                 return (
-                    <BlockParagraph key={`info-line-${startIndex}-${lineIndex}`}>
+                    <BlockParagraph key={`info-line-${startIndex}-${lineIndex}`} blockId={block.id}>
                         {inlineParts}
                     </BlockParagraph>
                 );
             });
 
-            // 创建block
-            const block = this.createBlock(this.lines, startIndex, i, BlockType.Alert);
-
             return {
-                element: <BlockAlert key={block.id} type={type}>{parsedContent}</BlockAlert>,
+                element: <BlockAlert key={block.id} blockId={block.id} type={type}>{parsedContent}</BlockAlert>,
                 nextIndex: i,
             };
         }
@@ -332,6 +335,7 @@ class BlockParser {
                     element: (
                         <BlockIframe
                             key={block.id}
+                            blockId={block.id}
                             src={src}
                             width={widthMatch ? widthMatch[1] : undefined}
                             height={heightMatch ? heightMatch[1] : undefined}
@@ -380,7 +384,7 @@ class BlockParser {
             const block = this.createBlock(this.lines, startIndex, i, BlockType.FrontMatter);
 
             return {
-                element: <BlockFrontMatter key={block.id} data={frontmatterData} />,
+                element: <BlockFrontMatter key={block.id} blockId={block.id} data={frontmatterData} />,
                 nextIndex: i,
             };
         }
@@ -475,7 +479,7 @@ class BlockParser {
                     // 创建block
                     const block = this.createBlock(this.lines, i, i, BlockType.Paragraph);
                     this.elements.push(
-                        <BlockParagraph key={block.id}>{inlineParts}</BlockParagraph>
+                        <BlockParagraph key={block.id} blockId={block.id}>{inlineParts}</BlockParagraph>
                     );
                 }
                 continue;
@@ -483,7 +487,7 @@ class BlockParser {
             // 兜底：如果不是字符串，直接原样包裹
             // 创建block
             const block = this.createBlock(this.lines, i, i, BlockType.Paragraph);
-            this.elements.push(<BlockParagraph key={block.id}>{line}</BlockParagraph>);
+            this.elements.push(<BlockParagraph key={block.id} blockId={block.id}>{line}</BlockParagraph>);
         }
 
 

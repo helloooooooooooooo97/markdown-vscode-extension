@@ -2,6 +2,7 @@
 export const Table: React.FC<{
     headers: React.ReactNode[];
     rows: React.ReactNode[][];
+    blockId: string;
 }> = ({ headers, rows }) => (
     <table style={{ borderCollapse: "collapse", width: "100%", margin: "8px 0" }}>
         <thead>

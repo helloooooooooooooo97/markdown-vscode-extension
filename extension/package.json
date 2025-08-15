@@ -24,7 +24,30 @@
   "categories": [
     "Other"
   ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
+    "configuration": {
+      "title": "Supernode Markdown Extension",
+      "properties": {
+        "supernode.autoOpenPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否在扩展激活时自动开启预览面板"
+        },
+        "supernode.previewPosition": {
+          "type": "string",
+          "enum": [
+            "beside",
+            "active",
+            "second"
+          ],
+          "default": "beside",
+          "description": "预览面板的显示位置"
+        }
+      }
+    },
     "commands": [
       {
         "command": "supernode.openPreview",

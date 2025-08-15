@@ -87,6 +87,37 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // 自动开启预览面板
+  const config = vscode.workspace.getConfiguration('supernode');
+  const autoOpenPreview = config.get<boolean>('autoOpenPreview', true);
+
+  if (autoOpenPreview) {
+    console.log("准备自动开启预览面板...");
+
+    // 智能开启逻辑
+    const openPreview = () => {
+      try {
+        MarkdownWebviewProvider.createOrShow();
+        console.log("预览面板创建成功");
+      } catch (error) {
+        console.error("创建预览面板时出错:", error);
+      }
+    };
+
+    // 方法1: 如果当前有 Markdown 文件打开，立即创建
+    const activeEditor = vscode.window.activeTextEditor;
+    if (activeEditor && (activeEditor.document.languageId === "markdown" || activeEditor.document.languageId === "mdx")) {
+      console.log("检测到 Markdown 文件，立即创建预览面板");
+      openPreview();
+    } else {
+      // 方法2: 延迟创建，等待用户操作
+      setTimeout(() => {
+        console.log("延迟创建预览面板...");
+        openPreview();
+      }, 2000);
+    }
+  }
+
   context.subscriptions.push(
     openPreviewCommand,
     fileChangeDisposable,
@@ -105,9 +136,34 @@ class MarkdownWebviewProvider {
   private _disposables: vscode.Disposable[] = [];
 
   public static createOrShow() {
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined;
+    // 获取配置的预览位置
+    const config = vscode.workspace.getConfiguration('supernode');
+    const previewPosition = config.get<string>('previewPosition', 'beside');
+
+    let column: vscode.ViewColumn;
+    const activeEditor = vscode.window.activeTextEditor;
+
+    switch (previewPosition) {
+      case 'active':
+        // 在当前活动编辑器位置显示
+        column = activeEditor ? activeEditor.viewColumn! : vscode.ViewColumn.One;
+        break;
+      case 'second':
+        // 在第二个编辑器组显示
+        column = vscode.ViewColumn.Two;
+        break;
+      case 'beside':
+      default:
+        // 在活动编辑器旁边显示
+        if (activeEditor) {
+          column = activeEditor.viewColumn === vscode.ViewColumn.One
+            ? vscode.ViewColumn.Two
+            : vscode.ViewColumn.One;
+        } else {
+          column = vscode.ViewColumn.Two;
+        }
+        break;
+    }
 
     // 如果已经有面板存在，就显示它
     if (MarkdownWebviewProvider.currentPanel) {
@@ -119,7 +175,7 @@ class MarkdownWebviewProvider {
     const panel = vscode.window.createWebviewPanel(
       MarkdownWebviewProvider.viewType,
       "Markdown 预览",
-      column || vscode.ViewColumn.Two,
+      column,
       {
         enableScripts: true,
         retainContextWhenHidden: true,
@@ -159,6 +215,22 @@ class MarkdownWebviewProvider {
           case "updateMarkdownContentFromWebview":
             vscode.window.showInformationMessage(message.content);
             this.handleUpdateMarkdownContentFromWebview(message.content);
+            return;
+          case "webviewError":
+            console.error("Webview 报告错误:", message.error);
+            if (message.stack) {
+              console.error("错误堆栈:", message.stack);
+            }
+            if (message.filename) {
+              console.error("错误文件:", message.filename, "行:", message.lineno, "列:", message.colno);
+            }
+            vscode.window.showErrorMessage(`预览错误: ${message.error}`);
+            return;
+          case "webviewReady":
+            console.log("Webview 已准备就绪");
+            return;
+          case "debugInfo":
+            console.log("Webview 调试信息:", message.info);
             return;
           default:
             console.log("未知消息类型:", message.command);

@@ -1,5 +1,6 @@
 // Frontmatter 组件
 export const FrontmatterComponent: React.FC<{
+    blockId: string;
     data: Record<string, any>;
 }> = ({ data }) => {
     return (

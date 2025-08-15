@@ -1,5 +1,6 @@
 // 信息块组件
 export const AlertBlock: React.FC<{
+    blockId: string;
     type: string;
     children: React.ReactNode;
 }> = ({ type, children }) => {

@@ -26,6 +26,11 @@ function App() {
       setVscode(vscodeApi);
       // 同时设置到全局变量，供其他组件使用
       window.vscode = vscodeApi;
+
+      // 通知扩展 webview 已准备就绪
+      vscodeApi.postMessage({
+        command: "webviewReady"
+      });
     }
   }, []);
 
@@ -45,10 +50,41 @@ function App() {
       }
     };
 
+    // 全局错误处理
+    const handleError = (event: ErrorEvent) => {
+      console.error("Webview 错误:", event.error);
+      if (window.vscode) {
+        window.vscode.postMessage({
+          command: "webviewError",
+          error: event.error?.message || event.message || "未知错误",
+          stack: event.error?.stack,
+          filename: event.filename,
+          lineno: event.lineno,
+          colno: event.colno
+        });
+      }
+    };
+
+    // 未处理的 Promise 拒绝
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error("未处理的 Promise 拒绝:", event.reason);
+      if (window.vscode) {
+        window.vscode.postMessage({
+          command: "webviewError",
+          error: `Promise 拒绝: ${event.reason}`,
+          type: "unhandledRejection"
+        });
+      }
+    };
+
     window.addEventListener("message", handleMessage);
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
 
     return () => {
       window.removeEventListener("message", handleMessage);
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
     };
   }, []);
 
@@ -88,6 +124,21 @@ function App() {
       });
     } else {
       console.error("VSCode API 未初始化");
+    }
+  };
+
+  // 发送调试信息
+  const sendDebugInfo = () => {
+    if (vscode) {
+      vscode.postMessage({
+        command: "debugInfo",
+        info: {
+          userAgent: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+          contentLength: content.length,
+          isLoading
+        }
+      });
     }
   };
 
@@ -131,6 +182,7 @@ function App() {
         <button
           onClick={testUpdateMarkdownContent}
           style={{
+            marginRight: "10px",
             padding: "8px 16px",
             background: "#28a745",
             color: "white",
@@ -140,6 +192,19 @@ function App() {
           }}
         >
           测试更新Markdown内容
+        </button>
+        <button
+          onClick={sendDebugInfo}
+          style={{
+            padding: "8px 16px",
+            background: "#ffc107",
+            color: "black",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer"
+          }}
+        >
+          发送调试信息
         </button>
         <div style={{ marginTop: "10px", fontSize: "12px", color: "#666" }}>
           VSCode API 状态: {vscode ? "✅ 已初始化" : "❌ 未初始化"}
