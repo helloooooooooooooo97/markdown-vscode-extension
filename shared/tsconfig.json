@@ -5,23 +5,24 @@
     "lib": [
       "ES2020"
     ],
-    "types": [
-      "node"
-    ],
     "declaration": true,
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "noEmit": false,
-    "emitDeclarationOnly": false
+    "emitDeclarationOnly": false,
+    "moduleResolution": "node"
   },
   "include": [
-    "src/**/*"
+    "message/**/*",
+    "schema/**/*",
+    "index.ts"
   ],
   "exclude": [
     "node_modules",
