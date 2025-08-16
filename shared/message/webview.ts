@@ -13,6 +13,7 @@ export enum WebviewCommand {
 export interface UpdateMarkdownContentFromWebviewMessage extends WebviewMessage {
     command: WebviewCommand.updateMarkdownContentFromWebview;
     content: string;
+    fileName?: string;
 }
 
 // WebView 错误消息

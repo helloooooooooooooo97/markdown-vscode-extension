@@ -3,31 +3,24 @@ import * as path from "path";
 import { ConfigurationManager } from "../managers/ConfigurationManager";
 import { FileManager } from "../managers/FileManager";
 import { CommunicationLogger } from "../managers/CommunicationLogger";
+import { MessageRouter } from "../routers";
+import { HandlerFactory } from "../factories";
 import {
     WebviewMessage,
     UpdateMarkdownMessage,
-    ShowMessage,
-    OpenLocalFileMessage,
-    UpdateMarkdownContentFromWebviewMessage,
-    WebviewErrorMessage,
-    WebviewReadyMessage,
-    DebugInfoMessage,
     ExtensionCommand
 } from "@supernode/shared";
 
 export class MarkdownWebviewProvider {
     public static currentPanel: MarkdownWebviewProvider | undefined;
     public static readonly viewType = "markdownPreview";
-    // 保存上一次活跃的 Markdown 文档路径
-    public static lastActiveMarkdownPath: string | undefined;
-    // 保存扩展上下文
     public static extensionContext: vscode.ExtensionContext | undefined;
 
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
-    private configManager: ConfigurationManager;
     private fileManager: FileManager;
     private communicationLogger: CommunicationLogger;
+    private messageRouter!: MessageRouter;
 
     public static createOrShow() {
         const configManager = ConfigurationManager.getInstance();
@@ -86,9 +79,11 @@ export class MarkdownWebviewProvider {
 
     private constructor(panel: vscode.WebviewPanel) {
         this._panel = panel;
-        this.configManager = ConfigurationManager.getInstance();
         this.fileManager = FileManager.getInstance();
         this.communicationLogger = CommunicationLogger.getInstance();
+
+        // 初始化消息路由
+        this.initializeMessageRouter();
 
         // 设置初始HTML内容
         this._update();
@@ -123,94 +118,35 @@ export class MarkdownWebviewProvider {
 
     public sendMessage(message: WebviewMessage): void {
         // 记录发送到webview的消息
-        this.communicationLogger.logExtensionToWebview(message, MarkdownWebviewProvider.lastActiveMarkdownPath);
+        this.communicationLogger.logExtensionToWebview(message, message.fileName);
         this._panel.webview.postMessage(message);
+    }
+
+    /**
+     * 初始化消息路由
+     */
+    private initializeMessageRouter(): void {
+        if (!MarkdownWebviewProvider.extensionContext) {
+            console.error("扩展上下文未设置");
+            return;
+        }
+
+        this.messageRouter = new MessageRouter(MarkdownWebviewProvider.extensionContext);
+        const handlerFactory = new HandlerFactory(MarkdownWebviewProvider.extensionContext);
+        const handlers = handlerFactory.createAllHandlers();
+        this.messageRouter.registerMultipleHandlers(handlers);
     }
 
     /**
      * 处理来自 WebView 的消息
      */
-    private handleWebviewMessage(message: WebviewMessage): void {
+    private async handleWebviewMessage(message: WebviewMessage): Promise<void> {
         // 记录从webview接收的消息
-        this.communicationLogger.logWebviewToExtension(message, MarkdownWebviewProvider.lastActiveMarkdownPath);
+        this.communicationLogger.logWebviewToExtension(message, message.fileName);
         console.log("收到webview消息:", message);
 
-        switch (message.command) {
-            case "showMessage":
-                this.handleShowMessage(message as ShowMessage);
-                break;
-            case "openLocalFile":
-                this.handleOpenLocalFile(message as OpenLocalFileMessage);
-                break;
-            case "updateMarkdownContentFromWebview":
-                this.handleUpdateMarkdownContentFromWebview(message as UpdateMarkdownContentFromWebviewMessage);
-                break;
-            case "webviewError":
-                this.handleWebviewError(message as WebviewErrorMessage);
-                break;
-            case "webviewReady":
-                this.handleWebviewReady(message as WebviewReadyMessage);
-                break;
-            case "debugInfo":
-                this.handleDebugInfo(message as DebugInfoMessage);
-                break;
-            default:
-                console.log("未知消息类型:", message.command);
-        }
-    }
-
-    /**
-     * 处理显示消息
-     */
-    private handleShowMessage(message: ShowMessage): void {
-        vscode.window.showInformationMessage(message.text);
-    }
-
-    /**
-     * 处理打开本地文件
-     */
-    private handleOpenLocalFile(message: OpenLocalFileMessage): void {
-        vscode.window.showInformationMessage(message.path);
-        this.fileManager.openLocalFile(message.path, MarkdownWebviewProvider.lastActiveMarkdownPath);
-    }
-
-    /**
-     * 处理从 WebView 更新 Markdown 内容
-     */
-    private async handleUpdateMarkdownContentFromWebview(message: UpdateMarkdownContentFromWebviewMessage): Promise<void> {
-        vscode.window.showInformationMessage(message.content);
-        await this.fileManager.updateMarkdownContent(
-            MarkdownWebviewProvider.lastActiveMarkdownPath!,
-            message.content
-        );
-    }
-
-    /**
-     * 处理 WebView 错误
-     */
-    private handleWebviewError(message: WebviewErrorMessage): void {
-        console.error("Webview 报告错误:", message.error);
-        if (message.stack) {
-            console.error("错误堆栈:", message.stack);
-        }
-        if (message.filename) {
-            console.error("错误文件:", message.filename, "行:", message.lineno, "列:", message.colno);
-        }
-        vscode.window.showErrorMessage(`预览错误: ${message.error}`);
-    }
-
-    /**
-     * 处理 WebView 准备就绪
-     */
-    private handleWebviewReady(message: WebviewReadyMessage): void {
-        console.log("Webview 已准备就绪");
-    }
-
-    /**
-     * 处理调试信息
-     */
-    private handleDebugInfo(message: DebugInfoMessage): void {
-        console.log("Webview 调试信息:", message.info);
+        // 使用消息路由器处理消息
+        await this.messageRouter.routeMessage(message);
     }
 
     /**
@@ -316,4 +252,5 @@ export class MarkdownWebviewProvider {
 </body>
 </html>`;
     }
-} 
+}
+

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ConfigProvider, theme } from "antd";
 import MarkdownRenderer from "./page/MarkdownRenderer";
+import { useMarkdownStore } from "./store/markdown/store";
 import "./App.css";
 declare global {
   interface Window {
@@ -19,6 +20,7 @@ function App() {
   const [content, setContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [vscode, setVscode] = useState<any>(null);
+  const { setCurrentFileName } = useMarkdownStore();
 
   // 初始化 VSCode API
   useEffect(() => {
@@ -43,6 +45,10 @@ function App() {
       switch (message.command) {
         case "updateMarkdownContent":
           setContent(message.content || "");
+          // 设置当前文件路径
+          if (message.fileName) {
+            setCurrentFileName(message.fileName);
+          }
           setIsLoading(false);
           break;
         case "showMessage":

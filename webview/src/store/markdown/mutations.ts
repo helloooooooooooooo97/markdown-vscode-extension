@@ -6,6 +6,7 @@ export interface MarkdownMutations {
     setDocument: (blocks: Block[]) => void;
     updateBlock: (id: string, lines: string[]) => void;
     generateBlockId: () => string;
+    setCurrentFileName: (fileName: string) => void;
 }
 
 // Mutations 操作实现
@@ -26,7 +27,14 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
             window?.vscode?.postMessage({
                 command: 'updateMarkdownContentFromWebview',
                 content: state.docs.map((b: Block) => b.lines.join('\n')).join('\n'),
+                fileName: state.currentFileName, // 添加文件路径
             });
+        });
+    },
+
+    setCurrentFileName: (fileName: string) => {
+        set((state) => {
+            state.currentFileName = fileName;
         });
     },
 

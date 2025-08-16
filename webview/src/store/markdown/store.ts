@@ -9,6 +9,7 @@ import { createQueries, MarkdownQueries } from './queries';
 // 状态接口
 export interface MarkdownStore {
     docs: Block[];
+    currentFileName: string; // 当前文件的路径
 }
 
 // 类型定义
@@ -21,6 +22,7 @@ export const useMarkdownStore = create<useMarkdownStoreType>()(
     immer((set, get) => ({
         // 初始状态
         docs: [],
+        currentFileName: "", // 当前文件的路径
         // 组合所有操作
         ...createMutations(set, get),
         ...createQueries(get)
