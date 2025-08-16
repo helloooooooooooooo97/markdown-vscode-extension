@@ -11,6 +11,7 @@
     "clean": "rimraf dist"
   },
   "dependencies": {
+    "@supernode/shared": "file:../shared",
     "@ant-design/icons": "^6.0.0",
     "@codemirror/basic-setup": "^0.20.0",
     "@codemirror/commands": "^6.8.1",

@@ -8,7 +8,7 @@ import {
     WebviewMessage,
     UpdateMarkdownMessage,
     ExtensionCommand
-} from "@supernode/shared";
+} from "@supernode/shared/src";
 
 export class MarkdownWebviewProvider {
     public static currentPanel: MarkdownWebviewProvider | undefined;

@@ -1,5 +1,5 @@
 import { useMarkdownStore } from '../../store/markdown/store';
-import { ExtensionCommand, UpdateMarkdownMessage } from '@supernode/shared';
+import { ExtensionCommand, UpdateMarkdownMessage } from '@supernode/shared/src';
 
 export class MessageReceiveHandler {
     init(): void {

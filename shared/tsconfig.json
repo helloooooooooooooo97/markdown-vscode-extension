@@ -21,11 +21,7 @@
     "emitDeclarationOnly": false
   },
   "include": [
-    "constants/**/*",
-    "types/**/*",
-    "schema/**/*",
-    "pipeline/**/*",
-    "index.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

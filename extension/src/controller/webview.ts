@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage } from "@supernode/shared";
+import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage } from "@supernode/shared/src";
 import { FileManager } from "../service/file";
 
 export class MessageHandler {

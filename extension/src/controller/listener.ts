@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { FileManager } from "../service/file";
-import { ExtensionCommand, UpdateMarkdownMessage } from "@supernode/shared";
+import { ExtensionCommand, UpdateMarkdownMessage } from "@supernode/shared/src";
 import { MarkdownWebviewProvider } from "../event/webview";
 
 /**

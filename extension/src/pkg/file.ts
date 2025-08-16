@@ -1,5 +1,5 @@
 import fs from "fs";
-import { FileMetadata, Relation, FrontMatter, MarkdownHeading } from "@supernode/shared/schema/file/schema";
+import { FileMetadata, Relation, FrontMatter, MarkdownHeading } from "@supernode/shared/src";
 import matter from "gray-matter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";

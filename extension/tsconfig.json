@@ -16,17 +16,12 @@
     "declarationMap": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "paths": {
-      "@supernode/shared/*": [
-        "../shared/*"
-      ]
-    },
+    "paths": {},
     "composite": false,
     "noEmitOnError": false
   },
   "include": [
-    "src/**/*",
-    "../shared/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
