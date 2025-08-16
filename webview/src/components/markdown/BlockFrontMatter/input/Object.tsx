@@ -1,8 +1,7 @@
-import React from 'react';
-import { Typography, Input } from 'antd';
+import React, { useState } from 'react';
+import { Typography, Input, Modal, Button } from 'antd';
 const { Text } = Typography;
 const { TextArea } = Input;
-
 
 // 对象类型输入组件
 const ObjectInput: React.FC<{
@@ -11,38 +10,98 @@ const ObjectInput: React.FC<{
     onValueChange: (newValue: object) => void;
     onEditStart: () => void;
     onEditEnd: () => void;
-}> = ({ value, isEditing, onValueChange, onEditStart, onEditEnd }) => {
-    if (isEditing) {
-        return (
-            <TextArea
-                value={JSON.stringify(value, null, 2)}
-                onChange={(e) => {
-                    try {
-                        const parsed = JSON.parse(e.target.value);
-                        onValueChange(parsed);
-                    } catch {
-                        // 如果解析失败，保持原值
-                    }
-                }}
-                onBlur={onEditEnd}
-                onPressEnter={onEditEnd}
-                autoSize={{ minRows: 3, maxRows: 6 }}
-                placeholder="输入有效的JSON格式"
-                autoFocus
-            />
-        );
-    }
+}> = ({ value, onValueChange, onEditStart, onEditEnd }) => {
+    const [modalVisible, setModalVisible] = useState(false);
+    const [tempValue, setTempValue] = useState(JSON.stringify(value, null, 2));
+    const [isValid, setIsValid] = useState(true);
+
+    const handleEditStart = () => {
+        setTempValue(JSON.stringify(value, null, 2));
+        setIsValid(true);
+        setModalVisible(true);
+        onEditStart();
+    };
+
+    const handleEditEnd = () => {
+        setModalVisible(false);
+        onEditEnd();
+    };
+
+    const handleSave = () => {
+        try {
+            const parsed = JSON.parse(tempValue);
+            onValueChange(parsed);
+            handleEditEnd();
+        } catch (error) {
+            setIsValid(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setTempValue(JSON.stringify(value, null, 2));
+        setIsValid(true);
+        handleEditEnd();
+    };
+
+    const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        const newValue = e.target.value;
+        setTempValue(newValue);
+
+        try {
+            JSON.parse(newValue);
+            setIsValid(true);
+        } catch {
+            setIsValid(false);
+        }
+    };
 
     return (
-        <Text
-            code
-            className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
-            onClick={onEditStart}
-        >
-            {JSON.stringify(value)}
-        </Text>
+        <>
+            <Text
+                code
+                className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
+                onClick={handleEditStart}
+            >
+                {JSON.stringify(value)}
+            </Text>
+
+            <Modal
+                title="编辑JSON对象"
+                open={modalVisible}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="cancel" onClick={handleCancel}>
+                        取消
+                    </Button>,
+                    <Button
+                        key="save"
+                        type="primary"
+                        onClick={handleSave}
+                        disabled={!isValid}
+                    >
+                        保存
+                    </Button>
+                ]}
+                width={600}
+            >
+                <div className="space-y-4">
+                    <TextArea
+                        value={tempValue}
+                        onChange={handleTextChange}
+                        autoSize={{ minRows: 10, maxRows: 20 }}
+                        placeholder="输入有效的JSON格式"
+                        autoFocus
+                        status={isValid ? undefined : 'error'}
+                    />
+                    {!isValid && (
+                        <Text type="danger" className="text-sm">
+                            请输入有效的JSON格式
+                        </Text>
+                    )}
+                </div>
+            </Modal>
+        </>
     );
 };
-
 
 export default ObjectInput;
