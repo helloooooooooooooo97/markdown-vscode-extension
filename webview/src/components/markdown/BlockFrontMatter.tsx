@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Tag, Typography, Space, Card, Input, DatePicker, Switch } from 'antd';
 import {
     UnorderedListOutlined,
@@ -8,7 +8,6 @@ import {
     NumberOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import useMarkdownStore from '../../store/markdown/store';
 
 const { Text } = Typography;
 const { TextArea } = Input;
@@ -172,50 +171,30 @@ const renderPropertyValue = (
 
 // Frontmatter 组件 - 根据数据类型展示
 export const FrontmatterComponent: React.FC<{
-    blockId: string;
     data: Record<string, any>;
-}> = ({ blockId, data }) => {
-    const [editingKey, setEditingKey] = useState<string | null>(null);
-    const [editingData, setEditingData] = useState<Record<string, any>>({});
-    const { updateBlock } = useMarkdownStore();
-
-    // 更新编辑中的值
-    const updateEditingValue = (key: string, value: any) => {
-        setEditingData(prev => ({ ...prev, [key]: value }));
-    };
+    blockId: string;
+}> = ({ data }) => {
 
     return (
-        <Card
-            size="small"
-        >
-            <div className='border-b bg-blue-200 pb-2'>  21312</div>
+        <div className="bg-zinc-900 rounded-md p-4 border border-zinc-700">
             {Object.entries(data).map(([key, value]) => {
                 const dataType = getDataType(value);
-                const isEditing = editingKey === key;
 
                 return (
-                    <div key={key} style={{
-                        display: 'flex',
-                        alignItems: 'flex-between',
-                        gap: '12px',
-                    }}>
+                    <div
+                        key={key}
+                        className="flex items-center gap-3 last:mb-0"
+                    >
                         {/* 图标 */}
-                        <div style={{
-                            color: '#8c8c8c',
-                            fontSize: '16px',
-                            minWidth: '20px',
-                            marginTop: '2px'
-                        }}>
+                        <div className="text-zinc-400 text-base min-w-[20px] mt-[2px]">
                             {getTypeIcon(dataType)}
                         </div>
                         {/* 值展示/编辑区域 */}
-                        {renderPropertyValue(key, value, isEditing, (newValue) =>
-                            updateEditingValue(key, newValue)
-                        )}
+                        {renderPropertyValue(key, value, false, () => { })}
                     </div>
                 );
             })}
-        </Card>
+        </div>
     );
 };
 

@@ -7,6 +7,7 @@ const testMarkdown = `
 ---
 title: 测试
 date: 2021-01-01
+tags: [1, 2, 3]
 ---
 
 # 测试
@@ -34,8 +35,8 @@ const MarkdownRenderer: React.FC = () => {
     }, [content, isLoading]);
 
     return (
-        <div className="markdown-renderer">
-            <div className="text-sm text-black">{currentFileName}</div>
+        <div>
+            <div>{currentFileName}</div>
             {parsedMarkdown}
         </div>
     );

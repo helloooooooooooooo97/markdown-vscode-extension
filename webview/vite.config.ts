@@ -21,10 +21,6 @@ export default defineConfig({
         if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && String(warning.message).indexOf('"use client"') !== -1) {
           return;
         }
-        // 忽略其他无用的警告
-        if (warning.code === 'UNUSED_EXTERNAL_IMPORT') {
-          return;
-        }
         // 显示其他重要警告
         warn(warning);
       },
