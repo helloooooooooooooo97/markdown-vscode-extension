@@ -2,7 +2,7 @@
   "name": "@supernode/extension",
   "version": "1.0.0",
   "description": "VSCode 扩展核心",
-  "main": "./dist/extension/src/extension.js",
+  "main": "./dist/index.js",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",

@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { StatusBarManager } from "./service/StatusBarManager";
+import { StatusBarManager } from "./service/layout/status_bar";
 import { CommandManager } from "./event/command";
 import { EventListeners } from "./event/listener";
 import { AutoPreviewService } from "./service/auto_preview";

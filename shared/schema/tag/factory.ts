@@ -2,7 +2,7 @@ import { TagMetadata, Tag, TagLevel } from "./schema";
 import { FileMetadata, MarkdownHeading } from "../file/schema";
 
 export class TagExtractor {
-  static extractTags(fileMetaDatas: FileMetadata[]): TagMetadata[] {
+  static extract(fileMetaDatas: FileMetadata[]): TagMetadata[] {
     const tags = this.extractTagsOfHeadingLevel(fileMetaDatas);
     const docTags = this.extractTagsOfDocumentLevel(fileMetaDatas);
     return [...tags, ...docTags];

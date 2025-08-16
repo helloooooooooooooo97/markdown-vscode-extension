@@ -3,6 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { FileMetadata } from "@supernode/shared";
 import { FileMetadataExtractor } from "../pkg/file";
+import { TagExtractor, GraphExtractor } from "@supernode/shared";
 
 export interface MarkdownFileInfo {
     fileName: string;
@@ -157,26 +158,30 @@ export class MarkdownFileScannerService {
     /**
      * 将统计结果输出为JSON文件
      */
-    static async exportToJson(stats: MarkdownFileStats, outputPath?: string): Promise<string> {
+    static async exportToJson(stats: MarkdownFileStats): Promise<string> {
         try {
-            const jsonContent = JSON.stringify(stats, null, 2);
-
-            if (!outputPath) {
-                // 如果没有指定输出路径，在工作区根目录创建
-                const workspaceFolders = vscode.workspace.workspaceFolders;
-                if (!workspaceFolders || workspaceFolders.length === 0) {
-                    throw new Error("没有找到工作区文件夹");
-                }
-
-                // const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                outputPath = path.join(workspaceFolders[0].uri.fsPath, `markdown-files.json`);
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                throw new Error("没有找到工作区文件夹");
             }
 
-            // 写入文件
-            fs.writeFileSync(outputPath, jsonContent, 'utf8');
+            const basePath = workspaceFolders[0].uri.fsPath;
 
-            console.log(`Markdown文件统计已导出到: ${outputPath}`);
-            return outputPath;
+            // 1. stats 文件
+            const statsPath = path.join(basePath, "supernode_stats.json");
+            fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf8');
+
+            // 2. graph 文件
+            const graph = GraphExtractor.extract(stats.files.map(file => file.metadata));
+            const graphPath = path.join(basePath, "supernode_graph.json");
+            fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2), 'utf8');
+
+            // 3. tag 文件
+            const tag = TagExtractor.extract(stats.files.map(file => file.metadata));
+            const tagPath = path.join(basePath, "supernode_tag.json");
+            fs.writeFileSync(tagPath, JSON.stringify(tag, null, 2), 'utf8');
+
+            return "文件已导出";
 
         } catch (error) {
             console.error("导出JSON文件时出错:", error);
