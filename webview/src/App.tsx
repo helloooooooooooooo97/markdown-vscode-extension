@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { ConfigProvider, theme, Tabs } from "antd";
-import { VSCodeAPI } from "./api/vscode";
-import { MessageReceiveHandler, MessageSendManager } from "./router";
-import { MarkdownView, TestPanel } from "./components";
+import { VSCodeAPI } from "./pkg/api/vscode";
+import { MessageReceiveHandler, MessageSendManager } from "./pkg/router";
+import { MarkdownView, TestPanel } from "./pkg/components";
 import "./App.css";
 
 const items = [
@@ -17,7 +17,6 @@ const items = [
     children: <TestPanel />
   }
 ];
-
 
 function App() {
   useEffect(() => {

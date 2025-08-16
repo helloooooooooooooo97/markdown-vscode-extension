@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 
 import { UpdateMarkdownMessage } from "@supernode/shared";
-import { StatusBarManager } from "./managers/StatusBarManager";
-import { CommandManager } from "./commands/CommandManager";
-import { EventListeners } from "./listeners/EventListeners";
-import { AutoPreviewService } from "./services/AutoPreviewService";
-import { MarkdownWebviewProvider } from "./providers/MarkdownWebviewProvider";
-import { MarkdownFileScannerService } from "./services/MarkdownFileScannerService";
+import { StatusBarManager } from "./pkg/managers/StatusBarManager";
+import { CommandManager } from "./vscode/commands/CommandManager";
+import { EventListeners } from "./communication/listeners/EventListeners";
+import { AutoPreviewService } from "./pkg/services/AutoPreviewService";
+import { MarkdownWebviewProvider } from "./vscode/providers/MarkdownWebviewProvider";
+import { MarkdownFileScannerService } from "./pkg/services/MarkdownFileScannerService";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("Supernode Markdown Extension is now active!");
