@@ -110,7 +110,7 @@ export class MarkdownFileScannerService {
                     }
 
                     // 使用共享的 FileMetadataExtractor 提取完整元数据
-                    const metadata = FileMetadataExtractor.ProcessSingleFile(filePath, fileName, stats);
+                    const metadata = FileMetadataExtractor.ProcessSingleFile(filePath);
 
                     // 计算文档统计信息
                     console.log("开始计算文档统计信息...");

@@ -1,14 +1,7 @@
 export interface FileMetadata {
-  name: string; // 文件名
-  path: string; // 文件路径
-  size: number; // 文件大小（字节数）
-  createTime: Date; // 文件创建时间
-  modifyTime: Date; // 文件最后修改时间
+  filePath: string; // 文件路径
   frontmatter: FrontMatter; // 文件的 frontmatter 元数据
   references: Relation[]; // 文件引用了哪些其他文件
-  referedBy: Relation[]; // 文件被哪些其他文件引用
-  next: Relation[]; // 文件引用了哪些其他文件的next
-  prev: Relation[]; // 文件引用了哪些其他文件的prev
   markdownHeadings: MarkdownHeading[]; // markdown标题层级嵌套信息
   leafMarkdownHeadings: string[]; // 叶子节点，采集到markdown的标题层级信息
 }
@@ -32,29 +25,12 @@ export interface Relation {
 }
 
 export const fileMetaDataDefault: FileMetadata = {
-  name: "backward_propagation",
-  path: "/docs/he_cs336/D1_公式/backward_propagation",
-  size: 2915,
-  createTime: new Date("2025-07-30T03:56:17.696Z"),
-  modifyTime: new Date("2025-08-01T17:41:31.248Z"),
+  filePath: "/docs/he_cs336/D1_公式/backward_propagation",
   frontmatter: {
     prev: [],
     next: [],
   },
   references: [
-    {
-      path: "/docs/he_cs336/D1_公式/forward_propagation",
-      description: "< 前向传播",
-    },
-  ],
-  referedBy: [
-    {
-      path: "/docs/he_cs336/D1_公式",
-      description: "index",
-    },
-  ],
-  next: [],
-  prev: [
     {
       path: "/docs/he_cs336/D1_公式/forward_propagation",
       description: "< 前向传播",

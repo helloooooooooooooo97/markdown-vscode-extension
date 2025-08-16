@@ -19,7 +19,7 @@ export class GraphExtractor {
 
         // 创建节点分类（按文件路径层级）
         files.forEach((file) => {
-            const category = getCategoryFromPath(file.path);
+            const category = getCategoryFromPath(file.filePath);
             if (!categoryMap.has(category)) {
                 categoryMap.set(category, categoryIndex++);
             }
@@ -27,19 +27,19 @@ export class GraphExtractor {
 
         // 创建节点
         files.forEach((file) => {
-            const category = getCategoryFromPath(file.path);
+            const category = getCategoryFromPath(file.filePath);
             const categoryId = categoryMap.get(category) || 0;
 
             const node: GraphNode = {
-                id: file.path,
-                name: file.name, // 保留名称用于tooltip
-                path: file.path,
-                size: file.size,
-                symbolSize: calculateNodeSize(file.size),
+                id: file.filePath,
+                name: file.filePath, // 保留名称用于tooltip
+                path: file.filePath,
+                size: 0,
+                symbolSize: 0,
                 category: categoryId,
             };
             nodes.push(node);
-            nodeMap.set(file.path, node);
+            nodeMap.set(file.filePath, node);
         });
 
         // 创建连接
@@ -47,44 +47,8 @@ export class GraphExtractor {
             file.references.forEach((ref) => {
                 if (nodeMap.has(ref.path)) {
                     links.push({
-                        source: file.path,
+                        source: file.filePath,
                         target: ref.path,
-                    });
-                }
-            });
-
-            file.next.forEach((next) => {
-                if (nodeMap.has(next.path)) {
-                    links.push({
-                        source: file.path,
-                        target: next.path,
-                    });
-                }
-            });
-
-            file.prev.forEach((prev) => {
-                if (nodeMap.has(prev.path)) {
-                    links.push({
-                        source: prev.path,
-                        target: file.path,
-                    });
-                }
-            });
-
-            file.frontmatter?.dag?.next.forEach((nextPath: string) => {
-                if (nodeMap.has(nextPath)) {
-                    links.push({
-                        source: file.path,
-                        target: nextPath,
-                    });
-                }
-            });
-
-            file.frontmatter?.dag?.prev.forEach((prevPath: string) => {
-                if (nodeMap.has(prevPath)) {
-                    links.push({
-                        source: prevPath,
-                        target: file.path,
                     });
                 }
             });

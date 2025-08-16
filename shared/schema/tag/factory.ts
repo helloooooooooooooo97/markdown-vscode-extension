@@ -34,8 +34,6 @@ export class TagExtractor {
           const tag = tagMap.get(heading.text)!;
           for (let childHeading of heading.children || []) {
             tag.childrenSet.add({
-              name: childHeading.text,
-              path: docPath + "/" + "#" + childHeading.text,
               content: childHeading.children?.map((h) => h.text) || [],
               missing: [],
               filePath: filePath,
@@ -52,10 +50,10 @@ export class TagExtractor {
 
     for (const fileMetadata of allFileMetadata) {
       traverse(
-        fileMetadata.path,
+        fileMetadata.filePath,
         fileMetadata.markdownHeadings,
         1,
-        fileMetadata.path
+        fileMetadata.filePath
       );
     }
 
@@ -83,7 +81,7 @@ export class TagExtractor {
 
     for (const fileMetadata of allFileMetadata) {
       // 获取文件路径
-      const filePath = fileMetadata.path;
+      const filePath = fileMetadata.filePath;
       // 获取目录部分（去掉文件名）
       const dirPath = filePath.substring(0, filePath.lastIndexOf("/"));
       if (!tagMap.has(dirPath)) {
@@ -93,14 +91,12 @@ export class TagExtractor {
       }
       const tag = tagMap.get(dirPath)!;
       // 剔除掉index.mdx文件
-      if (fileMetadata.name === "index.mdx") {
+      if (fileMetadata.filePath.endsWith("index.mdx")) {
         continue;
       }
       // 将文件名作为子标签
       tag.childrenSet.add({
-        name: fileMetadata.name,
-        path: fileMetadata.path,
-        filePath: fileMetadata.path,
+        filePath: fileMetadata.filePath,
         content:
           fileMetadata.markdownHeadings[0]?.children?.map((h) => h.text) || [],
         missing: [],

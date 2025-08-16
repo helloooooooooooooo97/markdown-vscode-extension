@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import { FileMetadata, Relation, FrontMatter, MarkdownHeading } from "./schema";
 import matter from "gray-matter";
 import { unified } from "unified";
@@ -12,80 +11,23 @@ export class FileMetadataExtractor {
      */
     static ProcessSingleFile(
         filePath: string,
-        file: string,
-        stats: fs.Stats
     ): FileMetadata {
         const frontmatter = FrontMatterExtractor.extract(filePath);
         const referenceData = ReferenceExtractor.extract(filePath);
         const markdownHeadings = MarkdownHeadingExtractor.extract(filePath);
-        const leafMarkdownHeadings =
-            MarkdownHeadingExtractor.extractLeafMarkdownHeadingsPath(
-                markdownHeadings
-            );
-
-        // 合并 next 关系：来自 referenceData 的 Relation[] 和来自 frontmatter 的 string[]
-        const nextRelations = new Map<string, Relation>();
-        referenceData.next.forEach((relation) => {
-            nextRelations.set(relation.path, relation);
-        });
-        // 合并 prev 关系
-        const prevRelations = new Map<string, Relation>();
-        referenceData.prev.forEach((relation) => {
-            prevRelations.set(relation.path, relation);
-        });
-
+        const leafMarkdownHeadings = MarkdownHeadingExtractor.extractLeafMarkdownHeadingsPath(markdownHeadings);
         return {
-            name: file.replace(/\.mdx?$/, ""),
-            path: filePath,
-            size: stats.size,
-            createTime: stats.birthtime,
-            modifyTime: stats.mtime,
+            filePath: filePath,
             frontmatter,
-            references: referenceData.references,
-            referedBy: [],
-            next: Array.from(nextRelations.values()),
-            prev: Array.from(prevRelations.values()),
+            references: referenceData,
             markdownHeadings,
             leafMarkdownHeadings,
         };
     }
 }
 
+// frontmatter 提取器
 export class FrontMatterExtractor {
-    /**
-     * 解析路径字符串，支持两种格式：
-     * 1. 简单路径格式: "path/to/file.mdx"
-     * 2. Markdown链接格式: "[description](path/to/file.mdx)"
-     */
-    static parsePathString(pathString: string): Relation {
-        // 匹配 Markdown 链接格式 [description](path)å
-        const linkMatch = pathString.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-        if (linkMatch) {
-            return {
-                path: linkMatch[2],
-                description: linkMatch[1],
-            };
-        }
-        // 简单路径格式
-        return {
-            path: pathString,
-            description: "",
-        };
-    }
-
-    /**
-     * 处理路径数组，解析每个路径字符串并转换为 Relation 对象
-     */
-    static processPathArray(pathArray: string[], filePath: string): Relation[] {
-        return pathArray.map((pathString) => {
-            const parsed = this.parsePathString(pathString);
-            return {
-                path: pathString,
-                description: parsed.description,
-            };
-        });
-    }
-
     static extract(filePath: string): Record<string, any> {
         try {
             const content = fs.readFileSync(filePath, "utf-8");
@@ -97,6 +39,7 @@ export class FrontMatterExtractor {
     }
 }
 
+// markdown 提取器
 export class MarkdownHeadingExtractor {
     static extract(filePath: string): MarkdownHeading[] {
         try {
@@ -233,39 +176,16 @@ export class MarkdownHeadingExtractor {
 }
 
 export class ReferenceExtractor {
-    /**
-     * 提取引用关系，保留原有逻辑（返回所有引用），并额外返回 next/prev 分类
-     * 支持两种格式：
-     * 1. 普通链接: [text](path)
-     * 2. 关系链接: [>text](path) 或 [<text](path)
-     *
-     * 返回格式：
-     * {
-     *   references: string[],
-     *   next: string[],
-     *   prev: string[]
-     * }
-     */
-    static extract(filePath: string): {
-        references: Relation[];
-        next: Relation[];
-        prev: Relation[];
-    } {
+    static extract(filePath: string): Relation[] {
         try {
             const content = fs.readFileSync(filePath, "utf-8");
             const { content: markdownContent } = matter(content);
-
-            const references: Map<string, Relation> = new Map();
-            const next: Map<string, Relation> = new Map();
-            const prev: Map<string, Relation> = new Map();
-
-            // 匹配Markdown链接 [text](url) 或 [>text](url) 或 [<text](url)
+            const references: Relation[] = [];
             const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
             let match;
             while ((match = linkRegex.exec(markdownContent)) !== null) {
                 let text = match[1].trim();
                 let url = match[2];
-
                 // 只处理 .md 和 .mdx 文件链接
                 if (url.endsWith(".mdx") || url.endsWith(".md")) {
                     const description = text;
@@ -273,31 +193,12 @@ export class ReferenceExtractor {
                         path: url,
                         description: description,
                     };
-
-                    // 判断链接文本前缀来确定关系类型
-                    if (text.startsWith(">")) {
-                        // 后继节点关系
-                        next.set(url, relation);
-                    } else if (text.startsWith("<")) {
-                        // 前驱节点关系
-                        prev.set(url, relation);
-                    }
-                    // 所有链接都加入 references，保持原有逻辑
-                    references.set(url, relation);
+                    references.push(relation);
                 }
             }
-
-            return {
-                references: Array.from(references.values()),
-                next: Array.from(next.values()),
-                prev: Array.from(prev.values()),
-            };
+            return references;
         } catch (e) {
-            return {
-                references: [],
-                next: [],
-                prev: [],
-            };
+            return [];
         }
     }
 }
