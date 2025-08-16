@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MarkdownParser from "../../pkg/utils/blockParser";
-import { useMarkdownStore } from "./store";
+import { useMarkdownStore } from "../../store/markdown/store";
 
 
 const testMarkdown = `
@@ -17,6 +17,17 @@ tags: ["标签1", "标签2", "标签3"]
 $$
 g_t = \nabla L(w_t)
 $$
+
+\`\`\`python
+
+
+
+
+print("hello")
+
+
+
+\`\`\`
 
 `
 

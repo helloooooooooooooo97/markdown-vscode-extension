@@ -4,7 +4,7 @@ import { VSCodeAPI } from "./communication/send/manual_vscode";
 import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
 import { MessageSendManager } from "./communication/send/auto_send";
 import { TestPanel } from "./components";
-import MarkdownView from "./store/markdown/view";
+import MarkdownView from "./page/markdown/view";
 import "./App.css";
 
 const items = [

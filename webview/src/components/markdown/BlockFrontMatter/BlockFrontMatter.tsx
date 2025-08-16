@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tag, Typography, Space, Input, DatePicker, Switch } from 'antd';
+import { Tag, Typography, Input, DatePicker, Switch } from 'antd';
 import {
     UnorderedListOutlined,
     CheckCircleOutlined,
