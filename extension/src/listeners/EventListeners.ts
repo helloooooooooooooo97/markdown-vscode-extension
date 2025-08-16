@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { FileManager } from "../managers/FileManager";
-import { UpdateMarkdownMessage } from "../types/messages";
+import { ExtensionCommand, UpdateMarkdownMessage } from "@supernode/shared";
 
 export class EventListeners {
     private static instance: EventListeners;
@@ -32,7 +32,7 @@ export class EventListeners {
                     console.log("保存 Markdown 文档路径:", document.fileName);
 
                     const message: UpdateMarkdownMessage = {
-                        command: "updateMarkdownContent",
+                        command: ExtensionCommand.updateMarkdownContent,
                         content: this.fileManager.getFileContent(document),
                         fileName: document.fileName,
                     };
@@ -40,7 +40,7 @@ export class EventListeners {
                 } else {
                     // 如果不是markdown或mdx文件，清空内容
                     const clearMessage: UpdateMarkdownMessage = {
-                        command: "updateMarkdownContent",
+                        command: ExtensionCommand.updateMarkdownContent,
                         content: "",
                         fileName: "",
                     };
@@ -66,7 +66,7 @@ export class EventListeners {
                 vscode.window.activeTextEditor?.document === document
             ) {
                 const message: UpdateMarkdownMessage = {
-                    command: "updateMarkdownContent",
+                    command: ExtensionCommand.updateMarkdownContent,
                     content: this.fileManager.getFileContent(document),
                     fileName: document.fileName,
                 };

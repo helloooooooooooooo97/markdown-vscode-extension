@@ -18,6 +18,8 @@ export class MarkdownWebviewProvider {
     public static readonly viewType = "markdownPreview";
     // 保存上一次活跃的 Markdown 文档路径
     public static lastActiveMarkdownPath: string | undefined;
+    // 保存扩展上下文
+    public static extensionContext: vscode.ExtensionContext | undefined;
 
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
@@ -60,6 +62,9 @@ export class MarkdownWebviewProvider {
         }
 
         // 否则，创建一个新的面板
+        const extensionPath = MarkdownWebviewProvider.extensionContext?.extensionPath;
+        const projectRoot = extensionPath ? path.dirname(extensionPath) : "";
+
         const panel = vscode.window.createWebviewPanel(
             MarkdownWebviewProvider.viewType,
             "Markdown 预览",
@@ -68,7 +73,7 @@ export class MarkdownWebviewProvider {
                 enableScripts: true,
                 retainContextWhenHidden: true,
                 localResourceRoots: [
-                    vscode.Uri.file(path.join(__dirname, "../../../webview/dist")),
+                    vscode.Uri.file(path.join(projectRoot, "webview/dist")),
                 ],
             }
         );
@@ -231,23 +236,36 @@ export class MarkdownWebviewProvider {
      * 获取 WebView 的 HTML 内容
      */
     private _getHtmlForWebview() {
-        // 读取HTML文件内容
-        const htmlPath = path.join(__dirname, "../../../webview/dist/index.html");
+        // 使用扩展上下文获取正确的路径
+        const extensionPath = MarkdownWebviewProvider.extensionContext?.extensionPath;
+        if (!extensionPath) {
+            console.error("扩展上下文未设置");
+            return this._getFallbackHtml();
+        }
+
+        // 从 extension 目录回到项目根目录
+        const projectRoot = path.dirname(extensionPath);
+        const htmlPath = path.join(projectRoot, "webview/dist/index.html");
 
         try {
+            console.log("尝试读取HTML文件:", htmlPath);
             let htmlContent = require("fs").readFileSync(htmlPath, "utf8");
+            console.log("成功读取HTML文件");
 
             // 替换资源路径为webview URI
             const scriptUri = this._panel.webview.asWebviewUri(
                 vscode.Uri.file(
-                    path.join(__dirname, "../../../webview/dist/assets/index.js")
+                    path.join(projectRoot, "webview/dist/assets/index.js")
                 )
             );
             const styleUri = this._panel.webview.asWebviewUri(
                 vscode.Uri.file(
-                    path.join(__dirname, "../../../webview/dist/assets/index.css")
+                    path.join(projectRoot, "webview/dist/assets/index.css")
                 )
             );
+
+            console.log("脚本URI:", scriptUri.toString());
+            console.log("样式URI:", styleUri.toString());
 
             htmlContent = htmlContent
                 .replace("/assets/index.js", scriptUri.toString())
@@ -255,6 +273,8 @@ export class MarkdownWebviewProvider {
 
             return htmlContent;
         } catch (error) {
+            console.error("读取HTML文件失败:", error);
+            console.error("尝试的路径:", htmlPath);
             // 如果文件读取失败，返回一个简单的HTML
             return this._getFallbackHtml();
         }
