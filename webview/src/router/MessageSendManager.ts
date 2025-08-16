@@ -1,4 +1,8 @@
 import { VSCodeAPI } from '../api/vscode';
+import {
+    WebviewCommand,
+    WebviewErrorMessage
+} from '../types/messages';
 
 export class MessageSendManager {
     init(): void {
@@ -13,23 +17,27 @@ export class MessageSendManager {
 
     private handleError = (event: ErrorEvent) => {
         console.error("Webview 错误:", event.error);
-        VSCodeAPI.postMessage({
-            command: "webviewError",
+        const message: WebviewErrorMessage = {
+            command: WebviewCommand.webviewError,
             error: event.error?.message || event.message || "未知错误",
             stack: event.error?.stack,
             filename: event.filename,
             lineno: event.lineno,
             colno: event.colno
-        });
+        };
+        VSCodeAPI.postMessage(message);
     };
 
     private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
         console.error("未处理的 Promise 拒绝:", event.reason);
-        VSCodeAPI.postMessage({
-            command: "webviewError",
+        const message: WebviewErrorMessage = {
+            command: WebviewCommand.webviewError,
             error: `Promise 拒绝: ${event.reason}`,
-            type: "unhandledRejection"
-        });
+            stack: undefined,
+            filename: undefined,
+            lineno: undefined,
+            colno: undefined
+        };
+        VSCodeAPI.postMessage(message);
     };
-}
-
+} 

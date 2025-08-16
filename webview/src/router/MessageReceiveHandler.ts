@@ -1,0 +1,44 @@
+import { useMarkdownStore } from '../store/markdown/store';
+import {
+    ExtensionCommand,
+    CommonCommand,
+    UpdateMarkdownMessage,
+    ShowMessage,
+    OpenLocalFileMessage
+} from '../types/messages';
+
+export class MessageReceiveHandler {
+    init(): void {
+        window.addEventListener("message", this.handleMessage);
+    }
+
+    destroy(): void {
+        window.removeEventListener("message", this.handleMessage);
+    }
+
+    private handleMessage = (event: MessageEvent): void => {
+        const message = event.data;
+        const { setContent, setCurrentFileName, setIsLoading } = useMarkdownStore.getState();
+
+        switch (message.command) {
+            case ExtensionCommand.updateMarkdownContent:
+                const updateMessage = message as UpdateMarkdownMessage;
+                setContent(updateMessage.content || "");
+                if (updateMessage.fileName) {
+                    setCurrentFileName(updateMessage.fileName);
+                }
+                setIsLoading(false);
+                break;
+            case CommonCommand.showMessage:
+                const showMessage = message as ShowMessage;
+                console.log("收到消息:", showMessage.text);
+                break;
+            case CommonCommand.openLocalFile:
+                const openFileMessage = message as OpenLocalFileMessage;
+                console.log("打开本地文件:", openFileMessage.path);
+                break;
+            default:
+                console.warn(`未处理的命令: ${message.command}`);
+        }
+    };
+} 

@@ -1,10 +1,9 @@
 import { useEffect } from "react";
 import { ConfigProvider, theme, Tabs } from "antd";
 import { VSCodeAPI } from "./api/vscode";
-import { MessageReceiveHandler } from "./router";
+import { MessageReceiveHandler, MessageSendManager } from "./router";
 import { MarkdownView, TestPanel } from "./components";
 import "./App.css";
-import { MessageSendManager } from "./router/Sender";
 
 const items = [
   {

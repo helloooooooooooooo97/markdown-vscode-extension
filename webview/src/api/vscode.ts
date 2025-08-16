@@ -1,6 +1,8 @@
+import { WebviewMessage, WebviewCommand, WebviewReadyMessage } from '../types/messages';
+
 // VSCode API 接口定义
 export interface VSCodeAPI {
-    postMessage: (message: any) => void;
+    postMessage: (message: WebviewMessage) => void;
     getState: () => any;
     setState: (state: any) => void;
 }
@@ -23,7 +25,10 @@ export class VSCodeAPI {
             window.vscode = this.instance;
 
             // 发送初始化完成消息
-            this.instance.postMessage({ command: "webviewReady" });
+            const readyMessage: WebviewReadyMessage = {
+                command: WebviewCommand.webviewReady
+            };
+            this.instance.postMessage(readyMessage);
 
             return this.instance;
         }
@@ -34,7 +39,7 @@ export class VSCodeAPI {
         return this.instance;
     }
 
-    static postMessage(message: any): void {
+    static postMessage(message: WebviewMessage): void {
         if (this.instance) {
             this.instance.postMessage(message);
         } else {

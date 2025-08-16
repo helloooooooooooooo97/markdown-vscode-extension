@@ -14,16 +14,3 @@ export interface UpdateMarkdownMessage extends WebviewMessage {
     content: string;
     fileName: string;
 }
-
-// 显示消息
-export interface ShowMessage extends WebviewMessage {
-    command: ExtensionCommand.showMessage;
-    text: string;
-}
-
-
-// 打开本地文件消息
-export interface OpenLocalFileMessage extends WebviewMessage {
-    command: ExtensionCommand.openLocalFile;
-    path: string;
-}
