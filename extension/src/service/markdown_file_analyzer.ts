@@ -56,22 +56,10 @@ export interface MarkdownFileStats {
 }
 
 export class MarkdownFileScannerService {
-    private static instance: MarkdownFileScannerService;
-
-    private constructor() {
-    }
-
-    public static getInstance(): MarkdownFileScannerService {
-        if (!MarkdownFileScannerService.instance) {
-            MarkdownFileScannerService.instance = new MarkdownFileScannerService();
-        }
-        return MarkdownFileScannerService.instance;
-    }
-
     /**
      * 扫描工作目录下的所有Markdown文件
      */
-    public async scanMarkdownFiles(): Promise<MarkdownFileStats> {
+    static async scanMarkdownFiles(): Promise<MarkdownFileStats> {
         console.log("开始扫描工作目录下的Markdown文件...");
 
         const workspaceFolders = vscode.workspace.workspaceFolders;
@@ -168,7 +156,7 @@ export class MarkdownFileScannerService {
     /**
      * 将统计结果输出为JSON文件
      */
-    public async exportToJson(stats: MarkdownFileStats, outputPath?: string): Promise<string> {
+    static async exportToJson(stats: MarkdownFileStats, outputPath?: string): Promise<string> {
         try {
             const jsonContent = JSON.stringify(stats, null, 2);
 
@@ -198,7 +186,7 @@ export class MarkdownFileScannerService {
     /**
      * 在输出面板中显示统计结果
      */
-    public displayStatsInOutput(stats: MarkdownFileStats): void {
+    static displayStatsInOutput(stats: MarkdownFileStats): void {
         const outputChannel = vscode.window.createOutputChannel("Markdown Files Scanner");
         outputChannel.show();
 
@@ -229,7 +217,7 @@ export class MarkdownFileScannerService {
     /**
      * 格式化文件大小
      */
-    private formatFileSize(bytes: number): string {
+    static formatFileSize(bytes: number): string {
         if (bytes === 0) return '0 Bytes';
 
         const k = 1024;
@@ -242,7 +230,7 @@ export class MarkdownFileScannerService {
     /**
  * 计算文档统计信息
  */
-    private calculateDocumentStats(filePath: string): DocumentStats {
+    static calculateDocumentStats(filePath: string): DocumentStats {
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
             const lines = content.split('\n');
@@ -299,7 +287,7 @@ export class MarkdownFileScannerService {
     /**
      * 分析文档内容
      */
-    private analyzeContent(filePath: string): ContentAnalysis {
+    static analyzeContent(filePath: string): ContentAnalysis {
         try {
             const content = fs.readFileSync(filePath, 'utf-8');
 
@@ -349,7 +337,7 @@ export class MarkdownFileScannerService {
     /**
      * 检测文档语言
      */
-    private detectLanguage(content: string): string {
+    static detectLanguage(content: string): string {
         // 简单的语言检测逻辑
         if (content.includes('```javascript') || content.includes('```js')) return 'javascript';
         if (content.includes('```typescript') || content.includes('```ts')) return 'typescript';
@@ -365,7 +353,7 @@ export class MarkdownFileScannerService {
     /**
      * 提取主题关键词
      */
-    private extractTopics(content: string): string[] {
+    static extractTopics(content: string): string[] {
         const topics: string[] = [];
 
         // 从标题中提取关键词
@@ -384,7 +372,7 @@ export class MarkdownFileScannerService {
     /**
      * 生成文档摘要
      */
-    private generateSummary(content: string): string {
+    static generateSummary(content: string): string {
         // 移除代码块和frontmatter
         const cleanContent = content
             .replace(/```[\s\S]*?```/g, '')
@@ -398,7 +386,7 @@ export class MarkdownFileScannerService {
     /**
  * 评估文档复杂度
  */
-    private assessComplexity(content: string): 'simple' | 'moderate' | 'complex' {
+    static assessComplexity(content: string): 'simple' | 'moderate' | 'complex' {
         const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
         const headings = (content.match(/^#{1,6}\s+/gm) || []).length;
         const links = (content.match(/\[.*?\]\(.*?\)/g) || []).length;
@@ -415,7 +403,7 @@ export class MarkdownFileScannerService {
     /**
      * 启动扫描并输出结果
      */
-    public async startScanAndExport(): Promise<void> {
+    static async startScanAndExport(): Promise<void> {
         try {
             console.log("开始Markdown文件扫描和导出...");
 

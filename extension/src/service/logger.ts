@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
 import { WebviewMessage } from "@supernode/shared";
-import { ConfigurationManager } from "./ConfigurationManager";
 
 export interface CommunicationLogEntry {
     timestamp: string;
@@ -14,69 +13,65 @@ export interface CommunicationLogEntry {
 }
 
 export class CommunicationLogger {
-    private static instance: CommunicationLogger;
-    private logFilePath: string;
-    private isEnabled: boolean = true;
-    private maxLogSize: number = 10 * 1024 * 1024; // 10MB
-    private maxLogFiles: number = 5;
-    private constructor() {
-        // 如果没有指定输出路径，在工作区根目录创建
+    private static logFilePath: string;
+    private static isEnabled: boolean = true;
+    private static maxLogSize: number = 10 * 1024 * 1024; // 10MB
+    private static maxLogFiles: number = 5;
+
+    private static initialize(): void {
+        if (CommunicationLogger.logFilePath) return; // 已经初始化过了
+
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
             throw new Error("没有找到工作区文件夹");
         }
-        // const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        this.logFilePath = path.join(workspaceFolders[0].uri.fsPath, `communication.log`);
-    }
-
-    public static getInstance(): CommunicationLogger {
-        if (!CommunicationLogger.instance) {
-            CommunicationLogger.instance = new CommunicationLogger();
-        }
-        return CommunicationLogger.instance;
+        CommunicationLogger.logFilePath = path.join(workspaceFolders[0].uri.fsPath, `communication.log`);
     }
 
     /**
      * 记录从extension发送到webview的消息
      */
-    public logExtensionToWebview(message: WebviewMessage, fileName?: string): void {
-        if (!this.isEnabled) return;
+    public static logExtensionToWebview(message: WebviewMessage, fileName?: string): void {
+        CommunicationLogger.initialize();
+        if (!CommunicationLogger.isEnabled) return;
 
         const logEntry: CommunicationLogEntry = {
             timestamp: new Date().toISOString(),
             direction: "extension-to-webview",
             command: message.command,
-            message: this.sanitizeMessage(message),
+            message: CommunicationLogger.sanitizeMessage(message),
             fileName: fileName
         };
 
-        this.writeLogEntry(logEntry);
+        CommunicationLogger.writeLogEntry(logEntry);
         console.log(`[通信日志] Extension → Webview: ${message.command}`, message);
     }
 
     /**
      * 记录从webview发送到extension的消息
      */
-    public logWebviewToExtension(message: WebviewMessage, fileName?: string): void {
-        if (!this.isEnabled) return;
+    public static logWebviewToExtension(message: WebviewMessage, fileName?: string): void {
+        CommunicationLogger.initialize();
+        if (!CommunicationLogger.isEnabled) return;
 
         const logEntry: CommunicationLogEntry = {
             timestamp: new Date().toISOString(),
             direction: "webview-to-extension",
             command: message.command,
-            message: this.sanitizeMessage(message),
+            message: CommunicationLogger.sanitizeMessage(message),
             fileName: fileName
         };
 
-        this.writeLogEntry(logEntry);
+        CommunicationLogger.writeLogEntry(logEntry);
         console.log(`[通信日志] Webview → Extension: ${message.command}`, message);
     }
 
     /**
      * 记录通信错误
      */
-    public logError(direction: "extension-to-webview" | "webview-to-extension", error: string, command?: string): void {
-        if (!this.isEnabled) return;
+    public static logError(direction: "extension-to-webview" | "webview-to-extension", error: string, command?: string): void {
+        CommunicationLogger.initialize();
+        if (!CommunicationLogger.isEnabled) return;
 
         const logEntry: CommunicationLogEntry = {
             timestamp: new Date().toISOString(),
@@ -86,20 +81,20 @@ export class CommunicationLogger {
             error: error
         };
 
-        this.writeLogEntry(logEntry);
+        CommunicationLogger.writeLogEntry(logEntry);
         console.error(`[通信日志] 错误 (${direction}): ${error}`);
     }
 
     /**
      * 写入日志条目到文件
      */
-    private writeLogEntry(logEntry: CommunicationLogEntry): void {
+    private static writeLogEntry(logEntry: CommunicationLogEntry): void {
         try {
             // 检查日志文件大小
-            this.checkLogFileSize();
+            CommunicationLogger.checkLogFileSize();
 
             const logLine = JSON.stringify(logEntry) + "\n";
-            fs.appendFileSync(this.logFilePath, logLine, "utf8");
+            fs.appendFileSync(CommunicationLogger.logFilePath, logLine, "utf8");
         } catch (error) {
             // 如果写入失败，只在控制台输出错误，不影响扩展运行
             console.warn("写入通信日志失败，但扩展继续运行:", error);
@@ -108,7 +103,7 @@ export class CommunicationLogger {
                 const errorCode = (error as any).code;
                 if (errorCode === 'EROFS' || errorCode === 'EACCES') {
                     console.warn("由于文件系统权限问题，通信日志记录已禁用");
-                    this.isEnabled = false;
+                    CommunicationLogger.isEnabled = false;
                 }
             }
         }
@@ -117,12 +112,12 @@ export class CommunicationLogger {
     /**
      * 检查并管理日志文件大小
      */
-    private checkLogFileSize(): void {
+    private static checkLogFileSize(): void {
         try {
-            if (fs.existsSync(this.logFilePath)) {
-                const stats = fs.statSync(this.logFilePath);
-                if (stats.size > this.maxLogSize) {
-                    this.rotateLogFiles();
+            if (fs.existsSync(CommunicationLogger.logFilePath)) {
+                const stats = fs.statSync(CommunicationLogger.logFilePath);
+                if (stats.size > CommunicationLogger.maxLogSize) {
+                    CommunicationLogger.rotateLogFiles();
                 }
             }
         } catch (error) {
@@ -133,19 +128,19 @@ export class CommunicationLogger {
     /**
      * 轮转日志文件
      */
-    private rotateLogFiles(): void {
+    private static rotateLogFiles(): void {
         try {
-            const logDir = path.dirname(this.logFilePath);
-            const baseName = path.basename(this.logFilePath, ".log");
+            const logDir = path.dirname(CommunicationLogger.logFilePath);
+            const baseName = path.basename(CommunicationLogger.logFilePath, ".log");
 
             // 删除最旧的日志文件
-            const oldestLogFile = path.join(logDir, `${baseName}.${this.maxLogFiles}.log`);
+            const oldestLogFile = path.join(logDir, `${baseName}.${CommunicationLogger.maxLogFiles}.log`);
             if (fs.existsSync(oldestLogFile)) {
                 fs.unlinkSync(oldestLogFile);
             }
 
             // 重命名现有的日志文件
-            for (let i = this.maxLogFiles - 1; i >= 1; i--) {
+            for (let i = CommunicationLogger.maxLogFiles - 1; i >= 1; i--) {
                 const oldFile = path.join(logDir, `${baseName}.${i}.log`);
                 const newFile = path.join(logDir, `${baseName}.${i + 1}.log`);
                 if (fs.existsSync(oldFile)) {
@@ -155,7 +150,7 @@ export class CommunicationLogger {
 
             // 重命名当前日志文件
             const backupFile = path.join(logDir, `${baseName}.1.log`);
-            fs.renameSync(this.logFilePath, backupFile);
+            fs.renameSync(CommunicationLogger.logFilePath, backupFile);
         } catch (error) {
             console.warn("轮转日志文件失败:", error);
         }
@@ -164,7 +159,7 @@ export class CommunicationLogger {
     /**
      * 清理消息内容，移除敏感信息
      */
-    private sanitizeMessage(message: any): any {
+    private static sanitizeMessage(message: any): any {
         const sanitized = { ...message };
 
         // 移除可能包含大量内容或敏感信息的字段
@@ -180,25 +175,27 @@ export class CommunicationLogger {
     /**
      * 启用或禁用日志记录
      */
-    public setEnabled(enabled: boolean): void {
-        this.isEnabled = enabled;
+    public static setEnabled(enabled: boolean): void {
+        CommunicationLogger.isEnabled = enabled;
         console.log(`[通信日志] 日志记录已${enabled ? "启用" : "禁用"}`);
     }
 
     /**
      * 获取日志文件路径
      */
-    public getLogFilePath(): string {
-        return this.logFilePath;
+    public static getLogFilePath(): string {
+        CommunicationLogger.initialize();
+        return CommunicationLogger.logFilePath;
     }
 
     /**
      * 清空日志文件
      */
-    public clearLogs(): void {
+    public static clearLogs(): void {
         try {
-            if (fs.existsSync(this.logFilePath)) {
-                fs.writeFileSync(this.logFilePath, "", "utf8");
+            CommunicationLogger.initialize();
+            if (fs.existsSync(CommunicationLogger.logFilePath)) {
+                fs.writeFileSync(CommunicationLogger.logFilePath, "", "utf8");
                 console.log("[通信日志] 日志文件已清空");
             }
         } catch (error) {
@@ -209,13 +206,14 @@ export class CommunicationLogger {
     /**
      * 获取最近的日志条目
      */
-    public getRecentLogs(limit: number = 100): CommunicationLogEntry[] {
+    public static getRecentLogs(limit: number = 100): CommunicationLogEntry[] {
         try {
-            if (!fs.existsSync(this.logFilePath)) {
+            CommunicationLogger.initialize();
+            if (!fs.existsSync(CommunicationLogger.logFilePath)) {
                 return [];
             }
 
-            const content = fs.readFileSync(this.logFilePath, "utf8");
+            const content = fs.readFileSync(CommunicationLogger.logFilePath, "utf8");
             const lines = content.trim().split("\n").filter(line => line.trim());
             const logs: CommunicationLogEntry[] = [];
 

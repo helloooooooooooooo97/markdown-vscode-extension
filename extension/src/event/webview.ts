@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { ConfigurationManager } from "../../pkg/managers/ConfigurationManager";
-import { FileManager } from "./file_service";
-import { CommunicationLogger } from "../../pkg/managers/CommunicationLogger";
-import { MessageRouter } from "../../communication/routers";
-import { HandlerFactory } from "../../communication/handlers";
+import { ConfigurationManager } from "../service/configuration";
+import { FileManager } from "../service/file";
+import { CommunicationLogger } from "../service/logger";
+import { MessageHandler } from "../controller/webview";
 import {
     WebviewMessage,
     UpdateMarkdownMessage,
@@ -18,13 +17,10 @@ export class MarkdownWebviewProvider {
 
     private readonly _panel: vscode.WebviewPanel;
     private _disposables: vscode.Disposable[] = [];
-    private fileManager: FileManager;
-    private communicationLogger: CommunicationLogger;
-    private messageRouter!: MessageRouter;
+    private messageHandler!: MessageHandler;
 
     public static createOrShow() {
-        const configManager = ConfigurationManager.getInstance();
-        const previewPosition = configManager.getPreviewPosition();
+        const previewPosition = ConfigurationManager.getPreviewPosition();
 
         let column: vscode.ViewColumn;
         const activeEditor = vscode.window.activeTextEditor;
@@ -79,11 +75,9 @@ export class MarkdownWebviewProvider {
 
     private constructor(panel: vscode.WebviewPanel) {
         this._panel = panel;
-        this.fileManager = FileManager.getInstance();
-        this.communicationLogger = CommunicationLogger.getInstance();
 
-        // 初始化消息路由
-        this.initializeMessageRouter();
+        // 初始化消息处理器
+        this.initializeMessageHandler();
 
         // 设置初始HTML内容
         this._update();
@@ -117,24 +111,20 @@ export class MarkdownWebviewProvider {
     }
 
     public sendMessage(message: WebviewMessage): void {
-        // 记录发送到webview的消息
-        this.communicationLogger.logExtensionToWebview(message, message.fileName);
+        CommunicationLogger.logExtensionToWebview(message, message.fileName);
         this._panel.webview.postMessage(message);
     }
 
     /**
-     * 初始化消息路由
+     * 初始化消息处理器
      */
-    private initializeMessageRouter(): void {
+    private initializeMessageHandler(): void {
         if (!MarkdownWebviewProvider.extensionContext) {
             console.error("扩展上下文未设置");
             return;
         }
 
-        this.messageRouter = new MessageRouter(MarkdownWebviewProvider.extensionContext);
-        const handlerFactory = new HandlerFactory(MarkdownWebviewProvider.extensionContext);
-        const handlers = handlerFactory.createAllHandlers();
-        this.messageRouter.registerMultipleHandlers(handlers);
+        this.messageHandler = new MessageHandler(MarkdownWebviewProvider.extensionContext);
     }
 
     /**
@@ -142,11 +132,11 @@ export class MarkdownWebviewProvider {
      */
     private async handleWebviewMessage(message: WebviewMessage): Promise<void> {
         // 记录从webview接收的消息
-        this.communicationLogger.logWebviewToExtension(message, message.fileName);
+        CommunicationLogger.logWebviewToExtension(message, message.fileName);
         console.log("收到webview消息:", message);
 
-        // 使用消息路由器处理消息
-        await this.messageRouter.routeMessage(message);
+        // 使用消息处理器处理消息
+        await this.messageHandler.handleMessage(message);
     }
 
     /**
@@ -156,8 +146,8 @@ export class MarkdownWebviewProvider {
         const editor: vscode.TextEditor | undefined = vscode.window.activeTextEditor;
         if (editor) {
             const document: vscode.TextDocument = editor.document;
-            if (this.fileManager.isMarkdownFile(document)) {
-                const content: string = this.fileManager.getFileContent(document);
+            if (FileManager.isMarkdownFile(document)) {
+                const content: string = FileManager.getFileContent(document);
                 const message: UpdateMarkdownMessage = {
                     command: ExtensionCommand.updateMarkdownContent,
                     content: content,

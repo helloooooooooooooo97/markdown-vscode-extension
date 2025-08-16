@@ -3,39 +3,29 @@ import * as path from "path";
 import * as fs from "fs";
 
 export class FileManager {
-    private static instance: FileManager;
-
-    private constructor() { }
-
-    public static getInstance(): FileManager {
-        if (!FileManager.instance) {
-            FileManager.instance = new FileManager();
-        }
-        return FileManager.instance;
-    }
 
     /**
      * 检查文件是否为 Markdown 文件
      */
-    public isMarkdownFile(document: vscode.TextDocument): boolean {
+    public static isMarkdownFile(document: vscode.TextDocument): boolean {
         return document.languageId === "markdown" || document.languageId === "mdx";
     }
 
     /**
      * 获取文件内容
      */
-    public getFileContent(document: vscode.TextDocument): string {
+    public static getFileContent(document: vscode.TextDocument): string {
         return document.getText();
     }
 
     /**
      * 打开本地文件
      */
-    public async openLocalFile(relativePath: string, basePath?: string): Promise<void> {
+    public static async openLocalFile(relativePath: string, basePath?: string): Promise<void> {
         try {
             console.log("开始处理本地文件打开请求，相对路径:", relativePath);
 
-            const resolvedBasePath = this.resolveBasePath(basePath);
+            const resolvedBasePath = FileManager.resolveBasePath(basePath);
             if (!resolvedBasePath) {
                 vscode.window.showErrorMessage("无法获取基准路径");
                 return;
@@ -69,7 +59,7 @@ export class FileManager {
     /**
      * 更新 Markdown 文件内容
      */
-    public async updateMarkdownContent(filePath: string, content: string): Promise<boolean> {
+    public static async updateMarkdownContent(filePath: string, content: string): Promise<boolean> {
         try {
             console.log("开始更新 Markdown 文件内容:", filePath);
 
@@ -108,7 +98,7 @@ export class FileManager {
     /**
      * 解析基准路径
      */
-    private resolveBasePath(basePath?: string): string | undefined {
+    private static resolveBasePath(basePath?: string): string | undefined {
         if (basePath) {
             return path.dirname(basePath);
         }
