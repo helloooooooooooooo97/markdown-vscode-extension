@@ -29,16 +29,15 @@ export const BlockLatex = ({
                 title="点击放大"
             />
             <Modal
-                title="LaTeX 公式"
                 open={isModalVisible}
                 onCancel={handleCancel}
                 footer={null}
-                width={800}
+                width={1200}
                 centered
             >
                 <div className="flex justify-center">
                     <div
-                        className="katex-display text-2xl"
+                        className="katex-display text-6xl"
                         dangerouslySetInnerHTML={{ __html: html }}
                     />
                 </div>

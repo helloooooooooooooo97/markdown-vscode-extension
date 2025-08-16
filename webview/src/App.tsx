@@ -3,7 +3,8 @@ import { ConfigProvider, theme, Tabs } from "antd";
 import { VSCodeAPI } from "./communication/send/manual_vscode";
 import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
 import { MessageSendManager } from "./communication/send/auto_send";
-import { MarkdownView, TestPanel } from "./components";
+import { TestPanel } from "./components";
+import MarkdownView from "./store/markdown/view";
 import "./App.css";
 
 const items = [

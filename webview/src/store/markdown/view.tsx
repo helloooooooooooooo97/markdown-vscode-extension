@@ -2,25 +2,40 @@ import React, { useEffect, useState } from "react";
 import MarkdownParser from "../../pkg/utils/blockParser";
 import { useMarkdownStore } from "./store";
 
-interface MarkdownRendererProps {
-    content: string;
-}
 
-const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
-    const { setDocument } = useMarkdownStore();
+const testMarkdown = `
+---
+title: 测试
+date: 2021-01-01
+---
+
+# 测试
+## 测试
+### 测试
+`
+
+const MarkdownRenderer: React.FC = () => {
+    const { setDocument, currentFileName, content, isLoading } = useMarkdownStore();
     const [parsedMarkdown, setParsedMarkdown] = useState<React.ReactNode[]>([]);
     useEffect(() => {
-        if (content.trim()) {
+        if (isLoading) {
+            const parser = new MarkdownParser(testMarkdown);
+            const markdown = parser.parse(); // 解析并获取渲染结果
+            const blocks = parser.getBlocks();
+            setDocument(blocks);
+            setParsedMarkdown(markdown); // 保存解析结果用于渲染
+        } else {
             const parser = new MarkdownParser(content);
             const markdown = parser.parse(); // 解析并获取渲染结果
             const blocks = parser.getBlocks();
             setDocument(blocks);
             setParsedMarkdown(markdown); // 保存解析结果用于渲染
         }
-    }, [content]);
+    }, [content, isLoading]);
 
     return (
         <div className="markdown-renderer">
+            <div className="text-sm text-black">{currentFileName}</div>
             {parsedMarkdown}
         </div>
     );
