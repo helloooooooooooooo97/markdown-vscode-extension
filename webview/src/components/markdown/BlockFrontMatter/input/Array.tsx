@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Tag, Select } from "antd";
 
-const { Option } = Select;
-
 // 数组类型输入组件
 const ArrayInput: React.FC<{
     value: any[];

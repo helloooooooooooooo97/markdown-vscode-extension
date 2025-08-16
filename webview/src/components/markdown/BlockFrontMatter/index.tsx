@@ -36,13 +36,12 @@ export const FrontmatterComponent: React.FC<{
             {Object.entries(editingData).map(([key, value]) => {
                 const dataType = getDataType(value);
                 const isEditing = editingKey === key;
-
                 return (
                     <div
                         key={key}
-                        className="flex gap-20 py-1 hover:bg-[#252526] rounded-md px-2"
+                        className="flex gap-20 hover:bg-[#252526] rounded-md px-2 cursor-pointer"
                     >
-                        <div className="w-20 flex items-center gap-2 text-[#838383]">
+                        <div className="w-20 flex items-center gap-2 text-[#838383] font-semibold">
                             {/* 图标 */}
                             <div>
                                 {getTypeIcon(dataType)}
