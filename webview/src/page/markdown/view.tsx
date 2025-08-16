@@ -1,36 +1,7 @@
 import React, { useEffect, useState } from "react";
 import MarkdownParser from "../../pkg/utils/blockParser";
 import { useMarkdownStore } from "../../store/markdown/store";
-
-
-const testMarkdown = `
----
-title: 测试
-updatedAt: '2025-08-02T07:25:09.456Z'
-tags: ["标签1", "标签2", "标签3"]
----
-
-# 测试
-## 测试
-### 测试
-
-$$
-g_t = \nabla L(w_t)
-$$
-
-
-\`\`\`python
-
-
-
-
-print("hello")
-
-
-
-\`\`\`
-
-`
+import { testMarkdown } from "../../store/markdown/factory";
 
 const MarkdownRenderer: React.FC = () => {
     const { setDocument, filePath, content, isLoading } = useMarkdownStore();

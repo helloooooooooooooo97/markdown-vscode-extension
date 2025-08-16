@@ -68,8 +68,8 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, blockId })
     }, [blockId, updateBlock, language]);
 
     return (
-        <div className="rounded-lg">
-            <div className="text-sm text-gray-200 bg-gray-600 rounded-t-lg px-2 py-2">{language}</div>
+        <div className="py-2 rounded-md">
+            <div className="text-sm text-gray-200 bg-gray-600 px-2 py-2">{language}</div>
             <CodeMirror
                 value={code}
                 onChange={handleChange}
