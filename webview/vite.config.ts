@@ -15,15 +15,7 @@ export default defineConfig({
         entryFileNames: "assets/[name].js",
         chunkFileNames: "assets/[name].js",
         assetFileNames: "assets/[name].[ext]",
-      },
-      onwarn(warning, warn) {
-        // 忽略 "use client" 指令的警告
-        if (warning.code === 'MODULE_LEVEL_DIRECTIVE' && String(warning.message).indexOf('"use client"') !== -1) {
-          return;
-        }
-        // 显示其他重要警告
-        warn(warning);
-      },
+      }
     },
   },
   server: {

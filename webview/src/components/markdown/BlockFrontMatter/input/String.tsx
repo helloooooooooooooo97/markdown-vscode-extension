@@ -19,6 +19,7 @@ const StringInput: React.FC<{
                 onBlur={onEditEnd}
                 onPressEnter={onEditEnd}
                 autoSize={{ minRows: 1, maxRows: 3 }}
+                className="px-1"
                 autoFocus
             />
         );
