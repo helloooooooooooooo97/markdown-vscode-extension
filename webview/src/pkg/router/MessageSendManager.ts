@@ -1,9 +1,6 @@
 import { VSCodeAPI } from '../api/vscode';
-import {
-    WebviewCommand,
-    WebviewErrorMessage
-} from '../api/messages';
 
+// 监听器发送
 export class MessageSendManager {
     init(): void {
         window.addEventListener("error", this.handleError);
@@ -16,28 +13,10 @@ export class MessageSendManager {
     }
 
     private handleError = (event: ErrorEvent) => {
-        console.error("Webview 错误:", event.error);
-        const message: WebviewErrorMessage = {
-            command: WebviewCommand.webviewError,
-            error: event.error?.message || event.message || "未知错误",
-            stack: event.error?.stack,
-            filename: event.filename,
-            lineno: event.lineno,
-            colno: event.colno
-        };
-        VSCodeAPI.postMessage(message);
+        VSCodeAPI.sendWebviewError({ error: event.error?.message || event.message || "未知错误", stack: event.error?.stack, filename: event.filename, lineno: event.lineno, colno: event.colno });
     };
 
     private handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-        console.error("未处理的 Promise 拒绝:", event.reason);
-        const message: WebviewErrorMessage = {
-            command: WebviewCommand.webviewError,
-            error: `Promise 拒绝: ${event.reason}`,
-            stack: undefined,
-            filename: undefined,
-            lineno: undefined,
-            colno: undefined
-        };
-        VSCodeAPI.postMessage(message);
+        VSCodeAPI.sendWebviewError({ error: `Promise 拒绝: ${event.reason}` });
     };
 } 

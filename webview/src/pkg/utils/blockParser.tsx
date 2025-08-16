@@ -12,7 +12,7 @@ import {
     BlockAlert,
     BlockIframe,
     BlockFrontMatter,
-} from "../components/markdown";
+} from "../../components/markdown";
 
 import InlineParser from "./inlineParser";
 import { Block, BlockType } from "../../store/markdown/type";

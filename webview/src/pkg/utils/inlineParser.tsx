@@ -7,7 +7,7 @@ import {
     InlineLink,
     LatexInlineComponent,
     LatexInlineErrorComponent,
-} from "../components/markdown";
+} from "../../components/markdown";
 
 /**
  * 行内解析器类

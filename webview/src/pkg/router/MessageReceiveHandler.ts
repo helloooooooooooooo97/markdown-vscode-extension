@@ -1,12 +1,5 @@
 import { useMarkdownStore } from '../../store/markdown/store';
-import {
-    ExtensionCommand,
-    CommonCommand,
-    UpdateMarkdownMessage,
-    ShowMessage,
-    OpenLocalFileMessage
-} from '../api/messages';
-
+import { ExtensionCommand, UpdateMarkdownMessage } from '../api/messages';
 export class MessageReceiveHandler {
     init(): void {
         window.addEventListener("message", this.handleMessage);
@@ -28,14 +21,6 @@ export class MessageReceiveHandler {
                     setCurrentFileName(updateMessage.fileName);
                 }
                 setIsLoading(false);
-                break;
-            case CommonCommand.showMessage:
-                const showMessage = message as ShowMessage;
-                console.log("收到消息:", showMessage.text);
-                break;
-            case CommonCommand.openLocalFile:
-                const openFileMessage = message as OpenLocalFileMessage;
-                console.log("打开本地文件:", openFileMessage.path);
                 break;
             default:
                 console.warn(`未处理的命令: ${message.command}`);

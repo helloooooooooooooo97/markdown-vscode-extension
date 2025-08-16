@@ -82,14 +82,10 @@ export class VSCodeAPI {
         this.postMessage(debugInfo);
     }
 
-    static sendWebviewError(error: string, stack: string, filename: string, lineno: number, colno: number): void {
+    static sendWebviewError(message: { error: string; stack?: string; filename?: string; lineno?: number; colno?: number }): void {
         const webviewError: WebviewErrorMessage = {
             command: WebviewCommand.webviewError,
-            error: error,
-            stack: stack,
-            filename: filename,
-            lineno: lineno,
-            colno: colno
+            ...message
         };
         this.postMessage(webviewError);
     }

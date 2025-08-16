@@ -15,7 +15,7 @@ import { css } from '@codemirror/lang-css';
 import { xml } from '@codemirror/lang-xml';
 import { yaml } from '@codemirror/lang-yaml';
 import { oneDark } from "@codemirror/theme-one-dark";
-import { useMarkdownStore } from '../../../store/markdown/store';
+import { useMarkdownStore } from '../../store/markdown/store';
 
 interface CodeBlockProps {
     code: string;
