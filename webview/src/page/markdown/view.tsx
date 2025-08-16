@@ -18,6 +18,7 @@ $$
 g_t = \nabla L(w_t)
 $$
 
+
 \`\`\`python
 
 
