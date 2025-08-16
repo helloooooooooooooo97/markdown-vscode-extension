@@ -12,9 +12,14 @@
     "vscode": "^1.74.0"
   },
   "dependencies": {
-    "@supernode/shared": "file:../shared"
+    "@supernode/shared": "file:../shared",
+    "gray-matter": "^4.0.3",
+    "mdast": "^2.3.2",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
+    "@types/mdast": "^4.0.4",
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.74.0",
     "rimraf": "^5.0.0",

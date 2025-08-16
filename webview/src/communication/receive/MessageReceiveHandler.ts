@@ -1,5 +1,6 @@
 import { useMarkdownStore } from '../../store/markdown/store';
-import { ExtensionCommand, UpdateMarkdownMessage } from '../messages';
+import { ExtensionCommand, UpdateMarkdownMessage } from '@supernode/shared';
+
 export class MessageReceiveHandler {
     init(): void {
         window.addEventListener("message", this.handleMessage);

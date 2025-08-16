@@ -1,5 +1,5 @@
 import fs from "fs";
-import { FileMetadata, Relation, FrontMatter, MarkdownHeading } from "./schema";
+import { FileMetadata, Relation, FrontMatter, MarkdownHeading } from "@supernode/shared/schema/file/schema";
 import matter from "gray-matter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
@@ -202,4 +202,3 @@ export class ReferenceExtractor {
         }
     }
 }
-
