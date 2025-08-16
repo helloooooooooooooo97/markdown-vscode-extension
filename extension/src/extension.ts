@@ -12,17 +12,13 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 注册事件：命令事件、
   const commandDisposables = CommandManager.registerCommands();
-  const eventDisposables = EventListeners.registerAllListeners();
+  const eventDisposables = EventListeners.registerAllListeners(context);
 
   // 设置扩展上下文
   MarkdownWebviewProvider.extensionContext = context;
 
-  // 初始化各个管理器和服务
-  const statusBarManager = StatusBarManager.getInstance();
-  const autoPreviewService = AutoPreviewService.getInstance();
-
   // 启动自动预览服务
-  autoPreviewService.start();
+  AutoPreviewService.start();
 
   // 启动时扫描Markdown文件并输出JSON
   MarkdownFileScannerService.startScanAndExport().catch(error => {
@@ -33,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     ...commandDisposables,
     ...eventDisposables,
-    statusBarManager.getStatusBarItem()
+    StatusBarManager.getStatusBarItem()
   );
 }
 
@@ -41,5 +37,5 @@ export function deactivate() {
   console.log("Supernode Markdown Extension is now deactivated!");
   CommandManager.dispose();
   EventListeners.dispose();
-  StatusBarManager.getInstance().dispose();
+  StatusBarManager.dispose();
 }
