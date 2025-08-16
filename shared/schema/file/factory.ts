@@ -28,21 +28,10 @@ export class FileMetadataExtractor {
         referenceData.next.forEach((relation) => {
             nextRelations.set(relation.path, relation);
         });
-        (frontmatter.nextRelation || []).forEach((relation: Relation) => {
-            if (!nextRelations.has(relation.path)) {
-                nextRelations.set(relation.path, relation);
-            }
-        });
-
         // 合并 prev 关系
         const prevRelations = new Map<string, Relation>();
         referenceData.prev.forEach((relation) => {
             prevRelations.set(relation.path, relation);
-        });
-        (frontmatter.prevRelation || []).forEach((relation: Relation) => {
-            if (!prevRelations.has(relation.path)) {
-                prevRelations.set(relation.path, relation);
-            }
         });
 
         return {
@@ -101,14 +90,6 @@ export class FrontMatterExtractor {
         try {
             const content = fs.readFileSync(filePath, "utf-8");
             const { data }: { data: FrontMatter } = matter(content);
-            if (data) {
-                data.prevRelation = data.prev
-                    ? this.processPathArray(data.prev, filePath)
-                    : [];
-                data.nextRelation = data.next
-                    ? this.processPathArray(data.next, filePath)
-                    : [];
-            }
             return data || {};
         } catch (e) {
             return {};

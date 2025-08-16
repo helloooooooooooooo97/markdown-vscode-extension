@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { FrontMatter, FileMetadata, FileMetadataExtractor } from "@supernode/shared";
+import { FileMetadata, FileMetadataExtractor } from "@supernode/shared";
 
 export interface MarkdownFileInfo {
     fileName: string;
