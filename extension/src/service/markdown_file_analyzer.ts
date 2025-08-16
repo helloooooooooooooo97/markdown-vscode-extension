@@ -2,8 +2,9 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { FileMetadata } from "@supernode/shared";
-import { FileMetadataExtractor } from "../pkg/file";
+import { FileAnalysisResult, FileMetadataExtractor } from "../pkg/file";
 import { TagExtractor, GraphExtractor } from "@supernode/shared";
+import { FileWatcherService } from "./file_watcher";
 
 export interface MarkdownFileInfo {
     fileName: string;
@@ -12,39 +13,13 @@ export interface MarkdownFileInfo {
     size: number;
     lastModified: Date;
     languageId: string;
-
-    // 新增：完整的文件元数据（来自共享提取器）
     metadata: FileMetadata;
-
-    // 新增：文档统计信息
     documentStats: DocumentStats;
-
-    // 新增：内容分析
     contentAnalysis: ContentAnalysis;
 }
 
-// 新增接口定义
-export interface DocumentStats {
-    totalLines: number;
-    contentLines: number;
-    codeLines: number;
-    commentLines: number;
-    emptyLines: number;
-    wordCount: number;
-    characterCount: number;
-    readingTimeMinutes: number;
-}
-
-export interface ContentAnalysis {
-    language: string;
-    topics: string[];
-    summary: string;
-    complexity: 'simple' | 'moderate' | 'complex';
-    hasCodeBlocks: boolean;
-    hasImages: boolean;
-    hasTables: boolean;
-    hasMath: boolean;
-}
+// 从 pkg/file 中导入接口
+import { DocumentStats, ContentAnalysis } from "../pkg/file";
 
 export interface MarkdownFileStats {
     totalFiles: number;
@@ -58,6 +33,7 @@ export interface MarkdownFileStats {
 }
 
 export class MarkdownFileScannerService {
+    private static fileWatcher = FileWatcherService.getInstance();
     /**
      * 扫描工作目录下的所有Markdown文件
      */
@@ -99,16 +75,8 @@ export class MarkdownFileScannerService {
                         languageId = "mdx";
                     }
 
-                    // 使用共享的 FileMetadataExtractor 提取完整元数据
-                    const metadata = FileMetadataExtractor.ProcessSingleFile(filePath);
-
-                    // 计算文档统计信息
-                    console.log("开始计算文档统计信息...");
-                    const documentStats = this.calculateDocumentStats(filePath);
-
-                    // 分析内容
-                    console.log("开始分析内容...");
-                    const contentAnalysis = this.analyzeContent(filePath);
+                    // 使用新的 FileMetadataExtractor 进行完整分析
+                    const analysis = FileMetadataExtractor.ProcessFileWithAnalysis(filePath);
 
                     const fileInfo: MarkdownFileInfo = {
                         fileName,
@@ -117,9 +85,9 @@ export class MarkdownFileScannerService {
                         size: stats.size,
                         lastModified: stats.mtime,
                         languageId,
-                        metadata,
-                        documentStats,
-                        contentAnalysis
+                        metadata: analysis.metadata,
+                        documentStats: analysis.documentStats,
+                        contentAnalysis: analysis.contentAnalysis
                     };
 
                     files.push(fileInfo);
@@ -188,38 +156,6 @@ export class MarkdownFileScannerService {
             throw error;
         }
     }
-
-    /**
-     * 在输出面板中显示统计结果
-     */
-    static displayStatsInOutput(stats: MarkdownFileStats): void {
-        const outputChannel = vscode.window.createOutputChannel("Markdown Files Scanner");
-        outputChannel.show();
-
-        outputChannel.appendLine("=== Markdown 文件统计报告 ===");
-        outputChannel.appendLine(`扫描时间: ${stats.scanTime.toLocaleString()}`);
-        outputChannel.appendLine(`工作区路径: ${stats.workspacePath}`);
-        outputChannel.appendLine(`总文件数: ${stats.totalFiles}`);
-        outputChannel.appendLine(`总大小: ${this.formatFileSize(stats.totalSize)}`);
-        outputChannel.appendLine("");
-
-        outputChannel.appendLine("按扩展名统计:");
-        Object.entries(stats.filesByExtension).forEach(([ext, count]) => {
-            outputChannel.appendLine(`  ${ext}: ${count} 个文件`);
-        });
-        outputChannel.appendLine("");
-
-        outputChannel.appendLine("文件列表:");
-        stats.files.forEach((file, index) => {
-            outputChannel.appendLine(`${index + 1}. ${file.fileName} (${this.formatFileSize(file.size)})`);
-            outputChannel.appendLine(`   路径: ${file.relativePath}`);
-            outputChannel.appendLine(`   修改时间: ${file.lastModified.toLocaleString()}`);
-            outputChannel.appendLine("");
-        });
-
-        outputChannel.appendLine("=== 统计完成 ===");
-    }
-
     /**
      * 格式化文件大小
      */
@@ -234,177 +170,52 @@ export class MarkdownFileScannerService {
     }
 
     /**
- * 计算文档统计信息
- */
-    static calculateDocumentStats(filePath: string): DocumentStats {
+     * 启动文件监听服务
+     */
+    static startFileWatching(): void {
         try {
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const lines = content.split('\n');
-            const totalLines = lines.length;
-            const emptyLines = lines.filter(line => line.trim() === '').length;
-            const contentLines = totalLines - emptyLines;
+            // 预加载所有文件到缓存
+            this.fileWatcher.preloadAllFiles().then(() => {
+                // 开始监听文件变化
+                this.fileWatcher.startWatching();
 
-            // 统计代码块
-            const codeBlockRegex = /```[\s\S]*?```/g;
-            const codeBlocks = content.match(codeBlockRegex) || [];
-            const codeLines = codeBlocks.reduce((acc, block) => {
-                const blockLines = block.split('\n').length - 2; // 减去 ``` 行
-                return acc + Math.max(0, blockLines);
-            }, 0);
+                // 添加变化监听器
+                this.fileWatcher.addChangeListener((event: any) => {
+                    console.log(`文件变化事件: ${event.type} - ${event.filePath}`);
 
-            // 统计注释行
-            const commentLines = lines.filter(line =>
-                line.trim().startsWith('<!--') || line.trim().startsWith('-->')
-            ).length;
+                    if (event.type === 'modified') {
+                        vscode.window.showInformationMessage(
+                            `文件 ${path.basename(event.filePath)} 已更新，相关数据已重新计算`
+                        );
+                    }
+                });
 
-            // 统计单词和字符
-            const textContent = content.replace(/```[\s\S]*?```/g, ''); // 移除代码块
-            const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
-            const characterCount = textContent.length;
+                vscode.window.showInformationMessage("Markdown 文件监听服务已启动");
+            });
 
-            // 估算阅读时间（假设每分钟200个单词）
-            const readingTimeMinutes = Math.ceil(wordCount / 200);
-
-            return {
-                totalLines,
-                contentLines,
-                codeLines,
-                commentLines,
-                emptyLines,
-                wordCount,
-                characterCount,
-                readingTimeMinutes
-            };
         } catch (error) {
-            console.error(`计算文档统计失败: ${filePath}`, error);
-            return {
-                totalLines: 0,
-                contentLines: 0,
-                codeLines: 0,
-                commentLines: 0,
-                emptyLines: 0,
-                wordCount: 0,
-                characterCount: 0,
-                readingTimeMinutes: 0
-            };
+            console.error("启动文件监听服务失败:", error);
+            vscode.window.showErrorMessage("启动文件监听服务失败");
         }
     }
 
     /**
-     * 分析文档内容
+     * 停止文件监听服务
      */
-    static analyzeContent(filePath: string): ContentAnalysis {
-        try {
-            const content = fs.readFileSync(filePath, 'utf-8');
-
-            // 检测语言（简单实现）
-            const language = this.detectLanguage(content);
-
-            // 提取主题关键词
-            const topics = this.extractTopics(content);
-
-            // 生成摘要
-            const summary = this.generateSummary(content);
-
-            // 评估复杂度
-            const complexity = this.assessComplexity(content);
-
-            // 检测内容类型
-            const hasCodeBlocks = /```[\s\S]*?```/g.test(content);
-            const hasImages = /!\[.*?\]\(.*?\)/g.test(content);
-            const hasTables = /\|.*\|.*\|/g.test(content);
-            const hasMath = /\$\$[\s\S]*?\$\$|\$[^\$]*\$/g.test(content);
-
-            return {
-                language,
-                topics,
-                summary,
-                complexity,
-                hasCodeBlocks,
-                hasImages,
-                hasTables,
-                hasMath
-            };
-        } catch (error) {
-            console.error(`分析内容失败: ${filePath}`, error);
-            return {
-                language: 'unknown',
-                topics: [],
-                summary: '',
-                complexity: 'simple',
-                hasCodeBlocks: false,
-                hasImages: false,
-                hasTables: false,
-                hasMath: false
-            };
-        }
+    static stopFileWatching(): void {
+        this.fileWatcher.stopWatching();
+        vscode.window.showInformationMessage("Markdown 文件监听服务已停止");
     }
 
     /**
-     * 检测文档语言
+     * 获取缓存统计信息
      */
-    static detectLanguage(content: string): string {
-        // 简单的语言检测逻辑
-        if (content.includes('```javascript') || content.includes('```js')) return 'javascript';
-        if (content.includes('```typescript') || content.includes('```ts')) return 'typescript';
-        if (content.includes('```python') || content.includes('```py')) return 'python';
-        if (content.includes('```java')) return 'java';
-        if (content.includes('```cpp') || content.includes('```c++')) return 'cpp';
-        if (content.includes('```c#')) return 'csharp';
-        if (content.includes('```go')) return 'go';
-        if (content.includes('```rust')) return 'rust';
-        return 'markdown';
+    static getCacheStats(): { totalFiles: number; cacheSize: number } {
+        return this.fileWatcher.getCacheStats();
     }
 
-    /**
-     * 提取主题关键词
-     */
-    static extractTopics(content: string): string[] {
-        const topics: string[] = [];
 
-        // 从标题中提取关键词
-        const headingRegex = /^#{1,6}\s+(.+)$/gm;
-        const headings = content.match(headingRegex) || [];
-        headings.forEach(heading => {
-            const title = heading.replace(/^#{1,6}\s+/, '');
-            const words = title.split(/\s+/).filter(word => word.length > 2);
-            topics.push(...words.slice(0, 3)); // 取前3个词
-        });
 
-        // 去重并限制数量
-        return [...new Set(topics)].slice(0, 5);
-    }
-
-    /**
-     * 生成文档摘要
-     */
-    static generateSummary(content: string): string {
-        // 移除代码块和frontmatter
-        const cleanContent = content
-            .replace(/```[\s\S]*?```/g, '')
-            .replace(/^---[\s\S]*?---/m, '');
-
-        // 取前200个字符作为摘要
-        const summary = cleanContent.trim().substring(0, 200);
-        return summary.length === 200 ? summary + '...' : summary;
-    }
-
-    /**
- * 评估文档复杂度
- */
-    static assessComplexity(content: string): 'simple' | 'moderate' | 'complex' {
-        const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
-        const headings = (content.match(/^#{1,6}\s+/gm) || []).length;
-        const links = (content.match(/\[.*?\]\(.*?\)/g) || []).length;
-        const images = (content.match(/!\[.*?\]\(.*?\)/g) || []).length;
-        const tables = (content.match(/\|.*\|.*\|/g) || []).length;
-
-        const complexityScore = codeBlocks * 2 + headings + links + images + tables * 3;
-
-        if (complexityScore < 10) return 'simple';
-        if (complexityScore < 25) return 'moderate';
-        return 'complex';
-    }
 
     /**
      * 启动扫描并输出结果
@@ -419,8 +230,8 @@ export class MarkdownFileScannerService {
             // 导出JSON文件
             const outputPath = await this.exportToJson(stats);
 
-            // 在输出面板显示结果
-            this.displayStatsInOutput(stats);
+            // 在 Problems 面板中显示缺失内容警告
+            await this.displayMissingContentWarnings(stats);
 
             // 显示成功消息
             vscode.window.showInformationMessage(
@@ -431,5 +242,124 @@ export class MarkdownFileScannerService {
             console.error("Markdown文件扫描失败:", error);
             vscode.window.showErrorMessage(`Markdown文件扫描失败: ${error}`);
         }
+    }
+
+    /**
+     * 在 Problems 面板中显示缺失内容警告
+     */
+    static async displayMissingContentWarnings(stats: MarkdownFileStats): Promise<void> {
+        console.log("开始显示缺失内容警告...");
+
+        // 创建诊断集合
+        const diagnosticCollection = vscode.languages.createDiagnosticCollection('supernode-missing-content');
+
+        // 清除之前的诊断
+        diagnosticCollection.clear();
+
+        let warningCount = 0;
+        let processedFiles = 0;
+
+        console.log(`开始处理 ${stats.files.length} 个文件...`);
+
+        for (const file of stats.files) {
+            processedFiles++;
+            console.log(`处理文件 ${processedFiles}/${stats.files.length}: ${file.fileName}`);
+
+            const diagnostics: vscode.Diagnostic[] = [];
+
+            // 检查文件是否有缺失内容
+            if (file.metadata && file.metadata.markdownHeadings) {
+                console.log(`检查文件 ${file.fileName} 的缺失内容...`);
+                const missingItems = await this.checkMissingContent(file.metadata);
+                console.log(`文件 ${file.fileName} 的缺失内容:`, missingItems);
+
+                if (missingItems.length > 0) {
+                    warningCount++;
+
+                    // 创建诊断信息
+                    const diagnostic = new vscode.Diagnostic(
+                        new vscode.Range(0, 0, 0, 0), // 在文件开头显示
+                        `缺失内容: ${missingItems.join(', ')}`,
+                        vscode.DiagnosticSeverity.Warning
+                    );
+
+                    diagnostic.source = 'Supernode';
+                    diagnostic.code = 'missing-content';
+
+                    diagnostics.push(diagnostic);
+                    console.log(`为文件 ${file.fileName} 创建了诊断信息`);
+                }
+            } else {
+                console.log(`文件 ${file.fileName} 没有元数据或标题信息`);
+            }
+
+            // 如果有诊断信息，添加到集合中
+            if (diagnostics.length > 0) {
+                const uri = vscode.Uri.file(file.filePath);
+                diagnosticCollection.set(uri, diagnostics);
+                console.log(`将诊断信息添加到集合中: ${file.filePath}`);
+            }
+        }
+
+        console.log(`处理完成，发现 ${warningCount} 个警告`);
+
+        if (warningCount > 0) {
+            vscode.window.showWarningMessage(
+                `发现 ${warningCount} 个文件存在内容缺失问题，请在 Problems 面板中查看详情`
+            );
+        } else {
+            console.log("没有发现缺失内容问题");
+            vscode.window.showInformationMessage("没有发现内容缺失问题");
+        }
+    }
+
+    /**
+ * 检查文件的缺失内容
+ */
+    private static async checkMissingContent(metadata: any): Promise<string[]> {
+        const missingItems: string[] = [];
+
+        // 从 TagExtractor 的结果中检查缺失内容
+        // 这里我们需要重新计算 TagExtractor 的结果来获取准确的缺失信息
+        try {
+            // 获取所有文件的元数据来计算标签
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                return missingItems;
+            }
+
+            // 获取当前工作区的所有 Markdown 文件
+            const markdownFiles = await vscode.workspace.findFiles(
+                '**/*.{md,mdx}',
+                '**/node_modules/**'
+            );
+
+            // 提取所有文件的元数据
+            const allFileMetadata = [];
+            for (const fileUri of markdownFiles) {
+                try {
+                    const fileMetadata = FileMetadataExtractor.ProcessSingleFile(fileUri.fsPath);
+                    allFileMetadata.push(fileMetadata);
+                } catch (error) {
+                    console.error(`提取文件元数据失败: ${fileUri.fsPath}`, error);
+                }
+            }
+
+            // 使用 TagExtractor 计算标签
+            const tagMetadata = TagExtractor.extract(allFileMetadata);
+
+            // 查找当前文件对应的标签信息
+            for (const tag of tagMetadata) {
+                for (const row of tag.rows) {
+                    if (row.filePath === metadata.filePath && row.missing && row.missing.length > 0) {
+                        missingItems.push(...row.missing);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('检查缺失内容时出错:', error);
+        }
+
+        return missingItems;
     }
 } 
