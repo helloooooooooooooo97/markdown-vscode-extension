@@ -1,4 +1,4 @@
-import { VSCodeAPI } from '../api/vscode';
+import { VSCodeAPI } from './manual_vscode';
 
 // 监听器发送
 export class MessageSendManager {

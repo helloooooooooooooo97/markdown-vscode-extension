@@ -1,4 +1,4 @@
-import { VSCodeAPI } from './vscode';
+import { VSCodeAPI } from '../../communication/send/manual_vscode';
 import { useMarkdownStore } from '../../store/markdown/store';
 
 // 简化的测试功能管理器
@@ -20,4 +20,4 @@ export class TestFunctionManager {
         const { content, isLoading } = useMarkdownStore.getState();
         VSCodeAPI.sendDebugInfo(content, isLoading, "test");
     }
-}   
+}

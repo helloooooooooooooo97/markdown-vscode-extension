@@ -1,5 +1,5 @@
 import { useMarkdownStore } from '../../store/markdown/store';
-import { ExtensionCommand, UpdateMarkdownMessage } from '../api/messages';
+import { ExtensionCommand, UpdateMarkdownMessage } from '../messages';
 export class MessageReceiveHandler {
     init(): void {
         window.addEventListener("message", this.handleMessage);

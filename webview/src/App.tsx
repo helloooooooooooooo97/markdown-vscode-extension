@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { ConfigProvider, theme, Tabs } from "antd";
-import { VSCodeAPI } from "./pkg/api/vscode";
-import { MessageReceiveHandler, MessageSendManager } from "./pkg/router";
+import { VSCodeAPI } from "./communication/send/manual_vscode";
+import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
+import { MessageSendManager } from "./communication/send/auto_send";
 import { MarkdownView, TestPanel } from "./components";
 import "./App.css";
 

@@ -1,6 +1,6 @@
 import { Button, Space, Typography } from "antd";
-import { TestFunctionManager } from "../pkg/api/test";
-import { useMarkdownStore } from "../store/markdown/store";
+import { TestFunctionManager } from "./api";
+import { useMarkdownStore } from "../../store/markdown/store";
 
 const { Title, Text } = Typography;
 

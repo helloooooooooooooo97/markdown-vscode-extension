@@ -1,2 +1,2 @@
-export { default as MarkdownView } from '../page/MarkdownPanel';
-export { default as TestPanel } from '../page/TestPanel'; 
+export { default as MarkdownView } from '../page/markdown/view';
+export { default as TestPanel } from '../page/test/view'; 

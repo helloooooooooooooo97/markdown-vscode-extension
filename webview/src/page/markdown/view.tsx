@@ -1,6 +1,6 @@
 import { Spin } from "antd";
-import MarkdownRenderer from "../store/markdown/view.tsx";
-import { useMarkdownStore } from "../store/markdown/store.ts";
+import MarkdownRenderer from "../../store/markdown/view.tsx";
+import { useMarkdownStore } from "../../store/markdown/store.ts";
 
 const MarkdownView = () => {
     const { content, isLoading } = useMarkdownStore();
