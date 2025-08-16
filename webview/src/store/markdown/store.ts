@@ -10,6 +10,8 @@ import { createQueries, MarkdownQueries } from './queries';
 export interface MarkdownStore {
     docs: Block[];
     currentFileName: string; // 当前文件的路径
+    content: string; // 原始 Markdown 内容
+    isLoading: boolean; // 加载状态
 }
 
 // 类型定义
@@ -23,6 +25,8 @@ export const useMarkdownStore = create<useMarkdownStoreType>()(
         // 初始状态
         docs: [],
         currentFileName: "", // 当前文件的路径
+        content: "", // 原始 Markdown 内容
+        isLoading: true, // 加载状态
         // 组合所有操作
         ...createMutations(set, get),
         ...createQueries(get)

@@ -7,6 +7,8 @@ export interface MarkdownMutations {
     updateBlock: (id: string, lines: string[]) => void;
     generateBlockId: () => string;
     setCurrentFileName: (fileName: string) => void;
+    setContent: (content: string) => void;
+    setIsLoading: (loading: boolean) => void;
 }
 
 // Mutations 操作实现
@@ -40,5 +42,17 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
 
     generateBlockId: () => {
         return `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    },
+
+    setContent: (content: string) => {
+        set((state) => {
+            state.content = content;
+        });
+    },
+
+    setIsLoading: (loading: boolean) => {
+        set((state) => {
+            state.isLoading = loading;
+        });
     }
 }); 
