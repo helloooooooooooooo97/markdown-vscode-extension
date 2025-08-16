@@ -18,11 +18,13 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "noEmit": false,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": false
   },
   "include": [
     "constants/**/*",
     "types/**/*",
+    "schema/**/*",
+    "pipeline/**/*",
     "index.ts"
   ],
   "exclude": [

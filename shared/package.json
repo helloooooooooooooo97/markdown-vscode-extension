@@ -2,8 +2,8 @@
   "name": "@supernode/shared",
   "version": "1.0.0",
   "description": "共享类型和常量",
-  "main": "index.ts",
-  "types": "index.ts",
+  "main": "dist/index.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "tsc",
     "clean": "rimraf dist"
