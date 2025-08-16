@@ -29,14 +29,14 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
             window?.vscode?.postMessage({
                 command: 'updateMarkdownContentFromWebview',
                 content: state.docs.map((b: Block) => b.lines.join('\n')).join('\n'),
-                fileName: state.currentFileName, // 添加文件路径
+                fileName: state.filePath, // 添加文件路径
             });
         });
     },
 
     setCurrentFileName: (fileName: string) => {
         set((state) => {
-            state.currentFileName = fileName;
+            state.filePath = fileName;
         });
     },
 

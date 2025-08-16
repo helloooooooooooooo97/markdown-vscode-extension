@@ -135,13 +135,13 @@ const renderPropertyValue = (
         switch (dataType) {
             case DataType.ARRAY:
                 return (
-                    <Space wrap>
+                    <div className="flex flex-wrap">
                         {Array.isArray(value) && value.map((item, index) => (
-                            <Tag key={index} color="blue">
+                            <Tag key={index} color="purple">
                                 {String(item)}
                             </Tag>
                         ))}
-                    </Space>
+                    </div>
                 );
 
             case DataType.BOOLEAN:
@@ -176,18 +176,25 @@ export const FrontmatterComponent: React.FC<{
 }> = ({ data }) => {
 
     return (
-        <div className="bg-zinc-900 rounded-md p-4 border border-zinc-700">
+        <div className="flex flex-col gap-2">
             {Object.entries(data).map(([key, value]) => {
                 const dataType = getDataType(value);
-
                 return (
                     <div
                         key={key}
-                        className="flex items-center gap-3 last:mb-0"
+                        className="flex gap-20 py-1 hover:bg-[#252526] rounded-md px-2"
+
                     >
-                        {/* 图标 */}
-                        <div className="text-zinc-400 text-base min-w-[20px] mt-[2px]">
-                            {getTypeIcon(dataType)}
+                        <div className="w-20 flex gap-2 text-[#838383]">
+                            {/* 图标 */}
+                            <div>
+                                {getTypeIcon(dataType)}
+                            </div>
+                            {/* 显示键 */}
+                            <div>
+                                {key}
+                            </div>
+
                         </div>
                         {/* 值展示/编辑区域 */}
                         {renderPropertyValue(key, value, false, () => { })}

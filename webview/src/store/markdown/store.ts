@@ -9,7 +9,7 @@ import { createQueries, MarkdownQueries } from './queries';
 // 状态接口
 export interface MarkdownStore {
     docs: Block[];
-    currentFileName: string; // 当前文件的路径
+    filePath: string; // 当前文件的路径
     content: string; // 原始 Markdown 内容
     isLoading: boolean; // 加载状态
 }
@@ -24,7 +24,7 @@ export const useMarkdownStore = create<useMarkdownStoreType>()(
     immer((set, get) => ({
         // 初始状态
         docs: [],
-        currentFileName: "", // 当前文件的路径
+        filePath: "", // 当前文件的路径
         content: "", // 原始 Markdown 内容
         isLoading: true, // 加载状态
         // 组合所有操作

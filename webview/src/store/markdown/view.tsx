@@ -6,8 +6,8 @@ import { useMarkdownStore } from "./store";
 const testMarkdown = `
 ---
 title: 测试
-date: 2021-01-01
-tags: [1, 2, 3]
+updatedAt: '2025-08-02T07:25:09.456Z'
+tags: ["标签1", "标签2", "标签3"]
 ---
 
 # 测试
@@ -21,7 +21,7 @@ $$
 `
 
 const MarkdownRenderer: React.FC = () => {
-    const { setDocument, currentFileName, content, isLoading } = useMarkdownStore();
+    const { setDocument, filePath, content, isLoading } = useMarkdownStore();
     const [parsedMarkdown, setParsedMarkdown] = useState<React.ReactNode[]>([]);
     useEffect(() => {
         if (isLoading) {
@@ -41,7 +41,9 @@ const MarkdownRenderer: React.FC = () => {
 
     return (
         <div>
-            <div>{currentFileName}</div>
+            <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
+                {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "文件名"}
+            </div>
             {parsedMarkdown}
         </div>
     );

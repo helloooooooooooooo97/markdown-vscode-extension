@@ -37,7 +37,7 @@ export const BlockLatex = ({
             >
                 <div className="flex justify-center">
                     <div
-                        className="katex-display text-6xl"
+                        className="katex-display text-4xl"
                         dangerouslySetInnerHTML={{ __html: html }}
                     />
                 </div>

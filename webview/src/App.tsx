@@ -55,12 +55,7 @@ function App() {
       <Tabs
         defaultActiveKey="markdown"
         items={items}
-        style={{
-          background: "#252526",
-          borderRadius: 8,
-          padding: 16,
-          minHeight: 400
-        }}
+        className="bg-[#191919] px-8"
         tabBarStyle={{
           marginBottom: 24
         }}
