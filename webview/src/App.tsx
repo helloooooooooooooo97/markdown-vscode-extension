@@ -10,7 +10,7 @@ import "./App.css";
 const items = [
   {
     key: "markdown",
-    label: "Markdown 渲染",
+    label: "Markdown",
     children: <MarkdownView />
   },
   {
