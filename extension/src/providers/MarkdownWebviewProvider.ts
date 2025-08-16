@@ -10,8 +10,9 @@ import {
     UpdateMarkdownContentFromWebviewMessage,
     WebviewErrorMessage,
     WebviewReadyMessage,
-    DebugInfoMessage
-} from "../types/messages";
+    DebugInfoMessage,
+    ExtensionCommand
+} from "@supernode/shared";
 
 export class MarkdownWebviewProvider {
     public static currentPanel: MarkdownWebviewProvider | undefined;
@@ -215,7 +216,7 @@ export class MarkdownWebviewProvider {
             if (this.fileManager.isMarkdownFile(document)) {
                 const content: string = this.fileManager.getFileContent(document);
                 const message: UpdateMarkdownMessage = {
-                    command: "updateMarkdownContent",
+                    command: ExtensionCommand.updateMarkdownContent,
                     content: content,
                     fileName: document.fileName,
                 };

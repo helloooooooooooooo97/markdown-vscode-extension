@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 
 import { UpdateMarkdownMessage } from "@supernode/shared";
-
 import { StatusBarManager } from "./managers/StatusBarManager";
 import { CommandManager } from "./commands/CommandManager";
 import { EventListeners } from "./listeners/EventListeners";
