@@ -1,0 +1,23 @@
+{
+    "folders": [
+        {
+            "name": "root",
+            "path": "../"
+        },
+        {
+            "name": "reference",
+            "path": "/Users/apple1/Desktop/supernode"
+        },
+    ],
+    "settings": {
+        "jest.runMode": {
+            "type": "on-demand",
+            "watch": false
+        }
+    },
+    "extensions": {
+        "recommendations": [
+            "orta.vscode-jest"
+        ]
+    }
+}

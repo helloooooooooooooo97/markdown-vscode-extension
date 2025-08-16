@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { FileManager } from "../managers/FileManager";
+import { FrontMatter, FileMetadata } from "@shared/schema/file/schema";
+import { FileMetadataExtractor } from "@shared/schema/file/factory";
 
 export interface MarkdownFileInfo {
     fileName: string;
@@ -10,6 +11,39 @@ export interface MarkdownFileInfo {
     size: number;
     lastModified: Date;
     languageId: string;
+    frontmatter: FrontMatter;
+
+    // 新增：完整的文件元数据（来自共享提取器）
+    metadata: FileMetadata;
+
+    // 新增：文档统计信息
+    documentStats: DocumentStats;
+
+    // 新增：内容分析
+    contentAnalysis: ContentAnalysis;
+}
+
+// 新增接口定义
+export interface DocumentStats {
+    totalLines: number;
+    contentLines: number;
+    codeLines: number;
+    commentLines: number;
+    emptyLines: number;
+    wordCount: number;
+    characterCount: number;
+    readingTimeMinutes: number;
+}
+
+export interface ContentAnalysis {
+    language: string;
+    topics: string[];
+    summary: string;
+    complexity: 'simple' | 'moderate' | 'complex';
+    hasCodeBlocks: boolean;
+    hasImages: boolean;
+    hasTables: boolean;
+    hasMath: boolean;
 }
 
 export interface MarkdownFileStats {
@@ -25,10 +59,8 @@ export interface MarkdownFileStats {
 
 export class MarkdownFileScannerService {
     private static instance: MarkdownFileScannerService;
-    private fileManager: FileManager;
 
     private constructor() {
-        this.fileManager = FileManager.getInstance();
     }
 
     public static getInstance(): MarkdownFileScannerService {
@@ -79,13 +111,29 @@ export class MarkdownFileScannerService {
                         languageId = "mdx";
                     }
 
+                    // 使用共享的 FileMetadataExtractor 提取完整元数据
+                    const metadata = FileMetadataExtractor.ProcessSingleFile(filePath, fileName, stats);
+                    const frontmatter = metadata.frontmatter;
+
+                    // 计算文档统计信息
+                    console.log("开始计算文档统计信息...");
+                    const documentStats = this.calculateDocumentStats(filePath);
+
+                    // 分析内容
+                    console.log("开始分析内容...");
+                    const contentAnalysis = this.analyzeContent(filePath);
+
                     const fileInfo: MarkdownFileInfo = {
                         fileName,
                         filePath,
                         relativePath,
                         size: stats.size,
                         lastModified: stats.mtime,
-                        languageId
+                        languageId,
+                        frontmatter,
+                        metadata,
+                        documentStats,
+                        contentAnalysis
                     };
 
                     files.push(fileInfo);
@@ -193,6 +241,220 @@ export class MarkdownFileScannerService {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
 
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    /**
+ * 计算文档统计信息
+ */
+    private calculateDocumentStats(filePath: string): DocumentStats {
+        try {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const lines = content.split('\n');
+            const totalLines = lines.length;
+            const emptyLines = lines.filter(line => line.trim() === '').length;
+            const contentLines = totalLines - emptyLines;
+
+            // 统计代码块
+            const codeBlockRegex = /```[\s\S]*?```/g;
+            const codeBlocks = content.match(codeBlockRegex) || [];
+            const codeLines = codeBlocks.reduce((acc, block) => {
+                const blockLines = block.split('\n').length - 2; // 减去 ``` 行
+                return acc + Math.max(0, blockLines);
+            }, 0);
+
+            // 统计注释行
+            const commentLines = lines.filter(line =>
+                line.trim().startsWith('<!--') || line.trim().startsWith('-->')
+            ).length;
+
+            // 统计单词和字符
+            const textContent = content.replace(/```[\s\S]*?```/g, ''); // 移除代码块
+            const wordCount = textContent.split(/\s+/).filter(word => word.length > 0).length;
+            const characterCount = textContent.length;
+
+            // 估算阅读时间（假设每分钟200个单词）
+            const readingTimeMinutes = Math.ceil(wordCount / 200);
+
+            return {
+                totalLines,
+                contentLines,
+                codeLines,
+                commentLines,
+                emptyLines,
+                wordCount,
+                characterCount,
+                readingTimeMinutes
+            };
+        } catch (error) {
+            console.error(`计算文档统计失败: ${filePath}`, error);
+            return {
+                totalLines: 0,
+                contentLines: 0,
+                codeLines: 0,
+                commentLines: 0,
+                emptyLines: 0,
+                wordCount: 0,
+                characterCount: 0,
+                readingTimeMinutes: 0
+            };
+        }
+    }
+
+    /**
+     * 分析文档内容
+     */
+    private analyzeContent(filePath: string): ContentAnalysis {
+        try {
+            const content = fs.readFileSync(filePath, 'utf-8');
+
+            // 检测语言（简单实现）
+            const language = this.detectLanguage(content);
+
+            // 提取主题关键词
+            const topics = this.extractTopics(content);
+
+            // 生成摘要
+            const summary = this.generateSummary(content);
+
+            // 评估复杂度
+            const complexity = this.assessComplexity(content);
+
+            // 检测内容类型
+            const hasCodeBlocks = /```[\s\S]*?```/g.test(content);
+            const hasImages = /!\[.*?\]\(.*?\)/g.test(content);
+            const hasTables = /\|.*\|.*\|/g.test(content);
+            const hasMath = /\$\$[\s\S]*?\$\$|\$[^\$]*\$/g.test(content);
+
+            return {
+                language,
+                topics,
+                summary,
+                complexity,
+                hasCodeBlocks,
+                hasImages,
+                hasTables,
+                hasMath
+            };
+        } catch (error) {
+            console.error(`分析内容失败: ${filePath}`, error);
+            return {
+                language: 'unknown',
+                topics: [],
+                summary: '',
+                complexity: 'simple',
+                hasCodeBlocks: false,
+                hasImages: false,
+                hasTables: false,
+                hasMath: false
+            };
+        }
+    }
+
+    /**
+     * 检测文档语言
+     */
+    private detectLanguage(content: string): string {
+        // 简单的语言检测逻辑
+        if (content.includes('```javascript') || content.includes('```js')) return 'javascript';
+        if (content.includes('```typescript') || content.includes('```ts')) return 'typescript';
+        if (content.includes('```python') || content.includes('```py')) return 'python';
+        if (content.includes('```java')) return 'java';
+        if (content.includes('```cpp') || content.includes('```c++')) return 'cpp';
+        if (content.includes('```c#')) return 'csharp';
+        if (content.includes('```go')) return 'go';
+        if (content.includes('```rust')) return 'rust';
+        return 'markdown';
+    }
+
+    /**
+     * 提取主题关键词
+     */
+    private extractTopics(content: string): string[] {
+        const topics: string[] = [];
+
+        // 从标题中提取关键词
+        const headingRegex = /^#{1,6}\s+(.+)$/gm;
+        const headings = content.match(headingRegex) || [];
+        headings.forEach(heading => {
+            const title = heading.replace(/^#{1,6}\s+/, '');
+            const words = title.split(/\s+/).filter(word => word.length > 2);
+            topics.push(...words.slice(0, 3)); // 取前3个词
+        });
+
+        // 去重并限制数量
+        return [...new Set(topics)].slice(0, 5);
+    }
+
+    /**
+     * 生成文档摘要
+     */
+    private generateSummary(content: string): string {
+        // 移除代码块和frontmatter
+        const cleanContent = content
+            .replace(/```[\s\S]*?```/g, '')
+            .replace(/^---[\s\S]*?---/m, '');
+
+        // 取前200个字符作为摘要
+        const summary = cleanContent.trim().substring(0, 200);
+        return summary.length === 200 ? summary + '...' : summary;
+    }
+
+    /**
+ * 评估文档复杂度
+ */
+    private assessComplexity(content: string): 'simple' | 'moderate' | 'complex' {
+        const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
+        const headings = (content.match(/^#{1,6}\s+/gm) || []).length;
+        const links = (content.match(/\[.*?\]\(.*?\)/g) || []).length;
+        const images = (content.match(/!\[.*?\]\(.*?\)/g) || []).length;
+        const tables = (content.match(/\|.*\|.*\|/g) || []).length;
+
+        const complexityScore = codeBlocks * 2 + headings + links + images + tables * 3;
+
+        if (complexityScore < 10) return 'simple';
+        if (complexityScore < 25) return 'moderate';
+        return 'complex';
+    }
+
+    /**
+     * 提取文件的 frontmatter
+     */
+    private extractFrontmatter(filePath: string): FrontMatter {
+        try {
+            const content = fs.readFileSync(filePath, 'utf-8');
+            const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+
+            if (frontmatterMatch) {
+                const frontmatterContent = frontmatterMatch[1];
+                const lines = frontmatterContent.split('\n');
+                const frontmatter: FrontMatter = {};
+
+                for (const line of lines) {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex > 0) {
+                        const key = line.substring(0, colonIndex).trim();
+                        const value = line.substring(colonIndex + 1).trim();
+
+                        // 处理数组值
+                        if (value.startsWith('[') && value.endsWith(']')) {
+                            try {
+                                frontmatter[key] = JSON.parse(value);
+                            } catch {
+                                frontmatter[key] = value;
+                            }
+                        } else {
+                            frontmatter[key] = value;
+                        }
+                    }
+                }
+
+                return frontmatter;
+            }
+        } catch (error) {
+            console.error(`提取 frontmatter 失败: ${filePath}`, error);
+        }
+
+        return {};
     }
 
     /**
