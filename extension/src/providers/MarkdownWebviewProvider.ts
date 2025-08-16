@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { ConfigurationManager } from "../managers/ConfigurationManager";
 import { FileManager } from "../managers/FileManager";
+import { CommunicationLogger } from "../managers/CommunicationLogger";
 import {
     WebviewMessage,
     UpdateMarkdownMessage,
@@ -26,6 +27,7 @@ export class MarkdownWebviewProvider {
     private _disposables: vscode.Disposable[] = [];
     private configManager: ConfigurationManager;
     private fileManager: FileManager;
+    private communicationLogger: CommunicationLogger;
 
     public static createOrShow() {
         const configManager = ConfigurationManager.getInstance();
@@ -86,6 +88,7 @@ export class MarkdownWebviewProvider {
         this._panel = panel;
         this.configManager = ConfigurationManager.getInstance();
         this.fileManager = FileManager.getInstance();
+        this.communicationLogger = CommunicationLogger.getInstance();
 
         // 设置初始HTML内容
         this._update();
@@ -119,6 +122,8 @@ export class MarkdownWebviewProvider {
     }
 
     public sendMessage(message: WebviewMessage): void {
+        // 记录发送到webview的消息
+        this.communicationLogger.logExtensionToWebview(message, MarkdownWebviewProvider.lastActiveMarkdownPath);
         this._panel.webview.postMessage(message);
     }
 
@@ -126,6 +131,8 @@ export class MarkdownWebviewProvider {
      * 处理来自 WebView 的消息
      */
     private handleWebviewMessage(message: WebviewMessage): void {
+        // 记录从webview接收的消息
+        this.communicationLogger.logWebviewToExtension(message, MarkdownWebviewProvider.lastActiveMarkdownPath);
         console.log("收到webview消息:", message);
 
         switch (message.command) {

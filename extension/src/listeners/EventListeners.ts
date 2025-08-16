@@ -27,10 +27,8 @@ export class EventListeners {
         const disposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (editor) {
                 const document = editor.document;
+                console.log("鼠标点击的文档:", document.fileName);
                 if (this.fileManager.isMarkdownFile(document)) {
-                    // 保存当前 Markdown 文档路径
-                    console.log("保存 Markdown 文档路径:", document.fileName);
-
                     const message: UpdateMarkdownMessage = {
                         command: ExtensionCommand.updateMarkdownContent,
                         content: this.fileManager.getFileContent(document),
