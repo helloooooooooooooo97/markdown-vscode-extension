@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { ConfigurationManager } from "../managers/ConfigurationManager";
-import { FileManager } from "../managers/FileManager";
-import { MarkdownWebviewProvider } from "../../vscode/providers/MarkdownWebviewProvider";
+import { FileManager } from "../../vscode/service/file_service";
+import { MarkdownWebviewProvider } from "../../vscode/service/webview_service";
 
 export class AutoPreviewService {
     private static instance: AutoPreviewService;

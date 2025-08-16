@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { ConfigurationManager } from "../../pkg/managers/ConfigurationManager";
-import { FileManager } from "../../pkg/managers/FileManager";
+import { FileManager } from "./file_service";
 import { CommunicationLogger } from "../../pkg/managers/CommunicationLogger";
 import { MessageRouter } from "../../communication/routers";
 import { HandlerFactory } from "../../communication/handlers";

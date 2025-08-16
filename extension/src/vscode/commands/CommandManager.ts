@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { MarkdownWebviewProvider } from "../providers/MarkdownWebviewProvider";
+import { MarkdownWebviewProvider } from "../service/webview_service";
 import { MarkdownFileScannerService } from "../../pkg/services/MarkdownFileScannerService";
 
 export class CommandManager {

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { UpdateMarkdownContentFromWebviewMessage } from "@supernode/shared";
 import { MessageHandler } from "./MessageHandler";
-import { FileManager } from "../../pkg/managers/FileManager";
+import { FileManager } from "../../vscode/service/file_service";
 
 /**
  * 更新Markdown内容处理器

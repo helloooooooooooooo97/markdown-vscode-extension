@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { FileManager } from "../../pkg/managers/FileManager";
+import { FileManager } from "../../vscode/service/file_service";
 import { ExtensionCommand, UpdateMarkdownMessage } from "@supernode/shared";
 
 export class EventListeners {

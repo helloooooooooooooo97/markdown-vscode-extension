@@ -5,7 +5,7 @@ import { StatusBarManager } from "./pkg/managers/StatusBarManager";
 import { CommandManager } from "./vscode/commands/CommandManager";
 import { EventListeners } from "./communication/listeners/EventListeners";
 import { AutoPreviewService } from "./pkg/services/AutoPreviewService";
-import { MarkdownWebviewProvider } from "./vscode/providers/MarkdownWebviewProvider";
+import { MarkdownWebviewProvider } from "./vscode/service/webview_service";
 import { MarkdownFileScannerService } from "./pkg/services/MarkdownFileScannerService";
 
 export function activate(context: vscode.ExtensionContext) {
