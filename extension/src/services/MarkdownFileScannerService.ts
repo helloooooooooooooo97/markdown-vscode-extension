@@ -10,7 +10,6 @@ export interface MarkdownFileInfo {
     size: number;
     lastModified: Date;
     languageId: string;
-    frontmatter: FrontMatter;
 
     // 新增：完整的文件元数据（来自共享提取器）
     metadata: FileMetadata;
@@ -112,7 +111,6 @@ export class MarkdownFileScannerService {
 
                     // 使用共享的 FileMetadataExtractor 提取完整元数据
                     const metadata = FileMetadataExtractor.ProcessSingleFile(filePath, fileName, stats);
-                    const frontmatter = metadata.frontmatter;
 
                     // 计算文档统计信息
                     console.log("开始计算文档统计信息...");
@@ -129,7 +127,6 @@ export class MarkdownFileScannerService {
                         size: stats.size,
                         lastModified: stats.mtime,
                         languageId,
-                        frontmatter,
                         metadata,
                         documentStats,
                         contentAnalysis
@@ -182,8 +179,8 @@ export class MarkdownFileScannerService {
                     throw new Error("没有找到工作区文件夹");
                 }
 
-                const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-                outputPath = path.join(workspaceFolders[0].uri.fsPath, `markdown-files-${timestamp}.json`);
+                // const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                outputPath = path.join(workspaceFolders[0].uri.fsPath, `markdown-files.json`);
             }
 
             // 写入文件
@@ -413,47 +410,6 @@ export class MarkdownFileScannerService {
         if (complexityScore < 10) return 'simple';
         if (complexityScore < 25) return 'moderate';
         return 'complex';
-    }
-
-    /**
-     * 提取文件的 frontmatter
-     */
-    private extractFrontmatter(filePath: string): FrontMatter {
-        try {
-            const content = fs.readFileSync(filePath, 'utf-8');
-            const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-
-            if (frontmatterMatch) {
-                const frontmatterContent = frontmatterMatch[1];
-                const lines = frontmatterContent.split('\n');
-                const frontmatter: FrontMatter = {};
-
-                for (const line of lines) {
-                    const colonIndex = line.indexOf(':');
-                    if (colonIndex > 0) {
-                        const key = line.substring(0, colonIndex).trim();
-                        const value = line.substring(colonIndex + 1).trim();
-
-                        // 处理数组值
-                        if (value.startsWith('[') && value.endsWith(']')) {
-                            try {
-                                frontmatter[key] = JSON.parse(value);
-                            } catch {
-                                frontmatter[key] = value;
-                            }
-                        } else {
-                            frontmatter[key] = value;
-                        }
-                    }
-                }
-
-                return frontmatter;
-            }
-        } catch (error) {
-            console.error(`提取 frontmatter 失败: ${filePath}`, error);
-        }
-
-        return {};
     }
 
     /**
