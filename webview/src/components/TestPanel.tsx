@@ -1,5 +1,5 @@
 import { Button, Space, Typography } from "antd";
-import { TestFunctionManager } from "../handlers";
+import { TestFunctionManager } from "../router";
 import { useMarkdownStore } from "../store/markdown/store";
 
 const { Title, Text } = Typography;
