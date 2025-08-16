@@ -63,6 +63,26 @@
         "command": "supernode.scanMarkdownFiles",
         "title": "扫描 Markdown 文件",
         "category": "Supernode"
+      },
+      {
+        "command": "supernode.startFileWatching",
+        "title": "启动文件监听",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.stopFileWatching",
+        "title": "停止文件监听",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.refreshProblemsPanel",
+        "title": "刷新 Problems 面板",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.clearAllDiagnostics",
+        "title": "清除所有诊断",
+        "category": "Supernode"
       }
     ],
     "menus": {

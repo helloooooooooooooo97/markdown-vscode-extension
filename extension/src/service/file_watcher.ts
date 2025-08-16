@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { FileAnalysisResult, FileMetadataExtractor } from "../pkg/file";
+import * as fs from "fs";
+import { FileAnalysisResult, FileMetadataExtractor } from "../pkg/file_analyzer";
 import { TagExtractor, GraphExtractor } from "@supernode/shared";
 
 export interface FileChangeEvent {
@@ -100,6 +101,13 @@ export class FileWatcherService {
     }
 
     /**
+     * 更新缓存的分析结果
+     */
+    updateCachedAnalysis(filePath: string, analysis: FileAnalysisResult): void {
+        this.analysisCache.set(filePath, analysis);
+    }
+
+    /**
      * 清除缓存
      */
     clearCache(): void {
@@ -119,10 +127,15 @@ export class FileWatcherService {
 
         try {
             if (type === 'deleted') {
-                // 文件被删除，从缓存中移除
+                // 文件被删除，从缓存中移除并清除诊断
                 this.analysisCache.delete(filePath);
+                const { MarkdownFileScannerService } = await import("./markdown_file_analyzer");
+                MarkdownFileScannerService.clearFileDiagnostics(filePath);
             } else {
-                // 文件被创建或修改，重新分析
+                // 文件被创建或修改，先清除该文件的诊断，然后重新分析
+                const { MarkdownFileScannerService } = await import("./markdown_file_analyzer");
+                MarkdownFileScannerService.clearFileDiagnostics(filePath);
+
                 const analysis = FileMetadataExtractor.ProcessFileWithAnalysis(filePath);
                 this.analysisCache.set(filePath, analysis);
                 event.analysis = analysis;
@@ -184,11 +197,14 @@ export class FileWatcherService {
             const graphPath = path.join(basePath, "supernode_graph.json");
             const tagPath = path.join(basePath, "supernode_tag.json");
 
-            const fs = require('fs');
             fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2), 'utf8');
             fs.writeFileSync(tagPath, JSON.stringify(tag, null, 2), 'utf8');
 
             console.log(`文件 ${path.basename(filePath)} 修改后，已重新生成 graph 和 tag 文件`);
+
+            // 刷新 Problems 面板
+            const { MarkdownFileScannerService } = await import("./markdown_file_analyzer");
+            await MarkdownFileScannerService.refreshProblemsPanel();
 
         } catch (error) {
             console.error("处理文件修改事件失败:", error);

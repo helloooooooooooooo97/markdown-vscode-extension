@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { FileMetadata } from "@supernode/shared";
-import { FileAnalysisResult, FileMetadataExtractor } from "../pkg/file";
+import { FileMetadataExtractor } from "../pkg/file_analyzer";
 import { TagExtractor, GraphExtractor } from "@supernode/shared";
 import { FileWatcherService } from "./file_watcher";
 
@@ -19,7 +19,7 @@ export interface MarkdownFileInfo {
 }
 
 // 从 pkg/file 中导入接口
-import { DocumentStats, ContentAnalysis } from "../pkg/file";
+import { DocumentStats, ContentAnalysis } from "../pkg/file_analyzer";
 
 export interface MarkdownFileStats {
     totalFiles: number;
@@ -34,6 +34,7 @@ export interface MarkdownFileStats {
 
 export class MarkdownFileScannerService {
     private static fileWatcher = FileWatcherService.getInstance();
+    private static diagnosticCollection: vscode.DiagnosticCollection | undefined;
     /**
      * 扫描工作目录下的所有Markdown文件
      */
@@ -214,6 +215,46 @@ export class MarkdownFileScannerService {
         return this.fileWatcher.getCacheStats();
     }
 
+    /**
+ * 刷新 Problems 面板
+ */
+    static async refreshProblemsPanel(): Promise<void> {
+        console.log("开始刷新 Problems 面板...");
+
+        try {
+            // 扫描当前文件状态
+            const stats = await this.scanMarkdownFiles();
+
+            // 显示缺失内容警告
+            await this.displayMissingContentWarnings(stats);
+
+            console.log("Problems 面板刷新完成");
+        } catch (error) {
+            console.error("刷新 Problems 面板失败:", error);
+        }
+    }
+
+    /**
+     * 清除特定文件的诊断
+     */
+    static clearFileDiagnostics(filePath: string): void {
+        if (this.diagnosticCollection) {
+            const uri = vscode.Uri.file(filePath);
+            this.diagnosticCollection.delete(uri);
+            console.log(`已清除文件 ${filePath} 的诊断信息`);
+        }
+    }
+
+    /**
+     * 清除所有诊断
+     */
+    static clearAllDiagnostics(): void {
+        if (this.diagnosticCollection) {
+            this.diagnosticCollection.clear();
+            console.log("已清除所有诊断信息");
+        }
+    }
+
 
 
 
@@ -245,16 +286,18 @@ export class MarkdownFileScannerService {
     }
 
     /**
-     * 在 Problems 面板中显示缺失内容警告
-     */
+ * 在 Problems 面板中显示缺失内容警告
+ */
     static async displayMissingContentWarnings(stats: MarkdownFileStats): Promise<void> {
         console.log("开始显示缺失内容警告...");
 
-        // 创建诊断集合
-        const diagnosticCollection = vscode.languages.createDiagnosticCollection('supernode-missing-content');
+        // 获取或创建诊断集合
+        if (!this.diagnosticCollection) {
+            this.diagnosticCollection = vscode.languages.createDiagnosticCollection('supernode-missing-content');
+        }
 
-        // 清除之前的诊断
-        diagnosticCollection.clear();
+        // 清除所有现有的诊断
+        this.diagnosticCollection.clear();
 
         let warningCount = 0;
         let processedFiles = 0;
@@ -263,24 +306,24 @@ export class MarkdownFileScannerService {
 
         for (const file of stats.files) {
             processedFiles++;
-            console.log(`处理文件 ${processedFiles}/${stats.files.length}: ${file.fileName}`);
 
             const diagnostics: vscode.Diagnostic[] = [];
 
             // 检查文件是否有缺失内容
             if (file.metadata && file.metadata.markdownHeadings) {
-                console.log(`检查文件 ${file.fileName} 的缺失内容...`);
                 const missingItems = await this.checkMissingContent(file.metadata);
-                console.log(`文件 ${file.fileName} 的缺失内容:`, missingItems);
 
                 if (missingItems.length > 0) {
                     warningCount++;
 
+                    // 去重缺失内容项
+                    const uniqueMissingItems = [...new Set(missingItems)];
+
                     // 创建诊断信息
                     const diagnostic = new vscode.Diagnostic(
                         new vscode.Range(0, 0, 0, 0), // 在文件开头显示
-                        `缺失内容: ${missingItems.join(', ')}`,
-                        vscode.DiagnosticSeverity.Warning
+                        `缺失内容: ${uniqueMissingItems.join(', ')}`,
+                        vscode.DiagnosticSeverity.Error
                     );
 
                     diagnostic.source = 'Supernode';
@@ -296,7 +339,7 @@ export class MarkdownFileScannerService {
             // 如果有诊断信息，添加到集合中
             if (diagnostics.length > 0) {
                 const uri = vscode.Uri.file(file.filePath);
-                diagnosticCollection.set(uri, diagnostics);
+                this.diagnosticCollection!.set(uri, diagnostics);
                 console.log(`将诊断信息添加到集合中: ${file.filePath}`);
             }
         }

@@ -8,8 +8,14 @@ export class EventListeners {
     /**
      * 注册所有事件监听器
      */
-    public static registerAllListeners(context: vscode.ExtensionContext): vscode.Disposable[] {
-        EventListeners.eventController = new EventController(context);
+    public static registerAllListeners(context: vscode.ExtensionContext, eventController?: EventController): vscode.Disposable[] {
+        // 如果传入了 eventController，使用它；否则创建新的
+        if (eventController) {
+            EventListeners.eventController = eventController;
+        } else {
+            EventListeners.eventController = new EventController(context);
+        }
+
         const disposables: vscode.Disposable[] = [];
 
         // 注册文件选择变化监听器
@@ -34,5 +40,8 @@ export class EventListeners {
     public static dispose(): void {
         EventListeners.disposables.forEach(disposable => disposable.dispose());
         EventListeners.disposables = [];
+        if (EventListeners.eventController) {
+            EventListeners.eventController.dispose();
+        }
     }
 } 

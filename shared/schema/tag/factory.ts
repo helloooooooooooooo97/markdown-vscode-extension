@@ -5,7 +5,10 @@ export class TagExtractor {
   static extract(fileMetaDatas: FileMetadata[]): TagMetadata[] {
     const tags = this.extractTagsOfHeadingLevel(fileMetaDatas);
     const docTags = this.extractTagsOfDocumentLevel(fileMetaDatas);
-    return [...tags, ...docTags];
+    // 按照 filePath 排序
+    const allTags = [...tags, ...docTags];
+    allTags.sort((a, b) => a.rows[0].filePath.localeCompare(b.rows[0].filePath));
+    return allTags;
   }
 
   static extractTagsOfHeadingLevel(
