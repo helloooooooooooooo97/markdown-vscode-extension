@@ -13,6 +13,11 @@ tags: [1, 2, 3]
 # 测试
 ## 测试
 ### 测试
+
+$$
+g_t = \nabla L(w_t)
+$$
+
 `
 
 const MarkdownRenderer: React.FC = () => {
