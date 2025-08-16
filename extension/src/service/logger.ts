@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
-import { WebviewMessage } from "@supernode/shared/src";
+import { WebviewMessage } from "@supernode/shared";
 
 export interface CommunicationLogEntry {
     timestamp: string;
