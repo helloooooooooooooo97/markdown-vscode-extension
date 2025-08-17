@@ -16,7 +16,6 @@ const DateInput: React.FC<{
                 onEditEnd();
             }}
             onBlur={onEditEnd}
-            autoFocus
         />
     );
 };

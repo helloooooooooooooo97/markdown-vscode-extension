@@ -6,3 +6,44 @@ math {
     padding-top: 0.5em;
     padding-bottom: 0.5em;
 }
+
+/* 自定义菜单样式 - 只高亮图标，不高亮背景 */
+.ant-menu-inline-collapsed .ant-menu-item {
+    background: transparent !important;
+    border: none !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item:hover {
+    background: transparent !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item-selected {
+    background: transparent !important;
+    border: none !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item-selected .anticon {
+    color: #FFFFFF !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item:hover .anticon {
+    color: #FFFFFF !important;
+}
+
+.ant-menu-inline-collapsed .ant-menu-item .anticon {
+    color: #cccccc;
+    transition: color 0.2s ease;
+}
+
+/* 移除菜单项的默认样式 */
+.ant-menu-inline-collapsed .ant-menu-item::after {
+    display: none !important;
+}
+
+/* 确保菜单项没有边框和背景 */
+.ant-menu-inline-collapsed .ant-menu-item,
+.ant-menu-inline-collapsed .ant-menu-item:hover,
+.ant-menu-inline-collapsed .ant-menu-item-selected {
+    border-right: none !important;
+    background: transparent !important;
+}
