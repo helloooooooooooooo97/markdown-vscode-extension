@@ -59,8 +59,9 @@ const ObjectInput: React.FC<{
         <>
             <Text
                 code
-                className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
+                className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1 max-w-[300px] truncate block"
                 onClick={handleEditStart}
+                title={JSON.stringify(value)}
             >
                 {JSON.stringify(value)}
             </Text>

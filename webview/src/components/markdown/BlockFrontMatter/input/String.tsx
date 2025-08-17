@@ -27,8 +27,9 @@ const StringInput: React.FC<{
 
     return (
         <Text
-            className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
+            className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1 max-w-[300px] truncate block"
             onClick={onEditStart}
+            title={value}
         >
             {value}
         </Text>

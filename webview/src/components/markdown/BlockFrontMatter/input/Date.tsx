@@ -1,6 +1,8 @@
 import React from "react";
 import { DatePicker } from 'antd';
 import dayjs from 'dayjs';
+
+// 不要有清除（叉）按钮
 const DateInput: React.FC<{
     value: string;
     isEditing: boolean;
@@ -11,6 +13,7 @@ const DateInput: React.FC<{
     return (
         <DatePicker
             value={dayjs(value)}
+            allowClear={false}
             onChange={(date) => {
                 onValueChange(date ? date.format('YYYY-MM-DD') : '');
                 onEditEnd();
@@ -19,6 +22,5 @@ const DateInput: React.FC<{
         />
     );
 };
-
 
 export default DateInput;
