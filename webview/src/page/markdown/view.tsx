@@ -23,7 +23,7 @@ const MarkdownRenderer: React.FC = () => {
     }, [content, isLoading]);
 
     return (
-        <div>
+        <div className="p-6">
             <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
                 {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "文件名"}
             </div>

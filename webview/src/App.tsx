@@ -91,7 +91,7 @@ function App() {
             expandIcon={null}
           />
         </Sider>
-        <Content className="!bg-[#1e1e1e] p-6 overflow-auto">
+        <Content className="!bg-[#1e1e1e] overflow-auto">
           {renderContent(activeKey)}
         </Content>
       </Layout>
