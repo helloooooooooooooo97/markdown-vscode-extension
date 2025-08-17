@@ -1,5 +1,6 @@
 import { Block } from './type';
 import { Setter, Getter } from './store';
+import debounce from 'lodash/debounce';
 
 // Mutations 操作接口
 export interface MarkdownMutations {
