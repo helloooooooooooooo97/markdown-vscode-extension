@@ -12,6 +12,7 @@ import {
     BlockAlert,
     BlockIframe,
     BlockFrontMatter,
+    BlockWrapper,
 } from "../../components/markdown";
 
 import InlineParser from "./inlineParser";
@@ -43,6 +44,28 @@ class BlockParser {
         };
         this.blocks.push(block);
         return block;
+    }
+
+    /**
+     * 包装block元素
+     */
+    wrapBlock(block: Block, element: React.ReactNode): React.ReactNode {
+        return (
+            <BlockWrapper
+                key={block.id}
+                block={block}
+                onClick={(block) => {
+                    console.log('Block clicked:', block);
+                    // 这里可以添加点击处理逻辑
+                }}
+                onMouseEnter={(block) => {
+                    console.log('Block hovered:', block);
+                    // 这里可以添加悬停处理逻辑
+                }}
+            >
+                {element}
+            </BlockWrapper>
+        );
     }
 
     /**
@@ -85,14 +108,13 @@ class BlockParser {
             const block = this.createBlock(this.lines, startIndex, i - 1, BlockType.Table);
 
             return {
-                element: (
+                element: this.wrapBlock(block, (
                     <BlockTable
                         blockId={block.id}
-                        key={block.id}
                         headers={headerCells}
                         rows={rows}
                     />
-                ),
+                )),
                 nextIndex: i - 1,
             };
         }
@@ -129,7 +151,7 @@ class BlockParser {
             const block = this.createBlock(this.lines, startIndex, j - 1, BlockType.List);
 
             return {
-                element: <BlockList key={block.id} blockId={block.id} items={items} />,
+                element: this.wrapBlock(block, <BlockList blockId={block.id} items={items} />),
                 nextIndex: j - 1,
             };
         }
@@ -146,11 +168,11 @@ class BlockParser {
             // 创建block
             const block = this.createBlock(this.lines, index, index, BlockType.Heading);
 
-            return (
-                <BlockHeading key={block.id} blockId={block.id} level={level}>
+            return this.wrapBlock(block, (
+                <BlockHeading blockId={block.id} level={level}>
                     {headingMatch[2]}
                 </BlockHeading>
-            );
+            ));
         }
         return null;
     }
@@ -184,14 +206,13 @@ class BlockParser {
             const block = this.createBlock(this.lines, startIndex, i, BlockType.Code);
 
             return {
-                element: (
+                element: this.wrapBlock(block, (
                     <BlockCode
-                        key={block.id}
                         blockId={block.id}
                         code={codeLines.join("\n")}
                         language={language}
                     />
-                ),
+                )),
                 nextIndex: i,
             };
         }
@@ -233,14 +254,13 @@ class BlockParser {
                         const block = this.createBlock(this.lines, startIndex, i, BlockType.Latex);
 
                         return {
-                            element: (
+                            element: this.wrapBlock(block, (
                                 <BlockLatex
-                                    key={block.id}
                                     blockId={block.id}
                                     html={html}
                                     index={startIndex}
                                 />
-                            ),
+                            )),
                             nextIndex: i,
                         };
                     } catch (error) {
@@ -249,14 +269,13 @@ class BlockParser {
                         const block = this.createBlock(this.lines, startIndex, i, BlockType.Latex);
 
                         return {
-                            element: (
+                            element: this.wrapBlock(block, (
                                 <BlockLatexError
-                                    key={block.id}
                                     blockId={block.id}
                                     latex={latexLines.join("\n")}
                                     index={startIndex}
                                 />
-                            ),
+                            )),
                             nextIndex: i,
                         };
                     }
@@ -304,7 +323,7 @@ class BlockParser {
             });
 
             return {
-                element: <BlockAlert key={block.id} blockId={block.id} type={type}>{parsedContent}</BlockAlert>,
+                element: this.wrapBlock(block, <BlockAlert blockId={block.id} type={type}>{parsedContent}</BlockAlert>),
                 nextIndex: i,
             };
         }
@@ -332,16 +351,15 @@ class BlockParser {
                 const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Iframe);
 
                 return {
-                    element: (
+                    element: this.wrapBlock(block, (
                         <BlockIframe
-                            key={block.id}
                             blockId={block.id}
                             src={src}
                             width={widthMatch ? widthMatch[1] : undefined}
                             height={heightMatch ? heightMatch[1] : undefined}
                             sandbox={sandboxMatch ? sandboxMatch[1] : undefined}
                         />
-                    ),
+                    )),
                     nextIndex: startIndex + 1,
                 };
             }
@@ -384,7 +402,7 @@ class BlockParser {
             const block = this.createBlock(this.lines, startIndex, i, BlockType.FrontMatter);
 
             return {
-                element: <BlockFrontMatter key={block.id} blockId={block.id} data={frontmatterData} />,
+                element: this.wrapBlock(block, <BlockFrontMatter blockId={block.id} data={frontmatterData} />),
                 nextIndex: i,
             };
         }
@@ -401,6 +419,14 @@ class BlockParser {
         // 遍历每一行，逐步解析
         for (let i = 0; i < this.lines.length; i++) {
             let line: string = this.lines[i];
+
+            // Frontmatter
+            const frontmatterResult = this.parseFrontmatter(i);
+            if (frontmatterResult) {
+                this.elements.push(frontmatterResult.element);
+                i = frontmatterResult.nextIndex;
+                continue;
+            }
 
             // 代码块
             const codeBlockResult = this.parseCodeBlock(i);
@@ -451,14 +477,6 @@ class BlockParser {
                 continue;
             }
 
-            // Frontmatter
-            const frontmatterResult = this.parseFrontmatter(i);
-            if (frontmatterResult) {
-                this.elements.push(frontmatterResult.element);
-                i = frontmatterResult.nextIndex;
-                continue;
-            }
-
             // 空行
             if (typeof line === "string" && line.trim() === "") {
                 continue;
@@ -479,7 +497,7 @@ class BlockParser {
                     // 创建block
                     const block = this.createBlock(this.lines, i, i, BlockType.Paragraph);
                     this.elements.push(
-                        <BlockParagraph key={block.id} blockId={block.id}>{inlineParts}</BlockParagraph>
+                        this.wrapBlock(block, <BlockParagraph blockId={block.id}>{inlineParts}</BlockParagraph>)
                     );
                 }
                 continue;
@@ -487,7 +505,7 @@ class BlockParser {
             // 兜底：如果不是字符串，直接原样包裹
             // 创建block
             const block = this.createBlock(this.lines, i, i, BlockType.Paragraph);
-            this.elements.push(<BlockParagraph key={block.id} blockId={block.id}>{line}</BlockParagraph>);
+            this.elements.push(this.wrapBlock(block, <BlockParagraph blockId={block.id}>{line}</BlockParagraph>));
         }
 
 
