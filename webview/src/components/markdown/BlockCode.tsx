@@ -1,7 +1,6 @@
 import React from 'react';
 import CodeMirror from "@uiw/react-codemirror";
 import { useMarkdownStore } from '../../store/markdown/store';
-import debounce from 'lodash/debounce';
 
 // 导入语言扩展
 import { javascript } from '@codemirror/lang-javascript';
@@ -62,11 +61,11 @@ interface CodeBlockProps {
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, blockId }) => {
     const { updateBlock } = useMarkdownStore();
 
-    const handleChange = debounce((value: string) => {
+    const handleChange = (value: string) => {
         const newCode = `\`\`\`${language}\n${value}\n\`\`\``;
         const newLines = newCode.split('\n');
         updateBlock(blockId, newLines);
-    }, 1000);
+    };
 
     return (
         <div className="py-2 rounded-md">
