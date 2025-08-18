@@ -1,11 +1,18 @@
+TODO
+
 1. CodeMirror主题 ✅
 2. FrontMatter添加属性按钮 ✅ 
 3. FrontMatter默认属性配置：prev、next、tags
 4. 标签表格设置 ➡️ collect、check
-5. todo解析
+5. todo块解析
 6. list嵌套解析
 7. 标题序号自动渲染
 8. 类似notion的背景图片选择
-9. date不要有border 
+9. date不要有border ✅ 
 10. 输入奇怪的阴影 ✅ 
 11. 多事件源的循环依赖问题 ✅ 
+12. ---的frontmatter和divider解析 
+13. 修改预览造成vscode的markdown的闪屏
+14. 全局统计功能：统计todo块
+15. 表格的搜索在右边而不是在左边
+16. exclidraw的渲染
