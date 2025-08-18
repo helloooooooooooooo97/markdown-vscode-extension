@@ -1,4 +1,4 @@
-export const testMarkdown = `---
+export const demoMarkdown = `---
 title: "Markdown 演示文档"
 author: "演示者"
 date: "2024-12-19"
@@ -92,14 +92,17 @@ $$
 ## 信息块
 
 :::info
+**信息提示**
 这是一个信息块，用于显示重要的提示信息。
 :::
 
 :::warning
+**警告信息**
 这是一个警告块，用于提醒用户注意某些事项。
 :::
 
 :::error
+**错误信息**
 这是一个错误块，用于显示错误或问题。
 :::
 
@@ -131,7 +134,12 @@ $$
 ## 高级功能
 
 ### HTML 嵌入
-<iframe src="https://www.google.com" width="100%" height="300" sandbox="allow-scripts"></iframe>
+<iframe src="https://www.example.com" width="100%" height="300" sandbox="allow-scripts"></iframe>
+
+### 自定义样式
+<div style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4); padding: 20px; border-radius: 10px; color: white;">
+这是一个自定义样式的区块
+</div>
 
 ---
 
@@ -166,7 +174,4 @@ $$
 
 ---
 
-## 演示结束，感谢您的关注!
-
----
-`;
+*演示结束，感谢您的关注！*`;
