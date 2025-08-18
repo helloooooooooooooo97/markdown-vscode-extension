@@ -50,7 +50,7 @@ export const getTypeIcon = (type: DataType) => {
 };
 
 // 渲染属性值 - 根据数据类型选择对应的输入组件
-export const renderPropertyValue = (
+export const renderInputComponentByValueType = (
     value: any,
     isEditing: boolean,
     onValueChange: (newValue: any) => void,

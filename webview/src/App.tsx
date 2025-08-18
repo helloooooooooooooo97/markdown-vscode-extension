@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { ConfigProvider, theme, Layout, Menu } from "antd";
-import { FileTextOutlined, BugOutlined } from "@ant-design/icons";
+import { FileTextOutlined, BugOutlined, MonitorOutlined } from "@ant-design/icons";
 import { VSCodeAPI } from "./communication/send/manual_vscode";
 import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
 import { MessageSendManager } from "./communication/send/auto_send";
 import { TestPanel } from "./components";
 import MarkdownView from "./page/markdown/view";
 import "./App.css";
+import StoreMonitor from "./page/store/view";
 
 const { Sider, Content } = Layout;
 
@@ -21,6 +22,10 @@ const menuItems = [
     key: "test",
     icon: <BugOutlined />,
     label: "连接测试",
+  }, {
+    key: "store",
+    icon: <MonitorOutlined />,
+    label: "Store监控",
   }
 ];
 
@@ -31,6 +36,8 @@ const renderContent = (activeKey: string) => {
       return <MarkdownView />;
     case "test":
       return <TestPanel />;
+    case "store":
+      return <StoreMonitor />;
     default:
       return <MarkdownView />;
   }
