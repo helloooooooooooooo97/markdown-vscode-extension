@@ -15,4 +15,8 @@ TODO
 13. 修改预览造成vscode的markdown的闪屏
 14. 全局统计功能：统计todo块
 15. 表格的搜索在右边而不是在左边
-16. exclidraw的渲染
+16. exclidraw的静态引用渲染
+17. exclidraw的同步修改
+18. 通用的block wrapper，可以添加block和删除block
+19. 添加文件引用属性
+20. 添加schema属性：可以实现内容约束
