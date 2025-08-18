@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { getDataType, getTypeIcon, renderInputComponentByValueType } from "./BlockFrontMatter";
 import useMarkdownStore from "../../../store/markdown/store";
 import matter from "gray-matter";
-import { PlusOutlined } from "@ant-design/icons";
+import { PlusOutlined, CheckOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Popover, Input, Button } from "antd";
 
 // 支持的数据类型
 const SUPPORTED_TYPES = [
@@ -49,21 +50,18 @@ export const FrontmatterComponent: React.FC<{
     // 属性名称编辑状态
     const [editingPropertyName, setEditingPropertyName] = useState<string | null>(null);
     const [editingPropertyNameValue, setEditingPropertyNameValue] = useState('');
-    const [showPropertyMenu, setShowPropertyMenu] = useState<string | null>(null);
+    const [isRenamePopoverVisible, setIsRenamePopoverVisible] = useState(false);
 
     const store = useMarkdownStore();
 
     // 监听 editingData 的变化
     useEffect(() => {
-        console.log('editingData 已更新:', editingData);
 
         // 使用 gray-matter 将 JSON 转换为 frontmatter 字符串
         const frontmatterString = matter.stringify('', editingData);
-        console.log('生成的 frontmatter 字符串:', frontmatterString);
 
         // 按行分割 frontmatter 字符串
         const frontmatterLines = frontmatterString.split('\n');
-        console.log('按行分割后的 frontmatter:', frontmatterLines);
 
         // 更新 store
         store.updateBlock(blockId, frontmatterLines);
@@ -113,14 +111,13 @@ export const FrontmatterComponent: React.FC<{
             delete newData[key];
             return newData;
         });
-        setShowPropertyMenu(null);
     };
 
     // 开始编辑属性名称
     const handleStartEditPropertyName = (key: string) => {
         setEditingPropertyName(key);
         setEditingPropertyNameValue(key);
-        setShowPropertyMenu(null);
+        setIsRenamePopoverVisible(true);
     };
 
     // 保存属性名称编辑
@@ -138,18 +135,17 @@ export const FrontmatterComponent: React.FC<{
         }
         setEditingPropertyName(null);
         setEditingPropertyNameValue('');
+        setIsRenamePopoverVisible(false);
     };
 
     // 取消属性名称编辑
     const handleCancelPropertyNameEdit = () => {
         setEditingPropertyName(null);
         setEditingPropertyNameValue('');
+        setIsRenamePopoverVisible(false);
     };
 
-    // 处理属性名称点击
-    const handlePropertyNameClick = (key: string) => {
-        setShowPropertyMenu(showPropertyMenu === key ? null : key);
-    };
+
 
     return (
         <div className="flex flex-col gap-2">
@@ -157,8 +153,6 @@ export const FrontmatterComponent: React.FC<{
             {Object.entries(editingData).map(([key, value]) => {
                 const dataType = getDataType(value);
                 const isEditing = editingKey === key;
-                const isEditingName = editingPropertyName === key;
-                const showMenu = showPropertyMenu === key;
                 return (
                     <div
                         key={key}
@@ -169,68 +163,51 @@ export const FrontmatterComponent: React.FC<{
                             <div>
                                 {getTypeIcon(dataType)}
                             </div>
-                            {/* 属性名称 - 可点击编辑 */}
-                            <div className="relative">
-                                {isEditingName ? (
-                                    <div className="flex items-center gap-1">
-                                        <input
-                                            type="text"
-                                            value={editingPropertyNameValue}
-                                            onChange={(e) => setEditingPropertyNameValue(e.target.value)}
-                                            className="px-1 py-0.5 bg-[#252526] border border-gray-600 rounded text-white text-sm w-16"
-                                            onKeyUp={(e) => {
-                                                if (e.key === 'Enter') {
-                                                    handleSavePropertyName();
-                                                }
-                                            }}
-                                            onKeyDown={(e) => {
-                                                if (e.key === 'Escape') {
+                            {/* 属性名称 */}
+                            <div className="flex items-center gap-2">
+                                <Popover
+                                    open={isRenamePopoverVisible && editingPropertyName === key}
+                                    onOpenChange={(visible) => {
+                                        if (visible) {
+                                            handleStartEditPropertyName(key);
+                                        } else {
+                                            handleCancelPropertyNameEdit();
+                                        }
+                                    }}
+                                    content={
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                value={editingPropertyNameValue}
+                                                onChange={(e) => setEditingPropertyNameValue(e.target.value)}
+                                                placeholder="请输入新的属性名称"
+                                                onPressEnter={handleSavePropertyName}
+                                                autoFocus
+                                                className="flex-1"
+                                            />
+                                            <div
+                                                onClick={() => {
+                                                    if (editingPropertyName) {
+                                                        handleDeleteProperty(editingPropertyName);
+                                                    }
                                                     handleCancelPropertyNameEdit();
-                                                }
-                                            }}
-                                            autoFocus
-                                        />
-                                        <button
-                                            onClick={handleSavePropertyName}
-                                            className="text-green-400 hover:text-green-300 text-xs"
-                                            title="保存"
-                                        >
-                                            ✓
-                                        </button>
-                                        <button
-                                            onClick={handleCancelPropertyNameEdit}
-                                            className="text-red-400 hover:text-red-300 text-xs"
-                                            title="取消"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <div
-                                        onClick={() => handlePropertyNameClick(key)}
+                                                }}
+                                            >
+                                                <DeleteOutlined className="text-red-500 cursor-pointer" />
+                                            </div>
+                                            <div onClick={handleSavePropertyName}>
+                                                <CheckOutlined className="text-green-500 cursor-pointer" />
+                                            </div>
+                                        </div>
+                                    }
+                                    trigger="click"
+                                    placement="bottomLeft"
+                                >
+                                    <span
                                         className="hover:text-white transition-colors cursor-pointer"
                                     >
                                         {key}
-                                    </div>
-                                )}
-
-                                {/* 属性菜单 */}
-                                {showMenu && !isEditingName && (
-                                    <div className="absolute top-full left-0 mt-1 bg-[#252526] border border-gray-600 rounded-md shadow-lg z-10 min-w-32">
-                                        <button
-                                            onClick={() => handleStartEditPropertyName(key)}
-                                            className="block w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-                                        >
-                                            ✏️ 重命名
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteProperty(key)}
-                                            className="block w-full text-left px-3 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300 transition-colors"
-                                        >
-                                            🗑️ 删除
-                                        </button>
-                                    </div>
-                                )}
+                                    </span>
+                                </Popover>
                             </div>
                         </div>
                         {/* 值展示/编辑区域 */}
@@ -306,6 +283,8 @@ export const FrontmatterComponent: React.FC<{
                     <span>add</span>
                 </button>
             )}
+
+
         </div>
     );
 };
