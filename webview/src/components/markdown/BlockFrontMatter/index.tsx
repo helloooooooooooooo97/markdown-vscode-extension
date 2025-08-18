@@ -3,7 +3,7 @@ import { getDataType, getTypeIcon, renderInputComponentByValueType } from "./Blo
 import useMarkdownStore from "../../../store/markdown/store";
 import matter from "gray-matter";
 import { PlusOutlined, CheckOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Popover, Input, Button } from "antd";
+import { Popover, Input } from "antd";
 
 // 支持的数据类型
 const SUPPORTED_TYPES = [

@@ -1,5 +1,5 @@
-import { WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage } from '@supernode/shared';
-
+import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage } from '@supernode/shared';
+import useMarkdownStore from '../../store/markdown/store';
 // VSCode API 接口定义
 export interface VSCodeAPI {
     postMessage: (message: WebviewMessage) => void;
@@ -47,13 +47,16 @@ export class VSCodeAPI {
         }
     }
 
-    static changeMarkdownContent(content: string, filename: string): void {
-        const message: UpdateMarkdownContentFromWebviewMessage = {
-            command: WebviewCommand.updateMarkdownContentFromWebview,
-            content: content,
-            fileName: filename
-        };
-        this.postMessage(message);
+    static UpdateMarkdownContentFromWebviewMessage(content: string, filename: string): void {
+        const { source } = useMarkdownStore.getState();
+        if (source === VscodeEventSource.WEBVIEW) {
+            const message: UpdateMarkdownContentFromWebviewMessage = {
+                command: WebviewCommand.updateMarkdownContentFromWebview,
+                content: content,
+                fileName: filename
+            };
+            this.postMessage(message);
+        }
     }
 
     static showMessage(message: string): void {
@@ -88,5 +91,13 @@ export class VSCodeAPI {
             ...message
         };
         this.postMessage(webviewError);
+    }
+
+    static setEventSourceToWebview(): void {
+        const setEventSourceMessage: SetEventSourceMessage = {
+            command: WebviewCommand.setEventSource,
+            source: "webview"
+        };
+        this.postMessage(setEventSourceMessage);
     }
 }

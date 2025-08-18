@@ -18,7 +18,6 @@ const NumberInput: React.FC<{
                 onChange={(e) => onValueChange(Number(e.target.value))}
                 onBlur={onEditEnd}
                 onPressEnter={onEditEnd}
-                autoFocus
             />
         );
     }
@@ -27,6 +26,7 @@ const NumberInput: React.FC<{
         <Text
             className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
             onClick={onEditStart}
+
         >
             {value}
         </Text>

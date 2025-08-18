@@ -20,7 +20,7 @@ export class EventListeners {
 
         // 注册文件选择变化监听器
         const fileChangeDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
-            EventListeners.eventController.handleFileChange(editor);
+            EventListeners.eventController.handleChangeActiveTextEditor(editor);
         });
 
         // 注册文档内容变化监听器

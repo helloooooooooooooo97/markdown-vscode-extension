@@ -19,6 +19,13 @@ const DateInput: React.FC<{
                 onEditEnd();
             }}
             onBlur={onEditEnd}
+            className="px-1 border-none outline-none bg-transparent resize-none"
+            style={{
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                backgroundColor: 'transparent'
+            }}
         />
     );
 };

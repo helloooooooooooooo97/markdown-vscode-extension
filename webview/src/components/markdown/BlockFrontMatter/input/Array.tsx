@@ -22,12 +22,6 @@ const ArrayInput: React.FC<{
                     onValueChange(newValue);
                 }}
                 onBlur={onEditEnd}
-                onDropdownVisibleChange={(open) => {
-                    if (!open) {
-                        onEditEnd();
-                    }
-                }}
-                autoFocus
                 allowClear
                 showSearch
                 filterOption={(input, option) => {
@@ -58,7 +52,7 @@ const ArrayInput: React.FC<{
 
     return (
         <div
-            className="flex flex-wrap cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
+            className="flex flex-wrap cursor-pointer hover:bg-[#1e1e1e] rounded py-1"
             onClick={onEditStart}
         >
             {Array.isArray(value) && value.map((item: any, index: number) => (

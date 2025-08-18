@@ -2,10 +2,12 @@ import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
 import { FileManager } from "../service/file";
-import { ExtensionCommand, UpdateMarkdownMessage, GraphExtractor, TagExtractor } from "@supernode/shared";
+import { GraphExtractor, TagExtractor } from "@supernode/shared";
 import { MarkdownWebviewProvider } from "../event/webview";
 import { FileWatcherService } from "../service/file_watcher";
 import { MarkdownFileScannerService } from "../service/markdown_file_analyzer";
+import EventSource from "../event/source";
+import { VscodeEventSource } from "@supernode/shared";
 
 /**
  * 事件处理控制器
@@ -20,6 +22,38 @@ export class EventController {
         this.fileWatcher = FileWatcherService.getInstance();
         this.initializeFileWatcher();
     }
+
+    // 设置事件来源为 WEBVIEW（当用户点击 webview 时调用）
+    public setEventSourceToWebview(): void {
+        EventSource.set(VscodeEventSource.WEBVIEW);
+    }
+
+
+    // 活跃编辑器变化
+    public handleChangeActiveTextEditor(editor: vscode.TextEditor | undefined): void {
+        if (editor) {
+            const document = editor.document;
+            if (FileManager.isMarkdownFile(document)) {
+                EventSource.set(VscodeEventSource.MARKDOWNFILE);
+                MarkdownWebviewProvider.currentPanel?.updateMarkdownContent(FileManager.getFileContent(document), document.fileName);
+            } else {
+                MarkdownWebviewProvider.currentPanel?.updateMarkdownContent("", "");
+            }
+        }
+    }
+
+    // 文档内容变化
+    public handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
+        const document = event.document;
+        if (
+            FileManager.isMarkdownFile(document) &&
+            vscode.window.activeTextEditor?.document === document
+        ) {
+            MarkdownWebviewProvider.currentPanel?.updateMarkdownContent(FileManager.getFileContent(document), document.fileName);
+        }
+    }
+
+
 
     /**
      * 初始化文件监听器
@@ -61,7 +95,6 @@ export class EventController {
  */
     private async handleFileSystemChange(type: 'created' | 'modified' | 'deleted', filePath: string): Promise<void> {
         console.log(`文件系统变化: ${type} - ${filePath}`);
-
         try {
             if (type === 'deleted') {
                 // 文件被删除，从缓存中移除并清除诊断
@@ -80,7 +113,12 @@ export class EventController {
             }
 
             // 通知 webview 更新
-            this.notifyWebviewOfFileChange(type, filePath);
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor && activeEditor.document.fileName === filePath) {
+                if (FileManager.isMarkdownFile(activeEditor.document)) {
+                    MarkdownWebviewProvider.currentPanel?.updateMarkdownContent(FileManager.getFileContent(activeEditor.document), activeEditor.document.fileName);
+                }
+            }
 
         } catch (error) {
             console.error(`处理文件系统变化失败: ${filePath}`, error);
@@ -178,25 +216,6 @@ export class EventController {
             console.error("处理文件修改事件失败:", error);
         }
     }
-
-    /**
-     * 通知 webview 文件变化
-     */
-    private notifyWebviewOfFileChange(type: string, filePath: string): void {
-        // 如果当前活动的编辑器是变化的文件，更新 webview
-        const activeEditor = vscode.window.activeTextEditor;
-        if (activeEditor && activeEditor.document.fileName === filePath) {
-            if (FileManager.isMarkdownFile(activeEditor.document)) {
-                const message: UpdateMarkdownMessage = {
-                    command: ExtensionCommand.updateMarkdownContent,
-                    content: FileManager.getFileContent(activeEditor.document),
-                    fileName: activeEditor.document.fileName,
-                };
-                this.sendMessageToWebview(message);
-            }
-        }
-    }
-
     /**
      * 启动文件监听服务
      */
@@ -224,60 +243,6 @@ export class EventController {
             this.fileSystemWatcher = undefined;
         }
         vscode.window.showInformationMessage("Markdown 文件监听服务已停止");
-    }
-
-    /**
-     * 处理文件选择变化
-     */
-    public handleFileChange(editor: vscode.TextEditor | undefined): void {
-        if (editor) {
-            const document = editor.document;
-            console.log("鼠标点击的文档:", document.fileName);
-
-            if (FileManager.isMarkdownFile(document)) {
-                const message: UpdateMarkdownMessage = {
-                    command: ExtensionCommand.updateMarkdownContent,
-                    content: FileManager.getFileContent(document),
-                    fileName: document.fileName,
-                };
-                this.sendMessageToWebview(message);
-            } else {
-                // 如果不是markdown或mdx文件，清空内容
-                const clearMessage: UpdateMarkdownMessage = {
-                    command: ExtensionCommand.updateMarkdownContent,
-                    content: "",
-                    fileName: "",
-                };
-                this.sendMessageToWebview(clearMessage);
-            }
-        }
-    }
-
-    /**
-     * 处理文档内容变化
-     */
-    public handleDocumentChange(event: vscode.TextDocumentChangeEvent): void {
-        const document = event.document;
-        if (
-            FileManager.isMarkdownFile(document) &&
-            vscode.window.activeTextEditor?.document === document
-        ) {
-            const message: UpdateMarkdownMessage = {
-                command: ExtensionCommand.updateMarkdownContent,
-                content: FileManager.getFileContent(document),
-                fileName: document.fileName,
-            };
-            this.sendMessageToWebview(message);
-        }
-    }
-
-    /**
-     * 发送消息到 Webview
-     */
-    private sendMessageToWebview(message: UpdateMarkdownMessage): void {
-        if (MarkdownWebviewProvider.currentPanel) {
-            MarkdownWebviewProvider.currentPanel.sendMessage(message);
-        }
     }
 
     /**

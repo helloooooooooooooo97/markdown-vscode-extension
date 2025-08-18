@@ -48,3 +48,4 @@ export const clearAllDiagnosticsCommand = vscode.commands.registerCommand(
         vscode.window.showInformationMessage("已清除所有诊断信息");
     }
 );
+

@@ -8,6 +8,8 @@ import { TestPanel } from "./components";
 import MarkdownView from "./page/markdown/view";
 import "./App.css";
 import StoreMonitor from "./page/store/view";
+import useMarkdownStore from "./store/markdown/store";
+import { VscodeEventSource } from "@supernode/shared";
 
 const { Sider, Content } = Layout;
 
@@ -44,6 +46,7 @@ const renderContent = (activeKey: string) => {
 };
 
 function App() {
+  const { setSource } = useMarkdownStore.getState();
   const [activeKey, setActiveKey] = useState("markdown");
 
   useEffect(() => {
@@ -68,6 +71,11 @@ function App() {
     setActiveKey(key);
   };
 
+  const handleChangeEventSourceToWebview = () => {
+    setSource(VscodeEventSource.WEBVIEW);
+    VSCodeAPI.setEventSourceToWebview();
+  };
+
   return (
     <ConfigProvider
       theme={{
@@ -82,7 +90,7 @@ function App() {
         },
       }}
     >
-      <Layout className="h-screen bg-[#1E1E1E]">
+      <Layout className="h-screen bg-[#1E1E1E]" onClick={() => handleChangeEventSourceToWebview()}>
         <Sider
           width={48}
           className="!bg-[#202020] border-r border-r-[#2A2A2A]"

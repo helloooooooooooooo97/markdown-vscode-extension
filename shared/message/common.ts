@@ -1,4 +1,5 @@
 // 基础消息接口
+
 export interface WebviewMessage {
     command: string;
     [key: string]: any;
@@ -21,3 +22,4 @@ export interface OpenLocalFileMessage extends WebviewMessage {
     command: CommonCommand.openLocalFile;
     path: string;
 }
+

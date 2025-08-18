@@ -7,8 +7,10 @@ import { MessageHandler } from "../controller/webview";
 import {
     WebviewMessage,
     UpdateMarkdownMessage,
-    ExtensionCommand
+    ExtensionCommand,
+    VscodeEventSource
 } from "@supernode/shared";
+import EventSource from "./source";
 
 export class MarkdownWebviewProvider {
     public static currentPanel: MarkdownWebviewProvider | undefined;
@@ -113,6 +115,17 @@ export class MarkdownWebviewProvider {
     public sendMessage(message: WebviewMessage): void {
         CommunicationLogger.logExtensionToWebview(message, message.fileName);
         this._panel.webview.postMessage(message);
+    }
+
+    updateMarkdownContent(content: string, fileName: string): void {
+        if (EventSource.value === VscodeEventSource.MARKDOWNFILE) {
+            const message: UpdateMarkdownMessage = {
+                command: ExtensionCommand.updateMarkdownContent,
+                content: content,
+                fileName: fileName,
+            };
+            this.sendMessage(message);
+        }
     }
 
     /**

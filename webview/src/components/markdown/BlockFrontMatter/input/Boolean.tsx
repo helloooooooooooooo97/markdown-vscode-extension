@@ -17,7 +17,13 @@ const BooleanInput: React.FC<{
                 onValueChange(e.target.checked);
                 onEditEnd();
             }}
-            className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1"
+            className="cursor-pointer px-1 border-none outline-none bg-transparent resize-none"
+            style={{
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                backgroundColor: 'transparent'
+            }}
         />
     );
 };

@@ -13,7 +13,7 @@ export class TestFunctionManager {
     }
 
     testUpdateMarkdownContent(): void {
-        VSCodeAPI.changeMarkdownContent("Hello, World!", "test.md");
+        VSCodeAPI.UpdateMarkdownContentFromWebviewMessage("Hello, World!", "test.md");
     }
 
     sendDebugInfo(): void {

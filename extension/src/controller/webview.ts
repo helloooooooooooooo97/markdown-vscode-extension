@@ -1,7 +1,9 @@
 import * as vscode from "vscode";
-import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage } from "@supernode/shared";
+import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage } from "@supernode/shared";
 import { FileManager } from "../service/file";
+import EventSource from "../event/source";
 
+// 从webview接收来的消息，然后去操作现有的
 export class MessageHandler {
     private context: vscode.ExtensionContext;
 
@@ -29,6 +31,9 @@ export class MessageHandler {
                     break;
                 case "debugInfo":
                     this.handleDebugInfo(message);
+                    break;
+                case "setEventSource":
+                    this.handleSetEventSource(message as SetEventSourceMessage);
                     break;
                 default:
                     console.log("未知消息类型:", message.command);
@@ -67,4 +72,15 @@ export class MessageHandler {
     private handleDebugInfo(message: any): void {
         console.log("调试信息:", message);
     }
-} 
+
+    private handleSetEventSource(message: SetEventSourceMessage): void {
+        if (message.source === "webview") {
+            EventSource.set(VscodeEventSource.WEBVIEW);
+            console.log("事件来源已设置为 WEBVIEW");
+        }
+    }
+}
+
+export class MessageSender {
+
+}

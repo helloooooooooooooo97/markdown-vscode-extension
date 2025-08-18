@@ -16,12 +16,13 @@ const StoreMonitor = () => {
 
     // 只提取 store 中的变量数据，过滤掉函数
     const getStoreData = () => {
-        const { docs, filePath, content, isLoading } = store;
+        const { docs, filePath, content, isLoading, source } = store;
         return {
             docs,
             filePath,
             content,
-            isLoading
+            isLoading,
+            source
         };
     };
 

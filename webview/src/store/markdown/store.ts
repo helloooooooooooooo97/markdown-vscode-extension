@@ -1,20 +1,17 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { Block } from './type';
-
-// 导入操作模块
 import { createMutations, MarkdownMutations } from './mutations';
 import { createQueries, MarkdownQueries } from './queries';
-
-// 状态接口
+import { VscodeEventSource } from '@supernode/shared';
 export interface MarkdownStore {
     docs: Block[];
     filePath: string; // 当前文件的路径
     content: string; // 原始 Markdown 内容
     isLoading: boolean; // 加载状态
+    source: VscodeEventSource; // 事件来源
 }
 
-// 类型定义
 export interface useMarkdownStoreType extends MarkdownStore, MarkdownMutations, MarkdownQueries { }
 export type Getter = () => useMarkdownStoreType;
 export type Setter = (fn: (state: useMarkdownStoreType) => void) => void;
@@ -27,7 +24,7 @@ export const useMarkdownStore = create<useMarkdownStoreType>()(
         filePath: "", // 当前文件的路径
         content: "", // 原始 Markdown 内容
         isLoading: true, // 加载状态
-        // 组合所有操作
+        source: VscodeEventSource.WEBVIEW, // 事件来源，如果事件来源是webview，则store变化会往extension同步，否则不往extension同步
         ...createMutations(set, get),
         ...createQueries(get)
     }))

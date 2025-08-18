@@ -1,5 +1,7 @@
 import { Block } from './type';
 import { Setter, Getter } from './store';
+import { VscodeEventSource } from '@supernode/shared';
+import { VSCodeAPI } from '../../communication/send';
 
 // Mutations 操作接口
 export interface MarkdownMutations {
@@ -9,6 +11,7 @@ export interface MarkdownMutations {
     setCurrentFileName: (fileName: string) => void;
     setContent: (content: string) => void;
     setIsLoading: (loading: boolean) => void;
+    setSource: (source: VscodeEventSource) => void;
 }
 
 // Mutations 操作实现
@@ -25,12 +28,10 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
             if (block) {
                 block.lines = lines;
             }
-            // vscode发起的更新，需要通知extension更新
-            window?.vscode?.postMessage({
-                command: 'updateMarkdownContentFromWebview',
-                content: state.docs.map((b: Block) => b.lines.join('\n')).join('\n'),
-                fileName: state.filePath, // 添加文件路径
-            });
+            // 只有当事件来源不是 MARKDOWNFILE 时才向 extension 发送更新消息
+            if (state.source !== VscodeEventSource.MARKDOWNFILE) {
+                VSCodeAPI.UpdateMarkdownContentFromWebviewMessage(state.docs.map((b: Block) => b.lines.join('\n')).join('\n'), state.filePath);
+            }
         });
     },
 
@@ -53,6 +54,12 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
     setIsLoading: (loading: boolean) => {
         set((state) => {
             state.isLoading = loading;
+        });
+    },
+
+    setSource: (source: VscodeEventSource) => {
+        set((state) => {
+            state.source = source;
         });
     }
 }); 

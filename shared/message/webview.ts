@@ -7,6 +7,7 @@ export enum WebviewCommand {
     webviewError = "webviewError",
     webviewReady = "webviewReady",
     debugInfo = "debugInfo",
+    setEventSource = "setEventSource",
 }
 
 // 从 WebView 更新 Markdown 内容消息
@@ -35,4 +36,10 @@ export interface WebviewReadyMessage extends WebviewMessage {
 export interface DebugInfoMessage extends WebviewMessage {
     command: WebviewCommand.debugInfo;
     info: any;
+}
+
+// 设置事件来源消息
+export interface SetEventSourceMessage extends WebviewMessage {
+    command: WebviewCommand.setEventSource;
+    source: string;
 }

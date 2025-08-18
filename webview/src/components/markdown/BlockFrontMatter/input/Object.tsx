@@ -91,14 +91,21 @@ const ObjectInput: React.FC<{
                         onChange={handleTextChange}
                         autoSize={{ minRows: 10, maxRows: 20 }}
                         placeholder="输入有效的JSON格式"
-                        autoFocus
                         status={isValid ? undefined : 'error'}
+                        className="px-1 border-none outline-none bg-transparent resize-none"
+                        style={{
+                            border: 'none',
+                            outline: 'none',
+                            boxShadow: 'none',
+                            backgroundColor: 'transparent'
+                        }}
                     />
                     {!isValid && (
                         <Text type="danger" className="text-sm">
                             请输入有效的JSON格式
                         </Text>
                     )}
+
                 </div>
             </Modal>
         </>
