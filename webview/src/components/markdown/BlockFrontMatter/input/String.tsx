@@ -1,6 +1,5 @@
 import React from "react";
-import { Input, Typography } from "antd";
-const { Text } = Typography;
+import { Input } from "antd";
 const { TextArea } = Input;
 
 // 字符串类型输入组件
@@ -10,29 +9,22 @@ const StringInput: React.FC<{
     onValueChange: (newValue: string) => void;
     onEditStart: () => void;
     onEditEnd: () => void;
-}> = ({ value, isEditing, onValueChange, onEditStart, onEditEnd }) => {
-    if (isEditing) {
-        return (
-            <TextArea
-                value={value}
-                onChange={(e) => onValueChange(e.target.value)}
-                onBlur={onEditEnd}
-                onPressEnter={onEditEnd}
-                autoSize={{ minRows: 1, maxRows: 3 }}
-                className="px-1"
-                autoFocus
-            />
-        );
-    }
-
+}> = ({ value, onValueChange, onEditEnd }) => {
     return (
-        <Text
-            className="cursor-pointer hover:bg-[#1e1e1e] rounded px-1 py-1 max-w-[300px] truncate block"
-            onClick={onEditStart}
-            title={value}
-        >
-            {value}
-        </Text>
+        <TextArea
+            value={value}
+            onChange={(e) => onValueChange(e.target.value)}
+            onBlur={onEditEnd}
+            onPressEnter={onEditEnd}
+            autoSize={{ minRows: 1, maxRows: 1 }}
+            className="px-1 border-none outline-none bg-transparent resize-none"
+            style={{
+                border: 'none',
+                outline: 'none',
+                boxShadow: 'none',
+                backgroundColor: 'transparent'
+            }}
+        />
     );
 };
 

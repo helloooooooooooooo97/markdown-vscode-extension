@@ -1,6 +1,7 @@
 import React from 'react';
 import CodeMirror from "@uiw/react-codemirror";
 import { useMarkdownStore } from '../../store/markdown/store';
+import { solarizedDark } from '@uiw/codemirror-theme-solarized';
 
 // 导入语言扩展
 import { javascript } from '@codemirror/lang-javascript';
@@ -17,6 +18,8 @@ import { markdown } from '@codemirror/lang-markdown';
 import { xml } from '@codemirror/lang-xml';
 import { yaml } from '@codemirror/lang-yaml';
 import { go } from '@codemirror/lang-go';
+
+// 主题参考文档：https://www.npmjs.com/package/@uiw/codemirror-themes
 
 // 语言映射
 const getLanguageExtension = (language?: string) => {
@@ -69,12 +72,12 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, blockId })
 
     return (
         <div className="py-2 rounded-md">
-            <div className="text-sm text-gray-200 bg-gray-600 px-2 py-2">{language}</div>
+            <div className="text-sm text-gray-200 bg-[#002b36] px-2 py-2">{language}</div>
             <CodeMirror
                 value={code}
                 onChange={handleChange}
                 height="auto"
-                theme="dark"
+                theme={solarizedDark}
                 basicSetup={{
                     lineNumbers: true,
                     highlightActiveLine: true,
