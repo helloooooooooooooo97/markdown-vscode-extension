@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { getDataType, getTypeIcon, renderInputComponentByValueType } from "./BlockFrontMatter";
 import useMarkdownStore from "../../../store/markdown/store";
 import matter from "gray-matter";
+import { PlusOutlined } from "@ant-design/icons";
 
 // 支持的数据类型
 const SUPPORTED_TYPES = [
@@ -299,10 +300,10 @@ export const FrontmatterComponent: React.FC<{
             {!showAddForm && (
                 <button
                     onClick={() => setShowAddForm(true)}
-                    className="flex items-center gap-2 px-3 py-2 text-blue-400 hover:text-blue-300 hover:bg-[#252526] rounded-md transition-colors"
+                    className="px-2 py-1 w-20 flex items-center gap-2 text-[#838383] font-semibold"
                 >
-                    <span>➕</span>
-                    <span>添加属性</span>
+                    <PlusOutlined />
+                    <span>add</span>
                 </button>
             )}
         </div>
