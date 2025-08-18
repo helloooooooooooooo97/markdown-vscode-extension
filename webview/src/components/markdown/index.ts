@@ -6,6 +6,8 @@ export { CodeBlock as BlockCode } from "./BlockCode";
 export { default as BlockAlert } from "./BlockAlert";
 export { default as BlockFrontMatter } from "./BlockFrontMatter";
 export { default as BlockIframe } from "./BlockIframe";
+export { default as BlockDivider } from "./BlockDivider";
+export { default as BlockTodo } from "./BlockTodo";
 export { default as BlockWrapper } from "./BlockWrapper";
 
 export { default as InlineLink } from "./InlineLink";

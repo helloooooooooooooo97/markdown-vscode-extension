@@ -1,6 +1,5 @@
-export const testMarkdown = `
-
----
+export const testMarkdown = `---
+prev: ["next"]
 title: 复杂文档示例
 author: 张三
 updatedAt: '2025-08-02T07:25:09.456Z'
@@ -49,6 +48,9 @@ todo: false
 | 李四 | 32   | li.si@ex.com        |
 
 
+[ ] 什？
+[ ] 2个？
+[ ] 3个？
 
 #### 代码块
 
@@ -85,5 +87,4 @@ console.log(fibonacci(10));
   1. 有序
      - 嵌套无序
         1. 更深层次
-           - 继续嵌套
-`
+           - 继续嵌套`;

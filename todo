@@ -4,8 +4,8 @@ TODO
 2. FrontMatter添加属性按钮 ✅ 
 3. FrontMatter默认属性配置：prev、next、tags
 4. 标签表格设置 ➡️ collect、check
-5. todo块解析
-6. list嵌套解析
+5. todo块解析 
+6. list嵌套解析 
 7. 标题序号自动渲染
 8. 类似notion的背景图片选择
 9. date不要有border ✅ 
@@ -14,9 +14,11 @@ TODO
 12. ---的frontmatter和divider解析 
 13. 修改预览造成vscode的markdown的闪屏
 14. 全局统计功能：统计todo块
-15. 表格的搜索在右边而不是在左边
+15. 表格的搜索在右边而不是在左边 ✅ 
 16. exclidraw的静态引用渲染
 17. exclidraw的同步修改
 18. 通用的block wrapper，可以添加block和删除block
 19. 添加文件引用属性
 20. 添加schema属性：可以实现内容约束
+21. 表格的正向编辑和反向编辑 
+22. 多选为空的时候无法点击 ✅ 
