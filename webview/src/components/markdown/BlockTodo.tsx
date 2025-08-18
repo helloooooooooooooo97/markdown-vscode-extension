@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Checkbox } from "antd";
+import { useMarkdownStore } from "../../store/markdown/store";
 
 /**
  * BlockTodo 组件，使用 antd 的 Checkbox 实现 todo 块
@@ -11,13 +12,21 @@ const BlockTodo: React.FC<{
     checked: boolean;
     text: string;
   };
-}> = ({ data }) => {
+}> = ({ data, blockId }) => {
+  const [checked, setChecked] = useState(data.checked);
+  const { updateBlock } = useMarkdownStore();
+  const handleChange = (checked: boolean) => {
+    setChecked(checked);
+    const newLine = `[${checked ? "✓" : " "}] ${data.text}`;
+    updateBlock(blockId, [newLine]);
+  };
+
   return (
     <div style={{ display: "flex", alignItems: "center", padding: "4px 0" }}>
       <Checkbox
-        checked={data.checked}
+        checked={checked}
         onChange={(e) => {
-          console.log(e.target.checked);
+          handleChange(e.target.checked);
         }}
       >
         {data.text}
