@@ -4,40 +4,16 @@ import {
   Relation,
   FrontMatter,
   MarkdownHeading,
+  DocumentStats,
+  ContentAnalysis,
+  FileAnalysisResult,
+  Complexity
 } from "@supernode/shared";
 import matter from "gray-matter";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import { Root, Heading } from "mdast";
 
-// 新增接口定义
-export interface DocumentStats {
-  totalLines: number;
-  contentLines: number;
-  codeLines: number;
-  commentLines: number;
-  emptyLines: number;
-  wordCount: number;
-  characterCount: number;
-  readingTimeMinutes: number;
-}
-
-export interface ContentAnalysis {
-  language: string;
-  topics: string[];
-  summary: string;
-  complexity: "simple" | "moderate" | "complex";
-  hasCodeBlocks: boolean;
-  hasImages: boolean;
-  hasTables: boolean;
-  hasMath: boolean;
-}
-
-export interface FileAnalysisResult {
-  metadata: FileMetadata;
-  documentStats: DocumentStats;
-  contentAnalysis: ContentAnalysis;
-}
 
 export class FileMetadataExtractor {
   /**
@@ -119,7 +95,7 @@ export class FileMetadataExtractor {
           language: "unknown",
           topics: [],
           summary: "",
-          complexity: "simple",
+          complexity: Complexity.SIMPLE,
           hasCodeBlocks: false,
           hasImages: false,
           hasTables: false,
@@ -471,7 +447,7 @@ export class ContentAnalyzer {
 
   private static assessComplexity(
     content: string
-  ): "simple" | "moderate" | "complex" {
+  ): Complexity {
     const codeBlocks = (content.match(/```[\s\S]*?```/g) || []).length;
     const headings = (content.match(/^#{1,6}\s+/gm) || []).length;
     const links = (content.match(/\[.*?\]\(.*?\)/g) || []).length;
@@ -481,8 +457,8 @@ export class ContentAnalyzer {
     const complexityScore =
       codeBlocks * 2 + headings + links + images + tables * 3;
 
-    if (complexityScore < 10) return "simple";
-    if (complexityScore < 25) return "moderate";
-    return "complex";
+    if (complexityScore < 10) return Complexity.SIMPLE;
+    if (complexityScore < 25) return Complexity.MEDIUM;
+    return Complexity.COMPLEX;
   }
 }

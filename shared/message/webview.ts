@@ -8,6 +8,7 @@ export enum WebviewCommand {
     webviewReady = "webviewReady",
     debugInfo = "debugInfo",
     setEventSource = "setEventSource",
+    getFileMetadata = "getFileMetadata",
 }
 
 // 从 WebView 更新 Markdown 内容消息
@@ -42,4 +43,9 @@ export interface DebugInfoMessage extends WebviewMessage {
 export interface SetEventSourceMessage extends WebviewMessage {
     command: WebviewCommand.setEventSource;
     source: string;
+}
+
+// 获取文件元数据消息
+export interface GetFileMetadataMessage extends WebviewMessage {
+    command: WebviewCommand.getFileMetadata;
 }

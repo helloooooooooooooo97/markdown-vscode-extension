@@ -1,3 +1,58 @@
+export interface MarkdownFileStats {
+  totalFiles: number;
+  totalSize: number;
+  filesByExtension: {
+    [key: string]: number;
+  };
+  files: FileInfo[];
+  scanTime: Date;
+  workspacePath: string;
+}
+
+export interface FileInfo {
+  fileName: string;
+  filePath: string;
+  relativePath: string;
+  size: number;
+  lastModified: Date;
+  languageId: string;
+  metadata: FileMetadata;
+  documentStats: DocumentStats;
+  contentAnalysis: ContentAnalysis;
+}
+
+export interface FileAnalysisResult {
+  metadata: FileMetadata;
+  documentStats: DocumentStats;
+  contentAnalysis: ContentAnalysis;
+}
+
+export interface DocumentStats {
+  totalLines: number;
+  contentLines: number;
+  codeLines: number;
+  commentLines: number;
+  emptyLines: number;
+  wordCount: number;
+  characterCount: number;
+  readingTimeMinutes: number;
+}
+export enum Complexity {
+  SIMPLE = "simple",
+  MEDIUM = "medium",
+  COMPLEX = "complex",
+}
+export interface ContentAnalysis {
+  language: string;
+  topics: string[];
+  summary: string;
+  complexity: Complexity;
+  hasCodeBlocks: boolean;
+  hasImages: boolean;
+  hasTables: boolean;
+  hasMath: boolean;
+}
+
 export interface FileMetadata {
   filePath: string; // 文件路径
   frontmatter: FrontMatter; // 文件的 frontmatter 元数据

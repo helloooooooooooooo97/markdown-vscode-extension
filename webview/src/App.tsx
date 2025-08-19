@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { ConfigProvider, theme, Layout, Menu } from "antd";
-import { FileTextOutlined, BugOutlined, MonitorOutlined } from "@ant-design/icons";
+import { FileTextOutlined, BugOutlined, MonitorOutlined, DatabaseOutlined } from "@ant-design/icons";
 import { VSCodeAPI } from "./communication/send/manual_vscode";
 import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
 import { MessageSendManager } from "./communication/send/auto_send";
 import { TestPanel } from "./components";
 import MarkdownView from "./page/markdown/view";
+import FileView from "./page/file/view";
 import "./App.css";
 import StoreMonitor from "./page/store/view";
 import useMarkdownStore from "./store/markdown/store";
@@ -19,6 +20,11 @@ const menuItems = [
     key: "markdown",
     icon: <FileTextOutlined />,
     label: "Markdown",
+  },
+  {
+    key: "files",
+    icon: <DatabaseOutlined />,
+    label: "文件分析",
   },
   {
     key: "test",
@@ -36,6 +42,8 @@ const renderContent = (activeKey: string) => {
   switch (activeKey) {
     case "markdown":
       return <MarkdownView />;
+    case "files":
+      return <FileView />;
     case "test":
       return <TestPanel />;
     case "store":

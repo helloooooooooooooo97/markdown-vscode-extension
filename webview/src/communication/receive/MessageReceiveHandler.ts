@@ -1,4 +1,5 @@
 import { useMarkdownStore } from '../../store/markdown/store';
+import { useFileStore } from '../../store/file/store';
 import { ExtensionCommand, UpdateMarkdownMessage, VscodeEventSource } from '@supernode/shared';
 
 export class MessageReceiveHandler {
@@ -13,8 +14,9 @@ export class MessageReceiveHandler {
     private handleMessage = (event: MessageEvent): void => {
         const message = event.data;
         const { setContent, setCurrentFileName, setIsLoading, setSource } = useMarkdownStore.getState();
+        const { setFiles, setIsLoading: setFileLoading } = useFileStore.getState();
 
-        switch (message.command) {
+        switch (message.command as ExtensionCommand) {
             case ExtensionCommand.updateMarkdownContent:
                 const updateMessage = message as UpdateMarkdownMessage;
                 // 设置事件来源为extension，防止store变化时往extension反向同步
@@ -26,6 +28,11 @@ export class MessageReceiveHandler {
                 setIsLoading(false);
                 break;
 
+            case ExtensionCommand.updateFileMetadata:
+                console.log("收到文件元数据更新:", message.files);
+                setFiles(message.files);
+                setFileLoading(false);
+                break;
             default:
                 console.warn(`未处理的命令: ${message.command}`);
         }

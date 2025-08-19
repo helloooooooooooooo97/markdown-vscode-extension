@@ -8,7 +8,9 @@ import {
     WebviewMessage,
     UpdateMarkdownMessage,
     ExtensionCommand,
-    VscodeEventSource
+    VscodeEventSource,
+    UpdateFileMetadataMessage,
+    FileInfo
 } from "@supernode/shared";
 import EventSource from "./source";
 
@@ -128,6 +130,14 @@ export class MarkdownWebviewProvider {
         }
     }
 
+    updateFileMetadata(files: FileInfo[]): void {
+        const message: UpdateFileMetadataMessage = {
+            command: ExtensionCommand.updateFileMetadata,
+            files: files,
+        };
+        this.sendMessage(message);
+    }
+
     /**
      * 初始化消息处理器
      */
@@ -138,6 +148,8 @@ export class MarkdownWebviewProvider {
         }
 
         this.messageHandler = new MessageHandler(MarkdownWebviewProvider.extensionContext);
+        // 设置webview提供者引用，以便MessageHandler可以发送消息
+        this.messageHandler.setWebviewProvider(this);
     }
 
     /**

@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { FileAnalysisResult, FileMetadataExtractor } from "../pkg/file_analyzer";
-import { TagExtractor, GraphExtractor } from "@supernode/shared";
+import { FileMetadataExtractor } from "../pkg/file_analyzer";
+import { TagExtractor, GraphExtractor, FileAnalysisResult } from "@supernode/shared";
 
 export interface FileChangeEvent {
     type: 'created' | 'modified' | 'deleted';

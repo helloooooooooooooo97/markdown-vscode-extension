@@ -1,39 +1,49 @@
 import * as vscode from "vscode";
-import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage } from "@supernode/shared";
+import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage, CommonCommand, WebviewCommand, ExtensionCommand } from "@supernode/shared";
 import { FileManager } from "../service/file";
+import { MarkdownFileScannerService } from "../service/markdown_file_analyzer";
 import EventSource from "../event/source";
+import { MarkdownWebviewProvider } from "../event/webview";
 
 // 从webview接收来的消息，然后去操作现有的
 export class MessageHandler {
     private context: vscode.ExtensionContext;
+    private webviewProvider: MarkdownWebviewProvider | undefined; // 添加webview提供者引用
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
     }
 
+    public setWebviewProvider(provider: MarkdownWebviewProvider): void {
+        this.webviewProvider = provider;
+    }
+
     public async handleMessage(message: WebviewMessage): Promise<void> {
         try {
             switch (message.command) {
-                case "showMessage":
+                case CommonCommand.showMessage:
                     this.handleShowMessage(message as ShowMessage);
                     break;
-                case "openLocalFile":
+                case CommonCommand.openLocalFile:
                     await this.handleOpenLocalFile(message as OpenLocalFileMessage);
                     break;
-                case "updateMarkdownContentFromWebview":
+                case WebviewCommand.updateMarkdownContentFromWebview:
                     await this.handleUpdateMarkdownContent(message as UpdateMarkdownContentFromWebviewMessage);
                     break;
-                case "webviewError":
+                case WebviewCommand.webviewError:
                     this.handleWebviewError(message);
                     break;
-                case "webviewReady":
+                case WebviewCommand.webviewReady:
                     this.handleWebviewReady(message);
                     break;
-                case "debugInfo":
+                case WebviewCommand.debugInfo:
                     this.handleDebugInfo(message);
                     break;
-                case "setEventSource":
+                case WebviewCommand.setEventSource:
                     this.handleSetEventSource(message as SetEventSourceMessage);
+                    break;
+                case WebviewCommand.getFileMetadata:
+                    await this.handleGetFileMetadata(message);
                     break;
                 default:
                     console.log("未知消息类型:", message.command);
@@ -77,6 +87,25 @@ export class MessageHandler {
         if (message.source === "webview") {
             EventSource.set(VscodeEventSource.WEBVIEW);
             console.log("事件来源已设置为 WEBVIEW");
+        }
+    }
+
+    private async handleGetFileMetadata(message: WebviewMessage): Promise<void> {
+        try {
+            // 使用 MarkdownFileScannerService 扫描文件
+            const stats = await MarkdownFileScannerService.scanMarkdownFiles();
+
+            // 通过webview提供者发送消息
+            if (this.webviewProvider) {
+                this.webviewProvider.updateFileMetadata(stats.files);
+                console.log("文件元数据已发送到webview，共", stats.files.length, "个文件");
+            } else {
+                console.error("webview提供者未设置，无法发送消息");
+            }
+
+        } catch (error) {
+            console.error("获取文件元数据失败:", error);
+            vscode.window.showErrorMessage(`获取文件元数据失败: ${error}`);
         }
     }
 }

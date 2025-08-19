@@ -1,36 +1,12 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import { FileMetadata } from "@supernode/shared";
+import { FileInfo, MarkdownFileStats } from "@supernode/shared";
 import { FileMetadataExtractor } from "../pkg/file_analyzer";
 import { TagExtractor, GraphExtractor } from "@supernode/shared";
 import { FileWatcherService } from "./file_watcher";
 
-export interface MarkdownFileInfo {
-    fileName: string;
-    filePath: string;
-    relativePath: string;
-    size: number;
-    lastModified: Date;
-    languageId: string;
-    metadata: FileMetadata;
-    documentStats: DocumentStats;
-    contentAnalysis: ContentAnalysis;
-}
 
-// 从 pkg/file 中导入接口
-import { DocumentStats, ContentAnalysis } from "../pkg/file_analyzer";
-
-export interface MarkdownFileStats {
-    totalFiles: number;
-    totalSize: number;
-    filesByExtension: {
-        [key: string]: number;
-    };
-    files: MarkdownFileInfo[];
-    scanTime: Date;
-    workspacePath: string;
-}
 
 export class MarkdownFileScannerService {
     private static fileWatcher = FileWatcherService.getInstance();
@@ -47,7 +23,7 @@ export class MarkdownFileScannerService {
         }
 
         const workspacePath = workspaceFolders[0].uri.fsPath;
-        const files: MarkdownFileInfo[] = [];
+        const files: FileInfo[] = [];
         let totalSize = 0;
         const filesByExtension: { [key: string]: number } = {};
 
@@ -79,7 +55,7 @@ export class MarkdownFileScannerService {
                     // 使用新的 FileMetadataExtractor 进行完整分析
                     const analysis = FileMetadataExtractor.ProcessFileWithAnalysis(filePath);
 
-                    const fileInfo: MarkdownFileInfo = {
+                    const fileInfo: FileInfo = {
                         fileName,
                         filePath,
                         relativePath,
