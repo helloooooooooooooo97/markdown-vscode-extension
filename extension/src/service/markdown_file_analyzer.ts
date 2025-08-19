@@ -3,7 +3,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { FileInfo, MarkdownFileStats } from "@supernode/shared";
 import { FileMetadataExtractor } from "../pkg/file_analyzer";
-import { TagExtractor, GraphExtractor } from "@supernode/shared";
+import { TagExtractor, GraphExtractor, DAGExtractor } from "@supernode/shared";
 import { FileWatcherService } from "./file_watcher";
 
 
@@ -121,6 +121,11 @@ export class MarkdownFileScannerService {
             // 1. stats 文件
             const statsPath = path.join(basePath, ".supernode", "stats.json");
             fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf8');
+
+            // 2. dag 文件
+            const dag = DAGExtractor.extract(stats.files.map(file => file.metadata));
+            const dagPath = path.join(basePath, ".supernode", "dag.json");
+            fs.writeFileSync(dagPath, JSON.stringify(dag, null, 2), 'utf8');
 
             // 2. graph 文件
             const graph = GraphExtractor.extract(stats.files.map(file => file.metadata));
