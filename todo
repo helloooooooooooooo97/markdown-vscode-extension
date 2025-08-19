@@ -2,12 +2,12 @@ TODO
 
 1. CodeMirror主题 ✅
 2. FrontMatter添加属性按钮 ✅ 
-3. FrontMatter默认属性配置：prev、next、tags
+3. FrontMatter默认属性配置：prev、next、tags ✅ 
 4. 标签表格设置 ➡️ collect、check
 5. todo块解析 
-6. list嵌套解析 
-7. 标题序号自动渲染
-8. 类似notion的背景图片选择
+6. list嵌套解析  
+7. 标题序号自动渲染 
+8. 类似notion的背景图片选择 
 9. date不要有border ✅ 
 10. 输入奇怪的阴影 ✅ 
 11. 多事件源的循环依赖问题 ✅ 
@@ -22,3 +22,5 @@ TODO
 20. 添加schema属性：可以实现内容约束
 21. 表格的正向编辑和反向编辑 
 22. 多选为空的时候无法点击 ✅ 
+23. 属性名的截断
+24. 

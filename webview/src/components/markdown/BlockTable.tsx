@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Table as AntTable, Input, Space, Button } from "antd";
-import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 export const Table: React.FC<{
   headers: React.ReactNode[];

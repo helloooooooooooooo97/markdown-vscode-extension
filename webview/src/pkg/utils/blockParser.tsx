@@ -16,9 +16,9 @@ import {
   BlockTodo,
   BlockWrapper,
 } from "../../components/markdown";
-
 import InlineParser from "./inlineParser";
 import { Block, BlockType } from "../../store/markdown/type";
+import { getDefaultFrontmatterData } from "../../components/markdown/BlockFrontMatter/const";
 
 /**
  * 块级解析器类
@@ -515,11 +515,7 @@ class BlockParser {
       }
 
       // 使用 js-yaml 解析 YAML 格式的 frontmatter
-      let frontmatterData: Record<string, any> = {
-        prev: [],
-        next: [],
-        tags: [],
-      };
+      let frontmatterData: Record<string, any> = getDefaultFrontmatterData();
 
       try {
         const yamlContent = frontmatterLines.join("\n");
@@ -560,11 +556,7 @@ class BlockParser {
    * 创建默认的 Frontmatter
    */
   createDefaultFrontmatter(): React.ReactNode {
-    const defaultData = {
-      prev: "",
-      next: "",
-      tags: [],
-    };
+    const defaultData = getDefaultFrontmatterData();
 
     // 创建block
     const block = this.createBlock([], 0, 0, BlockType.FrontMatter);
