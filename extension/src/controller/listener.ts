@@ -201,8 +201,8 @@ export class EventController {
             const tag = TagExtractor.extract(allFileMetadata);
 
             // 导出更新后的文件
-            const graphPath = path.join(basePath, "supernode_graph.json");
-            const tagPath = path.join(basePath, "supernode_tag.json");
+            const graphPath = path.join(basePath, ".supernode", "graph.json");
+            const tagPath = path.join(basePath, ".supernode", "tag.json");
 
             fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2), 'utf8');
             fs.writeFileSync(tagPath, JSON.stringify(tag, null, 2), 'utf8');

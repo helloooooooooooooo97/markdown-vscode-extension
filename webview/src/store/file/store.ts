@@ -40,7 +40,7 @@ export const useFileStore = create<useFileStoreType>()(
             field: 'fileName',
             order: 'ascend',
         },
-        viewMode: 'table',
+        viewMode: ViewMode.TABLE,
         isLoading: true,
         selectedFiles: [],
         ...createMutations(set, get),

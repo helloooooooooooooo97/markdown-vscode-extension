@@ -1,4 +1,4 @@
-import { FileInfo, DocumentStats, ContentAnalysis } from '@supernode/shared';
+import { FileInfo, DocumentStats, ContentAnalysis } from '@supernode/shared'
 
 export interface FileFilter {
     searchText: string;
@@ -17,4 +17,11 @@ export interface FileSort {
     order: 'ascend' | 'descend';
 }
 
-export type ViewMode = 'table' | 'card';
+export enum ViewMode {
+    TABLE = 'table', // 表格
+    CARD = 'card',   // 卡片
+    GRAPH = 'graph', // 图谱
+    DAG = 'dag',     // 有向无环图
+    TREE = 'tree',   // 树
+    LIST = 'list'    // 列表
+}

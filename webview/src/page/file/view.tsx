@@ -34,6 +34,7 @@ import { useFileStore } from "../../store/file/store";
 import { FileInfo, WebviewCommand } from "@supernode/shared";
 import { VSCodeAPI } from "../../communication/send/manual_vscode";
 import dayjs from "dayjs";
+import { ViewMode } from "../../store/file/type";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -277,14 +278,14 @@ const FileMetadataView: React.FC = () => {
                 <Space>
                     <Button
                         icon={<TableOutlined />}
-                        type={viewMode === 'table' ? 'primary' : 'default'}
-                        onClick={() => setViewMode('table')}
+                        type={viewMode === ViewMode.TABLE ? 'primary' : 'default'}
+                        onClick={() => setViewMode(ViewMode.TABLE)}
                     >
                     </Button>
                     <Button
                         icon={<AppstoreOutlined />}
-                        type={viewMode === 'card' ? 'primary' : 'default'}
-                        onClick={() => setViewMode('card')}
+                        type={viewMode === ViewMode.CARD ? 'primary' : 'default'}
+                        onClick={() => setViewMode(ViewMode.CARD)}
                     >
                     </Button>
                 </Space>
@@ -309,6 +310,7 @@ const FileMetadataView: React.FC = () => {
                     </Button>
                 </Space>
             </div>
+
             {/* 筛选面板 */}
             {showFilters && (
                 <Card className="mb-4">

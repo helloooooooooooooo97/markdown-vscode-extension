@@ -25,7 +25,7 @@ export class CommunicationLogger {
         if (!workspaceFolders || workspaceFolders.length === 0) {
             throw new Error("没有找到工作区文件夹");
         }
-        CommunicationLogger.logFilePath = path.join(workspaceFolders[0].uri.fsPath, `communication.log`);
+        CommunicationLogger.logFilePath = path.join(workspaceFolders[0].uri.fsPath, ".supernode", `communication.log`);
     }
 
     /**

@@ -112,18 +112,24 @@ export class MarkdownFileScannerService {
 
             const basePath = workspaceFolders[0].uri.fsPath;
 
+            // 创建.supernode目录
+            const supernodeDir = path.join(basePath, ".supernode");
+            if (!fs.existsSync(supernodeDir)) {
+                fs.mkdirSync(supernodeDir, { recursive: true });
+            }
+
             // 1. stats 文件
-            const statsPath = path.join(basePath, "supernode_stats.json");
+            const statsPath = path.join(basePath, ".supernode", "stats.json");
             fs.writeFileSync(statsPath, JSON.stringify(stats, null, 2), 'utf8');
 
             // 2. graph 文件
             const graph = GraphExtractor.extract(stats.files.map(file => file.metadata));
-            const graphPath = path.join(basePath, "supernode_graph.json");
+            const graphPath = path.join(basePath, ".supernode", "graph.json");
             fs.writeFileSync(graphPath, JSON.stringify(graph, null, 2), 'utf8');
 
             // 3. tag 文件
             const tag = TagExtractor.extract(stats.files.map(file => file.metadata));
-            const tagPath = path.join(basePath, "supernode_tag.json");
+            const tagPath = path.join(basePath, ".supernode", "tag.json");
             fs.writeFileSync(tagPath, JSON.stringify(tag, null, 2), 'utf8');
 
             return "文件已导出";
