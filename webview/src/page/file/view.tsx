@@ -236,7 +236,6 @@ const FileMetadataView: React.FC = () => {
         <div className="p-6">
             {/* 标题和统计 */}
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-white mb-4">文件元数据管理</h1>
                 <Card className="mb-4" bordered>
                     <Row gutter={16}>
                         <Col span={6}>
