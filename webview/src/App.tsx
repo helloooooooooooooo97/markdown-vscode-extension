@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { ConfigProvider, theme, Layout, Menu } from "antd";
-import { FileTextOutlined, BugOutlined, DatabaseOutlined } from "@ant-design/icons";
+import {
+  FileTextOutlined,
+  BugOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { VSCodeAPI } from "./communication/send/manual_vscode";
 import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
 import { MessageSendManager } from "./communication/send/auto_send";
@@ -22,14 +26,14 @@ const menuItems = [
   },
   {
     key: "files",
-    icon: <DatabaseOutlined />,
+    icon: <SearchOutlined />,
     label: "文件列表",
   },
   {
     key: "test",
     icon: <BugOutlined />,
     label: "连接测试",
-  }
+  },
 ];
 
 // 渲染内容组件
@@ -82,20 +86,20 @@ function App() {
       theme={{
         algorithm: theme.darkAlgorithm,
         token: {
-          colorBgContainer: '#1e1e1e',
-          colorBgElevated: '#252526',
-          colorBorder: '#404040',
-          colorText: '#cccccc',
-          colorTextSecondary: '#999999',
+          colorBgContainer: "#1e1e1e",
+          colorBgElevated: "#252526",
+          colorBorder: "#404040",
+          colorText: "#cccccc",
+          colorTextSecondary: "#999999",
           borderRadius: 6,
         },
       }}
     >
-      <Layout className="h-screen bg-[#1E1E1E]" onClick={() => handleChangeEventSourceToWebview()}>
-        <Sider
-          width={48}
-          className="!bg-[#202020] border-r border-r-[#2A2A2A]"
-        >
+      <Layout
+        className="h-screen bg-[#1E1E1E]"
+        onClick={() => handleChangeEventSourceToWebview()}
+      >
+        <Sider width={48} className="!bg-[#202020] border-r border-r-[#2A2A2A]">
           <Menu
             mode="inline"
             selectedKeys={[activeKey]}
