@@ -11,6 +11,8 @@ import {
   Statistic,
   DatePicker,
   message,
+  Tooltip,
+  Modal,
 } from "antd";
 import {
   TableOutlined,
@@ -22,10 +24,13 @@ import {
   ClockCircleOutlined,
   FileOutlined,
   NodeIndexOutlined,
-  RadarChartOutlined
+  RadarChartOutlined,
+  PushpinOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useFileStore } from "../../store/file/store";
+import { usePinStore } from "../../store/pin/store";
 import { WebviewCommand } from "@supernode/shared";
 import { VSCodeAPI } from "../../communication/send/manual_vscode";
 import { ViewMode } from "../../store/file/type";
@@ -33,6 +38,7 @@ import ViewTable from "./ViewTable";
 import ViewCard from "./ViewCard";
 import Graph from "./ViewGraph";
 import ViewDAG from "./ViewDAG";
+import IconSelector from "../../components/pin/IconSelector";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -41,9 +47,9 @@ const FileMetadataView: React.FC = () => {
   const {
     filteredFiles,
     filter,
+    sort,
     viewMode,
     selectedFiles,
-    isLoading,
     setFilter,
     setSort,
     setViewMode,
@@ -55,7 +61,70 @@ const FileMetadataView: React.FC = () => {
     getUniqueComplexities,
   } = useFileStore();
 
+  const { addPinnedQuery, pinnedQueries, setCurrentQuery, updateLastUsed, removePinnedQuery } = usePinStore();
+
   const [showFilters, setShowFilters] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [pinQueryName, setPinQueryName] = useState('');
+  const [pinSidebarIcon, setPinSidebarIcon] = useState('📌');
+  const [pinShowInSidebar, setPinShowInSidebar] = useState(true);
+
+  // 快速保存当前查询
+  const handleQuickPin = () => {
+    setPinQueryName('');
+    setPinSidebarIcon('📌');
+    setPinShowInSidebar(true);
+    setShowPinModal(true);
+  };
+
+  const handleSavePin = () => {
+    if (!pinQueryName.trim()) {
+      message.error('请输入查询名称');
+      return;
+    }
+
+    const newQuery = {
+      name: pinQueryName.trim(),
+      viewMode,
+      filter: { ...filter },
+      sort: { ...sort },
+      showInSidebar: pinShowInSidebar,
+      sidebarIcon: pinSidebarIcon,
+      sidebarOrder: 0,
+    };
+
+    addPinnedQuery(newQuery);
+    setPinQueryName('');
+    setShowPinModal(false);
+    message.success(pinShowInSidebar ? '查询已保存到侧边栏' : '查询已保存');
+  };
+
+  // 处理视图点击
+  const handleViewClick = (pinnedQuery: any) => {
+    // 应用视图的筛选条件和排序
+    setFilter(pinnedQuery.filter);
+    setSort(pinnedQuery.sort);
+    setViewMode(pinnedQuery.viewMode);
+    setCurrentQuery(pinnedQuery);
+    updateLastUsed(pinnedQuery.id);
+    message.success(`已切换到视图: ${pinnedQuery.name}`);
+  };
+
+  // 处理删除视图
+  const handleDeleteView = (e: React.MouseEvent, pinnedQuery: any) => {
+    e.stopPropagation(); // 阻止事件冒泡，避免触发视图切换
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除视图 "${pinnedQuery.name}" 吗？`,
+      okText: '删除',
+      cancelText: '取消',
+      okType: 'danger',
+      onOk: () => {
+        removePinnedQuery(pinnedQuery.id);
+        message.success(`已删除视图: ${pinnedQuery.name}`);
+      },
+    });
+  };
 
   // 从extension获取数据
   useEffect(() => {
@@ -103,19 +172,27 @@ const FileMetadataView: React.FC = () => {
   return (
     <div className="p-6">
       {/* 标题和统计 */}
-      <div className="mb-6">
-        <Card className="mb-4" bordered>
+      <div style={{ marginBottom: 24 }}>
+        <Card
+          bordered
+          title="筛选结果统计"
+          extra={
+            <Tooltip title="显示当前筛选条件下的文件统计信息">
+              <span style={{ fontSize: 12, color: '#666' }}>基于筛选条件</span>
+            </Tooltip>
+          }
+        >
           <Row gutter={16}>
             <Col span={6}>
               <Statistic
-                title="总文件数"
+                title="符合条件的文件数"
                 value={totalStats.totalFiles}
                 prefix={<FileTextOutlined />}
               />
             </Col>
             <Col span={6}>
               <Statistic
-                title="总大小"
+                title="符合条件的文件总大小"
                 value={(totalStats.totalSize / 1024 / 1024).toFixed(2)}
                 suffix="MB"
                 prefix={<FileOutlined />}
@@ -123,14 +200,14 @@ const FileMetadataView: React.FC = () => {
             </Col>
             <Col span={6}>
               <Statistic
-                title="总字数"
+                title="符合条件的文件总字数"
                 value={totalStats.totalWords}
                 prefix={<FileTextOutlined />}
               />
             </Col>
             <Col span={6}>
               <Statistic
-                title="总阅读时间"
+                title="符合条件的文件总阅读时间"
                 value={totalStats.totalReadingTime}
                 suffix="分钟"
                 prefix={<ClockCircleOutlined />}
@@ -139,6 +216,41 @@ const FileMetadataView: React.FC = () => {
           </Row>
         </Card>
       </div>
+
+      {/* 已保存的视图 */}
+      {pinnedQueries.length > 0 && (
+        <div className="mb-4">
+          <div className="text-sm font-medium mb-3 text-[#CCCCCC]">
+            📌 已保存的视图 ({pinnedQueries.length})
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {pinnedQueries.map((pinnedQuery) => (
+              <div
+                key={pinnedQuery.id}
+                className="flex items-center border border-gray-600 rounded-md transition-all duration-200 cursor-pointer overflow-hidden hover:border-gray-300 hover:shadow-md"
+              >
+                <Tooltip title={`点击切换到: ${pinnedQuery.name}`} placement="top">
+                  <div
+                    className="flex items-center gap-1.5 px-2 py-1 cursor-pointer"
+                    onClick={() => handleViewClick(pinnedQuery)}
+                  >
+                    <span className="text-sm">{pinnedQuery.sidebarIcon}</span>
+                    <span className="text-xs font-medium">{pinnedQuery.name}</span>
+                  </div>
+                </Tooltip>
+                <Tooltip title="删除视图" placement="top">
+                  <div
+                    className="flex items-center justify-center w-5 h-5 cursor-pointer border-l border-gray-200 transition-all duration-200 hover:bg-red-500 hover:text-white"
+                    onClick={(e) => handleDeleteView(e, pinnedQuery)}
+                  >
+                    <CloseOutlined className="text-xs" />
+                  </div>
+                </Tooltip>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 工具栏 */}
       <div className="mb-4 flex items-center justify-between">
@@ -163,6 +275,7 @@ const FileMetadataView: React.FC = () => {
             type={viewMode === ViewMode.DAG ? "primary" : "default"}
             onClick={() => setViewMode(ViewMode.DAG)}
           ></Button>
+
         </Space>
         <Space>
           <Input
@@ -178,6 +291,14 @@ const FileMetadataView: React.FC = () => {
             type={showFilters ? "primary" : "default"}
           ></Button>
           <Button icon={<ClearOutlined />} onClick={clearFilter}></Button>
+          <Tooltip title="快速保存当前查询">
+            <Button
+              icon={<PushpinOutlined />}
+              type="default"
+              className="pin-button"
+              onClick={handleQuickPin}
+            />
+          </Tooltip>
         </Space>
       </div>
 
@@ -311,6 +432,88 @@ const FileMetadataView: React.FC = () => {
           }}
         />
       ) : null}
+
+      {/* Pin Modal */}
+      <Modal
+        title="视图"
+        open={showPinModal}
+        onOk={handleSavePin}
+        onCancel={() => {
+          setShowPinModal(false);
+          setPinQueryName('');
+        }}
+        okText="保存"
+        cancelText="取消"
+      >
+        <div className="mb-4">
+          <div className="mb-2 text-sm font-medium">名称</div>
+          <Input
+            value={pinQueryName}
+            onChange={(e) => setPinQueryName(e.target.value)}
+            placeholder="输入视图名称"
+            onPressEnter={handleSavePin}
+          />
+        </div>
+
+        <div className="mb-4">
+          <div className="mb-2 text-sm font-medium">显示</div>
+          <Switch
+            checked={pinShowInSidebar}
+            onChange={setPinShowInSidebar}
+            checkedChildren="是"
+            unCheckedChildren="否"
+          />
+        </div>
+
+        {pinShowInSidebar && (
+          <div className="mb-4">
+            <div className="mb-2 text-sm font-medium">查询</div>
+            <IconSelector
+              value={pinSidebarIcon}
+              onChange={setPinSidebarIcon}
+              placeholder="选择侧边栏图标"
+            />
+          </div>
+        )}
+
+        <div className="mb-4">
+          <div className="text-base font-medium mb-2">条件</div>
+          <Card size="small">
+            <Row gutter={[8, 8]}>
+              <Col span={24}>
+                <div className="flex justify-between">
+                  <span className="text-[#666]">视图模式:</span>
+                  <span className="font-medium">{viewMode}</span>
+                </div>
+              </Col>
+              <Col span={24}>
+                <div className="flex justify-between">
+                  <span className="text-[#666]">搜索:</span>
+                  <span className="font-medium">{filter.searchText || '无'}</span>
+                </div>
+              </Col>
+              <Col span={24}>
+                <div className="flex justify-between">
+                  <span className="text-[#666]">语言筛选:</span>
+                  <span className="font-medium">{filter.languageFilter.length > 0 ? filter.languageFilter.join(', ') : '无'}</span>
+                </div>
+              </Col>
+              <Col span={24}>
+                <div className="flex justify-between">
+                  <span className="text-[#666]">复杂度筛选:</span>
+                  <span className="font-medium">{filter.complexityFilter.length > 0 ? filter.complexityFilter.join(', ') : '无'}</span>
+                </div>
+              </Col>
+              <Col span={24}>
+                <div className="flex justify-between">
+                  <span className="text-[#666]">排序:</span>
+                  <span className="font-medium">{sort.field} ({sort.order})</span>
+                </div>
+              </Col>
+            </Row>
+          </Card>
+        </div>
+      </Modal>
     </div>
   );
 };

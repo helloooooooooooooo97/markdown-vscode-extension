@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ConfigProvider, theme, Layout, Menu } from "antd";
 import {
   FileTextOutlined,
@@ -12,47 +12,88 @@ import { TestPanel } from "./components";
 import MarkdownView from "./page/markdown/view";
 import FileView from "./page/file/view";
 import useMarkdownStore from "./store/markdown/store";
+import { PinnedQuery, usePinStore } from "./store/pin/store";
+import { useFileStore } from "./store/file/store";
 import { VscodeEventSource } from "@supernode/shared";
 import "./App.css";
-
 const { Sider, Content } = Layout;
 
-// 定义菜单项
-const menuItems = [
-  {
-    key: "markdown",
-    icon: <FileTextOutlined />,
-    label: "Markdown",
-  },
-  {
-    key: "files",
-    icon: <SearchOutlined />,
-    label: "Search",
-  },
-  {
-    key: "test",
-    icon: <BugOutlined />,
-    label: "连接测试",
-  },
-];
+// 构建菜单项
+const buildMenuItems = (pinnedQueries: PinnedQuery[]) => {
+  const baseItems = [
+    {
+      key: "markdown",
+      icon: <FileTextOutlined />,
+      label: "Markdown",
+    },
+    {
+      key: "files",
+      icon: <SearchOutlined />,
+      label: "Search",
+    },
+    {
+      key: "test",
+      icon: <BugOutlined />,
+      label: "连接测试",
+    },
+  ];
 
-// 渲染内容组件
-const renderContent = (activeKey: string) => {
-  switch (activeKey) {
-    case "markdown":
-      return <MarkdownView />;
-    case "files":
-      return <FileView />;
-    case "test":
-      return <TestPanel />;
-    default:
-      return <MarkdownView />;
-  }
+  const sidebarItems = pinnedQueries
+    .filter((query) => query.showInSidebar)
+    .map((query) => ({
+      key: `pin-${query.id}`,
+      icon: <span style={{ fontSize: '16px' }}>{query.sidebarIcon}</span>,
+      label: query.name,
+    }));
+
+  console.log("sidebarItems", sidebarItems);
+
+  return [...baseItems, ...sidebarItems];
 };
 
 function App() {
   const { setSource } = useMarkdownStore.getState();
   const [activeKey, setActiveKey] = useState("markdown");
+  const { updateLastUsed, pinnedQueries } = usePinStore();
+  const { setFilter, setSort, setViewMode } = useFileStore();
+  const handleSidebarQueryClick = (queryId: string) => {
+    const query = pinnedQueries.find(q => q.id === queryId);
+    if (query) {
+      setFilter(query.filter);
+      setSort(query.sort);
+      setViewMode(query.viewMode);
+      updateLastUsed(query.id);
+      setActiveKey("files"); // 切换到文件页面
+    }
+  };
+
+
+
+  const menuItems = useMemo(() => buildMenuItems(pinnedQueries), [pinnedQueries]);
+
+  // 渲染内容组件
+  const renderContent = (activeKey: string) => {
+    switch (activeKey) {
+      case "markdown":
+        return <MarkdownView />;
+      case "files":
+        return <FileView />;
+      case "test":
+        return <TestPanel />;
+      default:
+        return <MarkdownView />;
+    }
+  };
+
+  const handleMenuClick = ({ key }: { key: string }) => {
+    // 检查是否是侧边栏查询
+    if (key.startsWith('pin-')) {
+      const queryId = key.replace('pin-', '');
+      handleSidebarQueryClick(queryId);
+    } else {
+      setActiveKey(key);
+    }
+  };
 
   useEffect(() => {
     // 初始化 VSCode API
@@ -72,9 +113,6 @@ function App() {
     };
   }, []);
 
-  const handleMenuClick = ({ key }: { key: string }) => {
-    setActiveKey(key);
-  };
 
   const handleChangeEventSourceToWebview = () => {
     setSource(VscodeEventSource.WEBVIEW);

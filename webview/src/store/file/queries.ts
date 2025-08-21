@@ -46,7 +46,7 @@ export const createQueries = (get: Getter): FileQueries => ({
     },
 
     getTotalStats: () => {
-        const files = get().files;
+        const files = get().filteredFiles; // 使用筛选后的文件而不是所有文件
         return {
             totalFiles: files.length,
             totalSize: files.reduce((sum, file) => sum + file.size, 0),
@@ -56,12 +56,12 @@ export const createQueries = (get: Getter): FileQueries => ({
     },
 
     getUniqueLanguages: () => {
-        const files = get().files;
+        const files = get().filteredFiles; // 使用筛选后的文件
         return [...new Set(files.map(file => file.languageId))];
     },
 
     getUniqueComplexities: () => {
-        const files = get().files;
+        const files = get().filteredFiles; // 使用筛选后的文件
         return [...new Set(files.map(file => file.contentAnalysis.complexity))];
     },
 });
