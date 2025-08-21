@@ -57,7 +57,7 @@ const defaultConfig: Required<DAGConfig> = {
   enableReset: true,
   enableValidation: true,
   fitView: true,
-  fitViewPadding: 0.2,
+  fitViewPadding: 0.4,
   currentNodeID: "",
 };
 

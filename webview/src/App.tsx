@@ -27,7 +27,7 @@ const menuItems = [
   {
     key: "files",
     icon: <SearchOutlined />,
-    label: "文件列表",
+    label: "Search",
   },
   {
     key: "test",
