@@ -18,6 +18,7 @@ import "reactflow/dist/style.css";
 import { DAGUtils, DAGExtractor, FileInfo } from "@supernode/shared";
 import { dagColors } from "./style";
 import NodeRoundView from "./node/NodeRoundView";
+import { useFileStore } from "../../../store/file/store";
 
 const nodeTypes: NodeTypes = {
   dag: NodeRoundView,
@@ -31,7 +32,6 @@ export interface DAGConfig {
   showGrid?: boolean; // 是否显示网格背景
   height?: string; // 容器高度
   className?: string; // 外部className
-  title?: string; // 标题文本
   enableNodeClick?: boolean; // 是否启用节点点击
   enableNodeDoubleClick?: boolean; // 是否启用节点双击
   enableAutoLayout?: boolean; // 是否启用自动布局
@@ -50,7 +50,6 @@ const defaultConfig: Required<DAGConfig> = {
   showGrid: true,
   height: "70vh",
   className: "",
-  title: "文档的DAG依赖关系图",
   enableNodeClick: true,
   enableNodeDoubleClick: true,
   enableAutoLayout: true,
@@ -67,24 +66,37 @@ interface DAGPageProps {
   config?: DAGConfig;
 }
 
+
 const ViewDAG: React.FC<DAGPageProps> = ({ filteredFiles, onNodeClick, config = {} }) => {
 
-
+  const { files } = useFileStore();
   // 合并配置
   const finalConfig = { ...defaultConfig, ...config };
 
-  // 将 FileInfo[] 转换为 DAGMetadata，然后通过 DAGExtractor 生成DAG数据
+  // 1、找到整张图
+  // 2、在整张图中标记要筛选的节点
+  // 3、找到对应的节点和边的数据
   const dagData = useMemo(() => {
     if (!filteredFiles || filteredFiles.length === 0) {
       return { nodes: [], edges: [] };
     }
 
-    // 提取 FileMetadata 数组
-    const fileMetadataArray = filteredFiles.map((file) => file.metadata);
+    // 整张图的节点和边
+    const { nodes, edges } = DAGExtractor.extract(files.map((file) => file.metadata));
+    const filteredNodeIDs: string[] = [];
+    const filteredEdgeIDs: string[] = [];
+    for (const file of filteredFiles) {
+      const { connectedNodes, connectedEdges } = DAGUtils.findWholeConnectedPath(file.filePath, edges);
+      filteredNodeIDs.push(...connectedNodes);
+      filteredEdgeIDs.push(...connectedEdges);
+    }
 
-    // 使用 DAGExtractor 生成DAG数据
-    return DAGExtractor.extract(fileMetadataArray);
-  }, [filteredFiles]);
+    // 过滤后的节点和边
+    const filteredNodes = nodes.filter((node) => filteredNodeIDs.includes(node.id));
+    const filteredEdges = edges.filter((edge) => filteredEdgeIDs.includes(edge.id));
+    return { nodes: filteredNodes, edges: filteredEdges };
+
+  }, [files, filteredFiles]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(dagData.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(dagData.edges);
