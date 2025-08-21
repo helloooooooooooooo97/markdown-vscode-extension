@@ -13,6 +13,7 @@ import {
   message,
   Tooltip,
   Modal,
+  Tag,
 } from "antd";
 import {
   TableOutlined,
@@ -111,19 +112,12 @@ const FileMetadataView: React.FC = () => {
   };
 
   // 处理删除视图
-  const handleDeleteView = (e: React.MouseEvent, pinnedQuery: any) => {
-    e.stopPropagation(); // 阻止事件冒泡，避免触发视图切换
-    Modal.confirm({
-      title: '确认删除',
-      content: `确定要删除视图 "${pinnedQuery.name}" 吗？`,
-      okText: '删除',
-      cancelText: '取消',
-      okType: 'danger',
-      onOk: () => {
-        removePinnedQuery(pinnedQuery.id);
-        message.success(`已删除视图: ${pinnedQuery.name}`);
-      },
-    });
+  const handleDeleteView = (e: React.MouseEvent | undefined, pinnedQuery: any) => {
+    if (e) {
+      e.stopPropagation(); // 阻止事件冒泡，避免触发视图切换
+    }
+    removePinnedQuery(pinnedQuery.id);
+    message.success(`已删除视图: ${pinnedQuery.name}`);
   };
 
   // 从extension获取数据
@@ -140,11 +134,9 @@ const FileMetadataView: React.FC = () => {
           console.log("已发送获取文件元数据请求");
         } else {
           console.error("VSCode API 未初始化");
-          message.error("VSCode API 未初始化");
         }
       } catch (error) {
         console.error("加载文件元数据失败:", error);
-        message.error("加载文件元数据失败");
       }
     };
     loadFiles();
@@ -221,32 +213,21 @@ const FileMetadataView: React.FC = () => {
       {pinnedQueries.length > 0 && (
         <div className="mb-4">
           <div className="text-sm font-medium mb-3 text-[#CCCCCC]">
-            📌 已保存的视图 ({pinnedQueries.length})
+            📌 所有视图 ({pinnedQueries.length})
           </div>
           <div className="flex flex-wrap gap-2">
             {pinnedQueries.map((pinnedQuery) => (
-              <div
+              <Tag
                 key={pinnedQuery.id}
-                className="flex items-center border border-gray-600 rounded-md transition-all duration-200 cursor-pointer overflow-hidden hover:border-gray-300 hover:shadow-md"
+                closable
+                onClose={(e) => handleDeleteView(e, pinnedQuery)}
+                onClick={() => handleViewClick(pinnedQuery)}
+                style={{ cursor: 'pointer' }}
+                className="flex items-center gap-1"
               >
-                <Tooltip title={`点击切换到: ${pinnedQuery.name}`} placement="top">
-                  <div
-                    className="flex items-center gap-1.5 px-2 py-1 cursor-pointer"
-                    onClick={() => handleViewClick(pinnedQuery)}
-                  >
-                    <span className="text-sm">{pinnedQuery.sidebarIcon}</span>
-                    <span className="text-xs font-medium">{pinnedQuery.name}</span>
-                  </div>
-                </Tooltip>
-                <Tooltip title="删除视图" placement="top">
-                  <div
-                    className="flex items-center justify-center w-5 h-5 cursor-pointer border-l border-gray-200 transition-all duration-200 hover:bg-red-500 hover:text-white"
-                    onClick={(e) => handleDeleteView(e, pinnedQuery)}
-                  >
-                    <CloseOutlined className="text-xs" />
-                  </div>
-                </Tooltip>
-              </div>
+                <span>{pinnedQuery.sidebarIcon}</span>
+                <span>{pinnedQuery.name}</span>
+              </Tag>
             ))}
           </div>
         </div>
