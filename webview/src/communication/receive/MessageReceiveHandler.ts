@@ -27,7 +27,6 @@ export class MessageReceiveHandler {
                 }
                 setIsLoading(false);
                 break;
-
             case ExtensionCommand.updateFileMetadata:
                 console.log("收到文件元数据更新:", message.files);
                 setFiles(message.files);

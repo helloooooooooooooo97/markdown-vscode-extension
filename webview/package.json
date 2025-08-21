@@ -26,6 +26,7 @@
     "@codemirror/lang-sql": "^6.9.1",
     "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/lang-yaml": "^6.1.2",
+    "reactflow": "^11.11.4",
     "@supernode/shared": "file:../shared",
     "@types/js-yaml": "^4.0.9",
     "@types/katex": "^0.16.7",

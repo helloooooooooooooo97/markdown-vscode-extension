@@ -1,4 +1,5 @@
 import { FileMetadata } from "../file/schema";
+import { DAGMetadata } from "./schema";
 import { Node, Edge } from "reactflow";
 
 // 路径拼接函数
@@ -35,10 +36,7 @@ export const joinPath = (basePath: string, relativePath: string): string => {
 };
 
 export class DAGExtractor {
-  static extract(allFileMetadata: FileMetadata[]): {
-    nodes: Node[];
-    edges: Edge[];
-  } {
+  static extract(allFileMetadata: FileMetadata[]): DAGMetadata {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
     const nodeMap = new Map<string, boolean>();
@@ -50,13 +48,14 @@ export class DAGExtractor {
       ) {
         const currentPath = fileMetadata.filePath;
         if (!nodeMap.has(currentPath)) {
-          const nodeName = fileMetadata.filePath.replace(/\.(mdx?|tsx?)$/, "");
+          // 提取文件名（不包含扩展名）
+          const fileName = currentPath.split('/').pop()?.replace(/\.(mdx?|tsx?)$/, "") || "未知";
           nodes.push({
             id: currentPath,
             type: "dag",
             position: { x: 0, y: 0 }, // 位置将由布局算法计算
             data: {
-              label: nodeName,
+              label: fileName,
               color: "#3b82f6", // 默认蓝色
             },
           });
@@ -67,11 +66,8 @@ export class DAGExtractor {
         for (const prev of fileMetadata.frontmatter?.prev || []) {
           const prevPath = joinPath(currentPath, prev);
           if (!nodeMap.has(prevPath)) {
-            const prevName =
-              prevPath
-                .split("/")
-                .pop()
-                ?.replace(/\.(mdx?|tsx?)$/, "") || "未知";
+            // 提取文件名（不包含扩展名）
+            const prevName = prevPath.split('/').pop()?.replace(/\.(mdx?|tsx?)$/, "") || "未知";
             nodes.push({
               id: prevPath,
               type: "dag",
@@ -100,11 +96,8 @@ export class DAGExtractor {
           const nextPath = joinPath(currentPath, next);
           // 创建 next 节点（如果不存在）
           if (!nodeMap.has(nextPath)) {
-            const nextName =
-              nextPath
-                .split("/")
-                .pop()
-                ?.replace(/\.(mdx?|tsx?)$/, "") || "未知";
+            // 提取文件名（不包含扩展名）
+            const nextName = nextPath.split('/').pop()?.replace(/\.(mdx?|tsx?)$/, "") || "未知";
             nodes.push({
               id: nextPath,
               type: "dag",

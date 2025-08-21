@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { FileFilter, FileSort, ViewMode } from './type';
-import { FileInfo } from '@supernode/shared';
+import { FileInfo, filesMock } from '@supernode/shared';
 import { createMutations, FileMutations } from './mutations';
 import { createQueries, FileQueries } from './queries';
 
@@ -23,8 +23,8 @@ export type Setter = (fn: (state: useFileStoreType) => void) => void;
 export const useFileStore = create<useFileStoreType>()(
     immer((set, get) => ({
         // 初始状态
-        files: [],
-        filteredFiles: [],
+        files: filesMock.files,
+        filteredFiles: filesMock.files,
         filter: {
             searchText: '',
             languageFilter: [],

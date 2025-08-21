@@ -22,15 +22,17 @@ import {
   ClockCircleOutlined,
   FileOutlined,
   NodeIndexOutlined,
+  RadarChartOutlined
 } from "@ant-design/icons";
+import dayjs from "dayjs";
 import { useFileStore } from "../../store/file/store";
 import { WebviewCommand } from "@supernode/shared";
 import { VSCodeAPI } from "../../communication/send/manual_vscode";
-import dayjs from "dayjs";
 import { ViewMode } from "../../store/file/type";
 import ViewTable from "./ViewTable";
 import ViewCard from "./ViewCard";
 import Graph from "./ViewGraph";
+import ViewDAG from "./ViewDAG";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -74,12 +76,8 @@ const FileMetadataView: React.FC = () => {
       } catch (error) {
         console.error("加载文件元数据失败:", error);
         message.error("加载文件元数据失败");
-      } finally {
-        // 注意：这里不设置setIsLoading(false)，因为数据加载是异步的
-        // 真正的loading状态会在收到extension响应后由MessageReceiveHandler处理
       }
     };
-
     loadFiles();
   }, []);
 
@@ -156,9 +154,14 @@ const FileMetadataView: React.FC = () => {
             onClick={() => setViewMode(ViewMode.CARD)}
           ></Button>
           <Button
-            icon={<NodeIndexOutlined />}
+            icon={<RadarChartOutlined />}
             type={viewMode === ViewMode.GRAPH ? "primary" : "default"}
             onClick={() => setViewMode(ViewMode.GRAPH)}
+          ></Button>
+          <Button
+            icon={<NodeIndexOutlined />}
+            type={viewMode === ViewMode.DAG ? "primary" : "default"}
+            onClick={() => setViewMode(ViewMode.DAG)}
           ></Button>
         </Space>
         <Space>
@@ -286,7 +289,6 @@ const FileMetadataView: React.FC = () => {
       {viewMode === ViewMode.TABLE ? (
         <ViewTable
           filteredFiles={filteredFiles}
-          isLoading={isLoading}
           selectedFiles={selectedFiles}
           onTableChange={handleTableChange}
           onRowSelectionChange={handleRowSelectionChange}
@@ -301,9 +303,14 @@ const FileMetadataView: React.FC = () => {
             // 这里可以添加跳转到文件的逻辑
           }}
         />
-      ) : (
-        <ViewCard filteredFiles={filteredFiles} />
-      )}
+      ) : viewMode === ViewMode.DAG ? (
+        <ViewDAG
+          filteredFiles={filteredFiles}
+          onNodeClick={(filePath) => {
+            console.log("点击了文件节点:", filePath);
+          }}
+        />
+      ) : null}
     </div>
   );
 };

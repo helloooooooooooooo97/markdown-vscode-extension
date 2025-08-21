@@ -11,7 +11,6 @@ import dayjs from "dayjs";
 
 interface ViewTableProps {
   filteredFiles: FileInfo[];
-  isLoading: boolean;
   selectedFiles: string[];
   onTableChange: (pagination: any, filters: any, sorter: any) => void;
   onRowSelectionChange: (selectedRowKeys: React.Key[]) => void;
@@ -19,7 +18,6 @@ interface ViewTableProps {
 
 const ViewTable: React.FC<ViewTableProps> = ({
   filteredFiles,
-  isLoading,
   selectedFiles,
   onTableChange,
   onRowSelectionChange,
@@ -128,7 +126,6 @@ const ViewTable: React.FC<ViewTableProps> = ({
       columns={columns}
       dataSource={filteredFiles}
       rowKey="filePath"
-      loading={isLoading}
       onChange={onTableChange}
       rowSelection={handleRowSelection}
       pagination={{
