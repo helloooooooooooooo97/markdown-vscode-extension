@@ -7,7 +7,7 @@ import { ReloadOutlined } from "@ant-design/icons";
 const { Title, Text } = Typography;
 
 const TestPanel = () => {
-    const { blocks, isLoading } = useMarkdownStore();
+    const { blocks } = useMarkdownStore();
     const testFunctionManager = new TestFunctionManager();
 
     const testCommunication = () => testFunctionManager.testCommunication();
@@ -25,11 +25,10 @@ const TestPanel = () => {
 
     // 只提取 store 中的变量数据，过滤掉函数
     const getStoreData = () => {
-        const { blocks, filePath, isLoading, source } = store;
+        const { blocks, filePath, source } = store;
         return {
             blocks,
             filePath,
-            isLoading,
             source
         };
     };
@@ -61,9 +60,6 @@ const TestPanel = () => {
                 </Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>
                     内容长度: {blocks.map(block => block.lines.join('\n')).join('\n').length} 字符
-                </Text>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                    加载状态: {isLoading ? "加载中" : "已完成"}
                 </Text>
             </Space>
             <Space direction="vertical" size="large" style={{ width: "100%" }}>
