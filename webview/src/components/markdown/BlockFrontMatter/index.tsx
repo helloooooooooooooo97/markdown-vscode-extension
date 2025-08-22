@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { getDataType, getTypeIcon, renderInputComponentByValueType } from "./BlockFrontMatter";
 import useMarkdownStore from "../../../store/markdown/store";
 import * as yaml from "js-yaml";
