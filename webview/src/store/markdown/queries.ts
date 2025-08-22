@@ -9,6 +9,6 @@ export interface MarkdownQueries {
 // Queries 操作实现
 export const createQueries = (get: Getter): MarkdownQueries => ({
     getMarkdown: () => {
-        return get().docs.map((block: Block) => block.lines.join('\n')).join('\n');
+        return get().blocks.map((block: Block) => block.lines.join('\n')).join('\n');
     }
 }); 

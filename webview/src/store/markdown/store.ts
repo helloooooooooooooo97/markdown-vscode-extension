@@ -5,9 +5,8 @@ import { createMutations, MarkdownMutations } from './mutations';
 import { createQueries, MarkdownQueries } from './queries';
 import { VscodeEventSource } from '@supernode/shared';
 export interface MarkdownStore {
-    docs: Block[];
+    blocks: Block[];
     filePath: string; // 当前文件的路径
-    content: string; // 原始 Markdown 内容
     isLoading: boolean; // 加载状态
     source: VscodeEventSource; // 事件来源
 }
@@ -20,9 +19,8 @@ export type Setter = (fn: (state: useMarkdownStoreType) => void) => void;
 export const useMarkdownStore = create<useMarkdownStoreType>()(
     immer((set, get) => ({
         // 初始状态
-        docs: [],
+        blocks: [],
         filePath: "", // 当前文件的路径
-        content: "", // 原始 Markdown 内容
         isLoading: true, // 加载状态
         source: VscodeEventSource.WEBVIEW, // 事件来源，如果事件来源是webview，则store变化会往extension同步，否则不往extension同步
         ...createMutations(set, get),

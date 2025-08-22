@@ -18,12 +18,12 @@ interface SlidesData {
 }
 
 const PresentationView: React.FC = () => {
-    const { content, filePath, isLoading } = useMarkdownStore();
+    const { filePath, isLoading, blocks } = useMarkdownStore();
     const [fullscreenSlide, setFullscreenSlide] = useState<number | null>(null);
 
     // 解析内容并分割成幻灯片
     const slidesData: SlidesData = useMemo(() => {
-        let markdownContent = content;
+        let markdownContent = blocks.map(block => block.lines.join('\n')).join('\n');
         if (isLoading) {
             markdownContent = testMarkdown;
         }
@@ -81,7 +81,7 @@ const PresentationView: React.FC = () => {
         });
 
         return { slides, blockMap };
-    }, [content, filePath, isLoading]);
+    }, [blocks, filePath, isLoading]);
 
     // 键盘事件处理
     useEffect(() => {
@@ -126,8 +126,8 @@ const PresentationView: React.FC = () => {
                                     </Tooltip>
                                 }
                             >
-                                {slide.blocks.map((block, blockIndex) => (
-                                    <div key={block.id || blockIndex}>
+                                {slide.blocks.map((block) => (
+                                    <div key={block.id}>
                                         {renderBlockView(block)}
                                     </div>
                                 ))}
@@ -152,8 +152,8 @@ const PresentationView: React.FC = () => {
                         title={`幻灯片 ${fullscreenSlide + 1}`}
                         className="mb-4"
                     >
-                        {slidesData.slides[fullscreenSlide].blocks.map((block, blockIndex) => (
-                            <div key={block.id || blockIndex}>
+                        {slidesData.slides[fullscreenSlide].blocks.map((block) => (
+                            <div key={block.id}>
                                 {renderBlockView(block)}
                             </div>
                         ))}

@@ -17,7 +17,7 @@ export class TestFunctionManager {
     }
 
     sendDebugInfo(): void {
-        const { content, isLoading } = useMarkdownStore.getState();
-        VSCodeAPI.sendDebugInfo(content, isLoading, "test");
+        const { blocks, isLoading } = useMarkdownStore.getState();
+        VSCodeAPI.sendDebugInfo(blocks.map(block => block.lines.join('\n')).join('\n'), isLoading, "test");
     }
 }

@@ -7,7 +7,7 @@ import { ReloadOutlined } from "@ant-design/icons";
 const { Title, Text } = Typography;
 
 const TestPanel = () => {
-    const { content, isLoading } = useMarkdownStore();
+    const { blocks, isLoading } = useMarkdownStore();
     const testFunctionManager = new TestFunctionManager();
 
     const testCommunication = () => testFunctionManager.testCommunication();
@@ -25,11 +25,10 @@ const TestPanel = () => {
 
     // 只提取 store 中的变量数据，过滤掉函数
     const getStoreData = () => {
-        const { docs, filePath, content, isLoading, source } = store;
+        const { blocks, filePath, isLoading, source } = store;
         return {
-            docs,
+            blocks,
             filePath,
-            content,
             isLoading,
             source
         };
@@ -61,7 +60,7 @@ const TestPanel = () => {
                     VSCode API 状态: ✅ 已初始化
                 </Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>
-                    内容长度: {content.length} 字符
+                    内容长度: {blocks.map(block => block.lines.join('\n')).join('\n').length} 字符
                 </Text>
                 <Text type="secondary" style={{ fontSize: 12 }}>
                     加载状态: {isLoading ? "加载中" : "已完成"}

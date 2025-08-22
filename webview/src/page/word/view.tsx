@@ -4,18 +4,18 @@ import { renderBlockView } from "../../pkg/utils/blockViewParser";
 import BlockSchemaParser from "../../pkg/utils/blockSchemParser";
 import { testMarkdown } from "../../store/markdown/factory";
 import { BlockType } from "../../store/markdown/type";
-import { Input, Select, Space } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Input, Select, Space, Button } from "antd";
+import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
 
 const MarkdownRenderer: React.FC = () => {
-    const { setDocument, filePath, content, isLoading } = useMarkdownStore();
+    const { setBlocks: setDocument, filePath, isLoading, blocks } = useMarkdownStore();
     const [showSearch, setShowSearch] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [searchType, setSearchType] = useState<string>("all");
 
     // 解析和筛选内容
     const filteredMarkdown = useMemo(() => {
-        let markdownContent = content;
+        let markdownContent = blocks.map(block => block.lines.join('\n')).join('\n');
         if (isLoading) {
             markdownContent = testMarkdown;
         }
@@ -24,8 +24,8 @@ const MarkdownRenderer: React.FC = () => {
         }
 
         const blockSchemaParser = new BlockSchemaParser(markdownContent);
-        const blocks = blockSchemaParser.parse().filter(block => block.type !== BlockType.Divider);
-        const markdown = blocks.map(block => renderBlockView(block));
+        const parsedBlocks = blockSchemaParser.parse().filter(block => block.type !== BlockType.Divider);
+        const markdown = parsedBlocks.map(block => renderBlockView(block));
 
         // 设置文档到 store
         setDocument(blocks);
@@ -45,13 +45,15 @@ const MarkdownRenderer: React.FC = () => {
 
             // 按文本筛选
             if (searchText) {
-                const blockText = (block as any).content || "";
-                return blockText.toLowerCase().includes(searchText.toLowerCase());
+                // 从 block 的 lines 中搜索文本
+                const blockLines = block.lines || [];
+                const blockText = blockLines.join(' ').toLowerCase();
+                return blockText.includes(searchText.toLowerCase());
             }
 
             return true;
         });
-    }, [content, isLoading, filePath, setDocument, searchText, searchType]);
+    }, [blocks, isLoading, filePath, setDocument, searchText, searchType]);
 
     // 键盘事件处理
     useEffect(() => {
@@ -111,10 +113,13 @@ const MarkdownRenderer: React.FC = () => {
                                 { value: BlockType.List, label: "列表" },
                                 { value: BlockType.Code, label: "代码" },
                                 { value: BlockType.Table, label: "表格" },
-                                { value: BlockType.Excalidraw, label: "绘图" },
-                                { value: BlockType.Latex, label: "公式" },
-                                { value: BlockType.Todo, label: "待办" },
-                                { value: BlockType.Alert, label: "警视" }
+                                { value: BlockType.Todo, label: "待办事项" },
+                                { value: BlockType.Latex, label: "LaTeX" },
+                                { value: BlockType.Excalidraw, label: "Excalidraw" },
+                                { value: BlockType.Iframe, label: "Iframe" },
+                                { value: BlockType.FrontMatter, label: "Front Matter" },
+                                { value: BlockType.Alert, label: "警告" },
+                                { value: BlockType.Divider, label: "分隔符" }
                             ]}
                         />
                         <Input
@@ -123,6 +128,12 @@ const MarkdownRenderer: React.FC = () => {
                             onChange={(e) => setSearchText(e.target.value)}
                             prefix={<SearchOutlined />}
                             style={{ width: 200 }}
+                        />
+                        <Button
+                            type="text"
+                            icon={<CloseOutlined />}
+                            onClick={() => setShowSearch(false)}
+                            style={{ color: 'white' }}
                         />
                     </Space>
                 </div>
