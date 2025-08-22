@@ -3,14 +3,16 @@ import { ConfigProvider, theme, Layout, Menu } from "antd";
 import {
   FileTextOutlined,
   BugOutlined,
-  SearchOutlined,
+  FileExcelOutlined,
+  FilePptOutlined,
 } from "@ant-design/icons";
 import { VSCodeAPI } from "./communication/send/manual_vscode";
 import { MessageReceiveHandler } from "./communication/receive/MessageReceiveHandler";
 import { MessageSendManager } from "./communication/send/auto_send";
 import { TestPanel } from "./components";
-import MarkdownView from "./page/markdown/view";
-import FileView from "./page/file/view";
+import MarkdownView from "./page/word/view";
+import FileView from "./page/excel/view";
+import PresentationView from "./page/presentation/view";
 import useMarkdownStore from "./store/markdown/store";
 import { PinnedQuery, usePinStore } from "./store/pin/store";
 import { useFileStore } from "./store/file/store";
@@ -18,21 +20,33 @@ import { VscodeEventSource } from "@supernode/shared";
 import "./App.css";
 const { Sider, Content } = Layout;
 
+enum MenuKey {
+  WORD = "word",
+  EXCEL = "excel",
+  PPT = "ppt",
+  test = "test",
+}
+
 // 构建菜单项
 const buildMenuItems = (pinnedQueries: PinnedQuery[]) => {
   const baseItems = [
     {
-      key: "markdown",
+      key: MenuKey.WORD,
       icon: <FileTextOutlined />,
-      label: "Markdown",
+      label: "word",
     },
     {
-      key: "files",
-      icon: <SearchOutlined />,
-      label: "Search",
+      key: MenuKey.PPT,
+      icon: <FilePptOutlined />,
+      label: "ppt",
     },
     {
-      key: "test",
+      key: MenuKey.EXCEL,
+      icon: <FileExcelOutlined />,
+      label: "excel",
+    },
+    {
+      key: MenuKey.test,
       icon: <BugOutlined />,
       label: "连接测试",
     },
@@ -53,7 +67,7 @@ const buildMenuItems = (pinnedQueries: PinnedQuery[]) => {
 
 function App() {
   const { setSource } = useMarkdownStore.getState();
-  const [activeKey, setActiveKey] = useState("markdown");
+  const [activeKey, setActiveKey] = useState<MenuKey>(MenuKey.WORD);
   const { updateLastUsed, pinnedQueries } = usePinStore();
   const { setFilter, setSort, setViewMode } = useFileStore();
   const handleSidebarQueryClick = (queryId: string) => {
@@ -63,22 +77,22 @@ function App() {
       setSort(query.sort);
       setViewMode(query.viewMode);
       updateLastUsed(query.id);
-      setActiveKey("files"); // 切换到文件页面
+      setActiveKey(MenuKey.EXCEL); // 切换到excel的搜索页面
     }
   };
-
-
 
   const menuItems = useMemo(() => buildMenuItems(pinnedQueries), [pinnedQueries]);
 
   // 渲染内容组件
-  const renderContent = (activeKey: string) => {
+  const renderContent = (activeKey: MenuKey) => {
     switch (activeKey) {
-      case "markdown":
+      case MenuKey.WORD:
         return <MarkdownView />;
-      case "files":
+      case MenuKey.EXCEL:
         return <FileView />;
-      case "test":
+      case MenuKey.PPT:
+        return <PresentationView />;
+      case MenuKey.test:
         return <TestPanel />;
       default:
         return <MarkdownView />;
@@ -91,7 +105,7 @@ function App() {
       const queryId = key.replace('pin-', '');
       handleSidebarQueryClick(queryId);
     } else {
-      setActiveKey(key);
+      setActiveKey(key as MenuKey);
     }
   };
 
@@ -125,7 +139,7 @@ function App() {
         algorithm: theme.darkAlgorithm,
         token: {
           colorBgContainer: "#1e1e1e",
-          colorBgElevated: "#252526",
+          colorBgElevated: "transparent",
           colorBorder: "#404040",
           colorText: "#cccccc",
           colorTextSecondary: "#999999",

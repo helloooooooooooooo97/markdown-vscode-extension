@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Checkbox } from "antd";
 import { useMarkdownStore } from "../../store/markdown/store";
+import InlineParser from "../../pkg/utils/inlineParser";
 
 /**
  * BlockTodo 组件，使用 antd 的 Checkbox 实现 todo 块
@@ -29,7 +30,7 @@ const BlockTodo: React.FC<{
           handleChange(e.target.checked);
         }}
       >
-        {data.text}
+        {InlineParser.parseInlineElements(data.text)}
       </Checkbox>
     </div>
   );
