@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getDataType, getTypeIcon, renderInputComponentByValueType } from "./BlockFrontMatter";
 import useMarkdownStore from "../../../store/markdown/store";
-import matter from "gray-matter";
+import * as yaml from "js-yaml";
 import { PlusOutlined, CheckOutlined, DeleteOutlined } from "@ant-design/icons";
 import { Popover, Input } from "antd";
 
@@ -52,19 +52,26 @@ export const FrontmatterComponent: React.FC<{
     const [editingPropertyNameValue, setEditingPropertyNameValue] = useState('');
     const [isRenamePopoverVisible, setIsRenamePopoverVisible] = useState(false);
 
-    const store = useMarkdownStore();
+    const { updateBlock } = useMarkdownStore();
+
+    // 监听 data prop 的变化，更新 editingData（只在初始化时）
+    useEffect(() => {
+        // 只在 editingData 为空或与 data 不同时才更新
+        if (Object.keys(editingData).length === 0 || JSON.stringify(editingData) !== JSON.stringify(data)) {
+            setEditingData(data);
+        }
+    }, [data]);
 
     // 监听 editingData 的变化
     useEffect(() => {
-
-        // 使用 gray-matter 将 JSON 转换为 frontmatter 字符串
-        const frontmatterString = matter.stringify('', editingData);
-
+        // 使用 js-yaml 将 JSON 转换为 YAML 字符串
+        const yamlString = yaml.dump(editingData);
+        // 构建完整的 frontmatter 字符串（包含分隔符）
+        const frontmatterString = `---\n${yamlString}---`;
         // 按行分割 frontmatter 字符串
         const frontmatterLines = frontmatterString.split('\n');
-
         // 更新 store
-        store.updateBlock(blockId, frontmatterLines);
+        updateBlock(blockId, frontmatterLines);
     }, [editingData]);
 
     // 开始编辑

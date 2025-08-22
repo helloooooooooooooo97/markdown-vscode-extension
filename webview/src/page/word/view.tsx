@@ -1,48 +1,27 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useMarkdownStore } from "../../store/markdown/store";
 import { renderBlockView } from "../../components/markdown/BlockViewParser";
-import BlockSchemaParser from "../../pkg/utils/blockSchemParser";
-import { testMarkdown } from "../../store/markdown/factory";
 import { BlockType } from "../../store/markdown/type";
 import { Input, Select, Space, Button } from "antd";
 import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
 
 const MarkdownRenderer: React.FC = () => {
-    const { setBlocks: setDocument, filePath, isLoading, blocks } = useMarkdownStore();
+    const { filePath, blocks } = useMarkdownStore();
     const [showSearch, setShowSearch] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [searchType, setSearchType] = useState<string>("all");
-
-    // 解析和筛选内容
     const filteredMarkdown = useMemo(() => {
-        let markdownContent = blocks.map(block => block.lines.join('\n')).join('\n');
-        if (isLoading) {
-            markdownContent = testMarkdown;
-        }
-        if (!markdownContent) {
-            return [];
-        }
-
-        const blockSchemaParser = new BlockSchemaParser(markdownContent);
-        const parsedBlocks = blockSchemaParser.parse().filter(block => block.type !== BlockType.Divider);
-        const markdown = parsedBlocks.map(block => renderBlockView(block));
-
-        // 设置文档到 store
-        setDocument(blocks);
-
-        // 筛选内容
+        const filteredBlocks = blocks.filter(block => block.type !== BlockType.Divider);
+        const view = filteredBlocks.map(block => renderBlockView(block));
         if (!searchText && searchType === "all") {
-            return markdown;
+            return view;
         }
-
-        return markdown.filter((_, index) => {
+        return view.filter((_, index) => {
             const block = blocks[index];
-
             // 按类型筛选
             if (searchType !== "all" && block.type !== searchType) {
                 return false;
             }
-
             // 按文本筛选
             if (searchText) {
                 // 从 block 的 lines 中搜索文本
@@ -50,10 +29,9 @@ const MarkdownRenderer: React.FC = () => {
                 const blockText = blockLines.join(' ').toLowerCase();
                 return blockText.includes(searchText.toLowerCase());
             }
-
             return true;
         });
-    }, [blocks, isLoading, filePath, setDocument, searchText, searchType]);
+    }, [blocks, searchText, searchType]);
 
     // 键盘事件处理
     useEffect(() => {

@@ -37,20 +37,24 @@ class FrontMatterRenderer extends BlockViewRenderer {
         let frontmatterData: Record<string, any> = getDefaultFrontmatterData();
 
         try {
-            // 跳过首尾的 --- 行，解析中间的 YAML 内容
-            const yamlLines = this.block.lines.slice(1, this.block.lines.length - 1);
-            const yamlContent = yamlLines.join("\n");
-            if (yamlContent.trim()) {
-                const parsedData = (yaml.load(yamlContent) as Record<string, any>) || {};
-                // 合并解析的数据和默认数据
-                frontmatterData = { ...frontmatterData, ...parsedData };
+            // 提取 frontmatter 内容（去掉开头的 --- 和结尾的 ---）
+            const lines = this.block.lines;
+            if (lines.length >= 3 && lines[0].trim() === "---" && lines[lines.length - 1].trim() === "---") {
+                const yamlContent = lines.slice(1, -1).join("\n");
+                console.log("YAML content:", yamlContent);
+
+                // 使用 js-yaml 解析 YAML
+                const parsedData = yaml.load(yamlContent) as Record<string, any>;
+                console.log("Parsed YAML data:", parsedData);
+
+                if (parsedData) {
+                    // 合并解析的数据和默认数据
+                    frontmatterData = { ...frontmatterData, ...parsedData };
+                    console.log("Final frontmatterData", frontmatterData)
+                }
             }
         } catch (error) {
             console.error("Frontmatter YAML parsing error:", error);
-            frontmatterData = {
-                ...frontmatterData,
-                error: "Failed to parse frontmatter",
-            };
         }
 
         return (
@@ -339,5 +343,5 @@ const blockTypeToRenderer: Record<BlockType, new (block: Block) => BlockViewRend
 export function renderBlockView(block: Block): React.ReactNode {
     const RendererClass = blockTypeToRenderer[block.type] || DefaultRenderer;
     const renderer = new RendererClass(block);
-    return <BlockWrapper block={block} >{block.id}{renderer.render()}</BlockWrapper>;
+    return <BlockWrapper block={block} >{block.id}{JSON.stringify(block.lines)}{renderer.render()}</BlockWrapper>;
 }

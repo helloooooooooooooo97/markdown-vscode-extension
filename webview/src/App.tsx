@@ -18,6 +18,7 @@ import { PinnedQuery, usePinStore } from "./store/pin/store";
 import { useFileStore } from "./store/file/store";
 import { VscodeEventSource } from "@supernode/shared";
 import "./App.css";
+import BlockSchemaParser from "./pkg/utils/blockSchemParser";
 const { Sider, Content } = Layout;
 
 enum MenuKey {
@@ -66,7 +67,7 @@ const buildMenuItems = (pinnedQueries: PinnedQuery[]) => {
 };
 
 function App() {
-  const { setSource } = useMarkdownStore.getState();
+  const { setSource, setBlocks, content } = useMarkdownStore.getState();
   const [activeKey, setActiveKey] = useState<MenuKey>(MenuKey.WORD);
   const { updateLastUsed, pinnedQueries } = usePinStore();
   const { setFilter, setSort, setViewMode } = useFileStore();
@@ -127,6 +128,12 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const blockSchemaParser = new BlockSchemaParser(content);
+    const parsedBlocks = blockSchemaParser.parse()
+    setBlocks(parsedBlocks)
+    console.log("parsedBlocks", parsedBlocks)
+  }, [content]);
 
   const handleChangeEventSourceToWebview = () => {
     setSource(VscodeEventSource.WEBVIEW);
