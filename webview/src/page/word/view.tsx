@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useMarkdownStore } from "../../store/markdown/store";
-import { renderBlockView } from "../../pkg/utils/blockViewParser";
+import { renderBlockView } from "../../components/markdown/BlockViewParser";
 import BlockSchemaParser from "../../pkg/utils/blockSchemParser";
 import { testMarkdown } from "../../store/markdown/factory";
 import { BlockType } from "../../store/markdown/type";

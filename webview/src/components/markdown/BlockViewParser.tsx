@@ -15,10 +15,11 @@ import {
     BlockDivider,
     BlockTodo,
     BlockExcalidraw,
-} from "../../components/markdown";
-import InlineParser from "./inlineParser";
+    BlockWrapper,
+} from ".";
+import InlineParser from "../../pkg/utils/inlineParser";
 import { Block, BlockType } from "../../store/markdown/type";
-import { getDefaultFrontmatterData } from "../../components/markdown/BlockFrontMatter/const";
+import { getDefaultFrontmatterData } from "./BlockFrontMatter/const";
 
 // 抽象基类
 abstract class BlockViewRenderer {
@@ -338,5 +339,5 @@ const blockTypeToRenderer: Record<BlockType, new (block: Block) => BlockViewRend
 export function renderBlockView(block: Block): React.ReactNode {
     const RendererClass = blockTypeToRenderer[block.type] || DefaultRenderer;
     const renderer = new RendererClass(block);
-    return renderer.render();
+    return <BlockWrapper block={block} >{block.id}{renderer.render()}</BlockWrapper>;
 }

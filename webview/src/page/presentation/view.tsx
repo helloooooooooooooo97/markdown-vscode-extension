@@ -3,7 +3,7 @@ import { Card, Button, Tooltip, Modal } from 'antd';
 import { FullscreenOutlined } from '@ant-design/icons';
 import { useMarkdownStore } from '../../store/markdown/store';
 import { testMarkdown } from '../../store/markdown/factory';
-import { renderBlockView } from '../../pkg/utils/blockViewParser';
+import { renderBlockView } from '../../components/markdown/BlockViewParser';
 import BlockSchemaParser from '../../pkg/utils/blockSchemParser';
 import { Block, BlockType } from '../../store/markdown/type';
 
