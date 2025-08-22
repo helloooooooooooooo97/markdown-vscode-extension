@@ -5,13 +5,15 @@ date: "2024-12-19"
 tags: ["演示", "PPT", "Markdown"]
 ---
 
+--- ppt1
+
 # Markdown 功能演示
 
 ## 欢迎使用我们的 Markdown 编辑器
 
 这是一个功能丰富的 Markdown 编辑器，支持多种格式和交互功能。
 
----
+--- ppt2
 
 ## 基础文本格式
 
@@ -25,7 +27,7 @@ tags: ["演示", "PPT", "Markdown"]
 - [访问我们的网站](https://example.com)
 - ![示例图片](https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=示例图片)
 
----
+--- ppt3
 
 ## 列表和结构
 
@@ -41,7 +43,7 @@ tags: ["演示", "PPT", "Markdown"]
 2. 第二步
 3. 第三步
 
----
+--- ppt4
 
 ## 表格展示
 
@@ -52,7 +54,7 @@ tags: ["演示", "PPT", "Markdown"]
 | 代码块 | ✅ | 支持语法高亮 |
 | 数学公式 | ✅ | 支持 LaTeX 渲染 |
 
----
+--- ppt5
 
 ## 代码示例
 
@@ -70,7 +72,7 @@ for i in range(10):
     print(f"F({i}) = {fibonacci(i)}")
 \`\`\`
 
----
+--- ppt6
 
 ## 数学公式
 
@@ -87,7 +89,7 @@ $$
 \\frac{\\partial f}{\\partial x} = \\lim_{h \\to 0} \\frac{f(x + h) - f(x)}{h}
 $$
 
----
+--- ppt7
 
 ## 信息块
 
@@ -103,7 +105,7 @@ $$
 这是一个错误块，用于显示错误或问题。
 :::
 
----
+--- ppt8
 
 ## 待办事项
 
@@ -113,7 +115,7 @@ $$
 [ ] 进行用户测试
 [ ] 发布正式版本
 
----
+--- ppt9
 
 ## 引用和注释
 
@@ -126,21 +128,21 @@ $$
 
 [^1]: 这是脚注的内容，会在页面底部显示。
 
----
+--- ppt10
 
 ## 高级功能
 
 ### HTML 嵌入
 <iframe src="https://www.google.com" width="100%" height="300" sandbox="allow-scripts"></iframe>
 
----
+--- ppt11
 
----
+--- ppt12
 ## 图表测试
 
 <BlockExcalidraw refer="docs/test.excalidraw">
 
----
+--- ppt13       
 
 ## 总结
 
@@ -157,7 +159,7 @@ $$
 - **解析**: 自定义解析器
 - **渲染**: KaTeX + Prism.js
 
----
+--- ppt14
 
 ## 谢谢观看
 
@@ -171,9 +173,7 @@ $$
 - [在线演示](https://demo.example.com)
 - [文档中心](https://docs.example.com)
 
----
+--- ppt15
 
 ## 演示结束，感谢您的关注!
-
----
 `;

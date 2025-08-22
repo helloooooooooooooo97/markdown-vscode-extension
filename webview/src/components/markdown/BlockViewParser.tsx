@@ -343,5 +343,5 @@ const blockTypeToRenderer: Record<BlockType, new (block: Block) => BlockViewRend
 export function renderBlockView(block: Block): React.ReactNode {
     const RendererClass = blockTypeToRenderer[block.type] || DefaultRenderer;
     const renderer = new RendererClass(block);
-    return <BlockWrapper block={block} >{block.id}{JSON.stringify(block.lines)}{renderer.render()}</BlockWrapper>;
+    return <BlockWrapper block={block}>{renderer.render()}</BlockWrapper>;
 }
