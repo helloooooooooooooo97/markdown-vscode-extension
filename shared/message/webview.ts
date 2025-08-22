@@ -9,6 +9,8 @@ export enum WebviewCommand {
     debugInfo = "debugInfo",
     setEventSource = "setEventSource",
     getFileMetadata = "getFileMetadata",
+    readFileContentRequest = "readFileContentRequest",
+    writeFileContentRequest = "writeFileContentRequest",
 }
 
 // 从 WebView 更新 Markdown 内容消息
@@ -48,4 +50,17 @@ export interface SetEventSourceMessage extends WebviewMessage {
 // 获取文件元数据消息
 export interface GetFileMetadataMessage extends WebviewMessage {
     command: WebviewCommand.getFileMetadata;
+}
+
+// 读取文件内容消息
+export interface ReadFileContentMessage extends WebviewMessage {
+    command: WebviewCommand.readFileContentRequest;
+    filePath: string;
+}
+
+// 写入文件内容消息
+export interface WriteFileContentMessage extends WebviewMessage {
+    command: WebviewCommand.writeFileContentRequest;
+    filePath: string;
+    content: string;
 }

@@ -8,19 +8,19 @@ const MarkdownRenderer: React.FC = () => {
     const [parsedMarkdown, setParsedMarkdown] = useState<React.ReactNode[]>([]);
     useEffect(() => {
         if (isLoading) {
-            const parser = new MarkdownParser(testMarkdown);
+            const parser = new MarkdownParser(testMarkdown, filePath);
             const markdown = parser.parse(); // 解析并获取渲染结果
             const blocks = parser.getBlocks();
             setDocument(blocks);
             setParsedMarkdown(markdown); // 保存解析结果用于渲染
         } else {
-            const parser = new MarkdownParser(content);
+            const parser = new MarkdownParser(content, filePath);
             const markdown = parser.parse(); // 解析并获取渲染结果
             const blocks = parser.getBlocks();
             setDocument(blocks);
             setParsedMarkdown(markdown); // 保存解析结果用于渲染
         }
-    }, [content, isLoading]);
+    }, [content, isLoading, filePath]);
 
     return (
         <div className="p-6">

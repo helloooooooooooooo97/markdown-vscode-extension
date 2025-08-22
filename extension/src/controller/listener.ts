@@ -16,6 +16,7 @@ export class EventController {
     private context: vscode.ExtensionContext;
     private fileWatcher: FileWatcherService;
     private fileSystemWatcher: vscode.FileSystemWatcher | undefined;
+    private updateTimeout: NodeJS.Timeout | null = null;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -112,13 +113,8 @@ export class EventController {
                 }
             }
 
-            // 通知 webview 更新
-            const activeEditor = vscode.window.activeTextEditor;
-            if (activeEditor && activeEditor.document.fileName === filePath) {
-                if (FileManager.isMarkdownFile(activeEditor.document)) {
-                    MarkdownWebviewProvider.currentPanel?.updateMarkdownContent(FileManager.getFileContent(activeEditor.document), activeEditor.document.fileName);
-                }
-            }
+            // 通知 webview 更新（使用防抖）
+            this.debouncedUpdateWebview(filePath);
 
         } catch (error) {
             console.error(`处理文件系统变化失败: ${filePath}`, error);
@@ -161,6 +157,26 @@ export class EventController {
             console.error(`重新分析文件失败: ${filePath}`, error);
             return null;
         }
+    }
+
+    /**
+     * 防抖更新 webview
+     */
+    private debouncedUpdateWebview(filePath: string): void {
+        // 清除之前的定时器
+        if (this.updateTimeout) {
+            clearTimeout(this.updateTimeout);
+        }
+
+        // 设置新的定时器
+        this.updateTimeout = setTimeout(() => {
+            const activeEditor = vscode.window.activeTextEditor;
+            if (activeEditor && activeEditor.document.fileName === filePath) {
+                if (FileManager.isMarkdownFile(activeEditor.document)) {
+                    MarkdownWebviewProvider.currentPanel?.updateMarkdownContent(FileManager.getFileContent(activeEditor.document), activeEditor.document.fileName);
+                }
+            }
+        }, 300); // 300ms 防抖延迟
     }
 
     /**

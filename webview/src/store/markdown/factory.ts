@@ -135,6 +135,13 @@ $$
 
 ---
 
+---
+## 图表测试
+
+<BlockExcalidraw refer="docs/test.excalidraw">
+
+---
+
 ## 总结
 
 ### 主要特性

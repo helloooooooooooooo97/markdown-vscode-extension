@@ -45,6 +45,12 @@ export class MessageHandler {
                 case WebviewCommand.getFileMetadata:
                     await this.handleGetFileMetadata(message);
                     break;
+                case WebviewCommand.readFileContentRequest:
+                    await this.handleReadFileContent(message);
+                    break;
+                case WebviewCommand.writeFileContentRequest:
+                    await this.handleWriteFileContent(message);
+                    break;
                 default:
                     console.log("未知消息类型:", message.command);
             }
@@ -106,6 +112,77 @@ export class MessageHandler {
         } catch (error) {
             console.error("获取文件元数据失败:", error);
             vscode.window.showErrorMessage(`获取文件元数据失败: ${error}`);
+        }
+    }
+
+    private async handleReadFileContent(message: any): Promise<void> {
+        try {
+            const filePath = message.filePath;
+            console.log("读取文件内容:", filePath);
+
+            // 使用 fs 模块读取文件
+            const fs = require('fs');
+
+            // 检查文件是否存在
+            if (!fs.existsSync(filePath)) {
+                console.error("文件不存在:", filePath);
+                if (this.webviewProvider) {
+                    this.webviewProvider.readFileContentReponse(filePath, "", false);
+                }
+                return;
+            }
+
+            // 读取文件内容
+            const content = fs.readFileSync(filePath, 'utf-8');
+            console.log("文件内容读取成功，长度:", content.length);
+
+            // 发送响应到 webview
+            if (this.webviewProvider) {
+                this.webviewProvider.readFileContentReponse(filePath, content, true);
+            } else {
+                console.error("webview提供者未设置，无法发送响应");
+            }
+
+        } catch (error) {
+            console.error("读取文件内容失败:", error);
+            if (this.webviewProvider) {
+                this.webviewProvider.readFileContentReponse(message.filePath, "", false);
+            }
+        }
+    }
+
+    private async handleWriteFileContent(message: any): Promise<void> {
+        try {
+            const filePath = message.filePath;
+            const content = message.content;
+            console.log("写入文件内容:", filePath);
+
+            // 使用 fs 模块写入文件
+            const fs = require('fs');
+            const path = require('path');
+
+            // 确保目录存在
+            const dir = path.dirname(filePath);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+
+            // 写入文件内容
+            fs.writeFileSync(filePath, content, 'utf-8');
+            console.log("文件内容写入成功");
+
+            // 发送响应到 webview
+            if (this.webviewProvider) {
+                this.webviewProvider.writeFileContentResponse(filePath, true);
+            } else {
+                console.error("webview提供者未设置，无法发送响应");
+            }
+
+        } catch (error) {
+            console.error("写入文件内容失败:", error);
+            if (this.webviewProvider) {
+                this.webviewProvider.writeFileContentResponse(message.filePath, false, error instanceof Error ? error.message : String(error));
+            }
         }
     }
 }

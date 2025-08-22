@@ -15,8 +15,8 @@ TODO
 13. 修改预览造成vscode的markdown的闪屏
 14. 全局统计功能：统计todo块
 15. 表格的搜索在右边而不是在左边 ✅ 
-16. exclidraw的静态引用渲染 
-17. exclidraw的同步修改 
+16. exclidraw的静态引用渲染 ✅  
+17. exclidraw的同步修改 ✅ 
 18. 通用的block wrapper，可以添加block和删除block  
 19. 添加文件引用属性 
 20. 添加schema属性：可以实现内容约束 
@@ -38,3 +38,7 @@ TODO
 36. 反向编辑：表格的反向编辑功能
 37. 阅读分数的估量要和公式成正比 
 38. custom block的解析：引入自定义的database在markdown文档中 
+39. mdx和md写文档有默认的提示功能，/后可以弹出要插入的block，然后可以选择要插入的块后直接插入
+40. 演示模式：通过---进行分隔进行ppt的演示
+41. 布局算法：通过实现布局算法，可以实现自动排版
+42. heading前面的标号的开关

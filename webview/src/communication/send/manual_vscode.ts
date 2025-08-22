@@ -1,4 +1,4 @@
-import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage } from '@supernode/shared';
+import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage, ReadFileContentMessage, WriteFileContentMessage } from '@supernode/shared';
 import useMarkdownStore from '../../store/markdown/store';
 // VSCode API 接口定义
 export interface VSCodeAPI {
@@ -99,5 +99,22 @@ export class VSCodeAPI {
             source: "webview"
         };
         this.postMessage(setEventSourceMessage);
+    }
+
+    static readFileContent(filePath: string): void {
+        const readFileMessage: ReadFileContentMessage = {
+            command: WebviewCommand.readFileContentRequest,
+            filePath: filePath
+        };
+        this.postMessage(readFileMessage);
+    }
+
+    static writeFileContent(filePath: string, content: string): void {
+        const writeFileMessage: WriteFileContentMessage = {
+            command: WebviewCommand.writeFileContentRequest,
+            filePath: filePath,
+            content: content
+        };
+        this.postMessage(writeFileMessage);
     }
 }

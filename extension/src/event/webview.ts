@@ -10,7 +10,9 @@ import {
     ExtensionCommand,
     VscodeEventSource,
     UpdateFileMetadataMessage,
-    FileInfo
+    FileInfo,
+    ReadFileContentResponseMessage,
+    WriteFileContentResponseMessage
 } from "@supernode/shared";
 import EventSource from "./source";
 
@@ -114,7 +116,7 @@ export class MarkdownWebviewProvider {
         }
     }
 
-    public sendMessage(message: WebviewMessage): void {
+    private sendMessage(message: WebviewMessage): void {
         CommunicationLogger.logExtensionToWebview(message, message.fileName);
         this._panel.webview.postMessage(message);
     }
@@ -134,6 +136,26 @@ export class MarkdownWebviewProvider {
         const message: UpdateFileMetadataMessage = {
             command: ExtensionCommand.updateFileMetadata,
             files: files,
+        };
+        this.sendMessage(message);
+    }
+
+    readFileContentReponse(filePath: string, content: string, success: boolean): void {
+        const message: ReadFileContentResponseMessage = {
+            command: ExtensionCommand.readFileContentResponse,
+            filePath: filePath,
+            content: content,
+            success: true,
+        };
+        this.sendMessage(message);
+    }
+
+    writeFileContentResponse(filePath: string, success: boolean, error?: string): void {
+        const message: WriteFileContentResponseMessage = {
+            command: ExtensionCommand.writeFileContentResponse,
+            filePath: filePath,
+            success: success,
+            error: error,
         };
         this.sendMessage(message);
     }

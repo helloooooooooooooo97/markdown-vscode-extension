@@ -14,6 +14,7 @@ import {
   BlockFrontMatter,
   BlockDivider,
   BlockTodo,
+  BlockExcalidraw,
   BlockWrapper,
 } from "../../components/markdown";
 import InlineParser from "./inlineParser";
@@ -27,23 +28,29 @@ class BlockParser {
   lines: string[];
   elements: React.ReactNode[];
   blocks: Block[];
+  filePath: string; // 添加文件路径属性
+  blockIDSet: Set<string>;
 
-  constructor(text: string) {
+  constructor(text: string, filePath: string = "") {
     this.lines = text.split("\n");
     this.elements = [];
     this.blocks = [];
+    this.filePath = filePath;
+    this.blockIDSet = new Set();
   }
 
   /**
-   * 创建block并生成id
-   */
+ * 创建block并生成id
+ */
   createBlock(
     lines: string[],
     startIndex: number,
     endIndex: number,
     type: BlockType
   ): Block {
-    const id = `block_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    // 为所有块使用内容哈希生成稳定的 ID，包含文件路径信息
+    const content = lines.slice(startIndex, endIndex + 1).join('\n');
+    const id = this.getBlockID(type, startIndex, this.filePath, content);
     const block: Block = {
       id,
       lines: lines.slice(startIndex, endIndex + 1),
@@ -51,6 +58,26 @@ class BlockParser {
     };
     this.blocks.push(block);
     return block;
+  }
+
+  /**
+   * 简单的字符串哈希函数
+   */
+  private getBlockID(blockType: BlockType, startIndex: number, filePath: string, content: string): string {
+    // 有重复的算上startIndex 
+    let str = `${blockType.toLowerCase()}:${filePath}:${content}`;
+    if (this.blockIDSet.has(str)) {
+      str = `${blockType.toLowerCase()}:${filePath}:${startIndex}:${content}`;
+    }
+    this.blockIDSet.add(str);
+    let hash = 0;
+    if (str.length === 0) return hash.toString();
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // 转换为32位整数
+    }
+    return Math.abs(hash).toString(36);
   }
 
   /**
@@ -365,6 +392,43 @@ class BlockParser {
     return null;
   }
   /**
+   * 解析 Excalidraw 块
+   */
+  parseExcalidrawBlock(
+    startIndex: number
+  ): { element: React.ReactNode; nextIndex: number } | null {
+    const line = this.lines[startIndex];
+    if (
+      typeof line === "string" &&
+      line.trim().startsWith("<BlockExcalidraw") &&
+      line.trim().endsWith(">")
+    ) {
+      // 提取 refer 属性
+      const referMatch = line.trim().match(/refer="([^"]+)"/);
+      const refer = referMatch ? referMatch[1] : "";
+
+      if (refer) {
+        // 创建block，只包含当前行
+        const block = this.createBlock(
+          this.lines,
+          startIndex,
+          startIndex,
+          BlockType.Excalidraw
+        );
+
+        return {
+          element: this.wrapBlock(
+            block,
+            <BlockExcalidraw blockId={block.id} refer={refer} />
+          ),
+          nextIndex: startIndex + 1,
+        };
+      }
+    }
+    return null;
+  }
+
+  /**
    * 解析信息块
    */
   parseInfoBlock(
@@ -611,6 +675,14 @@ class BlockParser {
       if (todoResult) {
         this.elements.push(todoResult.element);
         i = todoResult.nextIndex;
+        continue;
+      }
+
+      // Excalidraw 块
+      const excalidrawResult = this.parseExcalidrawBlock(i);
+      if (excalidrawResult) {
+        this.elements.push(excalidrawResult.element);
+        i = excalidrawResult.nextIndex;
         continue;
       }
 

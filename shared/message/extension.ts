@@ -8,6 +8,8 @@ export enum ExtensionCommand {
     showMessage = "showMessage",
     openLocalFile = "openLocalFile",
     updateFileMetadata = "updateFileMetadata",
+    readFileContentResponse = "readFileContentResponse",
+    writeFileContentResponse = "writeFileContentResponse",
 }
 
 // 更新 Markdown 内容消息
@@ -21,4 +23,21 @@ export interface UpdateMarkdownMessage extends WebviewMessage {
 export interface UpdateFileMetadataMessage extends WebviewMessage {
     command: ExtensionCommand.updateFileMetadata;
     files: FileInfo[];
+}
+
+// 文件内容响应消息
+export interface ReadFileContentResponseMessage extends WebviewMessage {
+    command: ExtensionCommand.readFileContentResponse;
+    filePath: string;
+    content: string;
+    success: boolean;
+    error?: string;
+}
+
+// 写入文件内容响应消息
+export interface WriteFileContentResponseMessage extends WebviewMessage {
+    command: ExtensionCommand.writeFileContentResponse;
+    filePath: string;
+    success: boolean;
+    error?: string;
 }

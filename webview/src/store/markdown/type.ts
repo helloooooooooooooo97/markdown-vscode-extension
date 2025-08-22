@@ -10,6 +10,7 @@ export enum BlockType {
   Latex = "latex",
   Divider = "divider",
   Todo = "todo",
+  Excalidraw = "excalidraw",
 }
 
 export interface Block {
