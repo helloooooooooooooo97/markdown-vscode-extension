@@ -21,6 +21,8 @@ export interface Block {
   filePath?: string; // block的文件路径
   storage?: any; // block的存储数据，比如excalidraw的data
   isLoading?: boolean; // block的加载状态，比如excalidraw的加载状态
+  startIndex: number; // block的开始索引
+  endIndex: number; // block的结束索引
 }
 
 export interface Document {

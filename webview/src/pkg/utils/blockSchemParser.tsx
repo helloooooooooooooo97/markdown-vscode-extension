@@ -61,6 +61,8 @@ class BlockSchemaParser {
             filePath: filePath,
             storage: storage,
             isLoading: type === BlockType.Excalidraw ? true : false,
+            startIndex: startIndex,
+            endIndex: endIndex,
         };
         this.blocks.push(block);
         return block;
@@ -69,7 +71,7 @@ class BlockSchemaParser {
     /**
      * 解析 Frontmatter
      */
-    private parseFrontmatter(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseFrontmatter(startIndex: number): Block | null {
         if (startIndex !== 0) return null;
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith("---")) {
@@ -82,7 +84,7 @@ class BlockSchemaParser {
                 i++;
             }
             const block = this.createBlock(this.lines, startIndex, i, BlockType.FrontMatter);
-            return { block, nextIndex: i };
+            return block;
         }
         return null;
     }
@@ -90,11 +92,11 @@ class BlockSchemaParser {
     /**
      * 解析分割线
      */
-    private parseDivider(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseDivider(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith("---")) {
             const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Divider);
-            return { block, nextIndex: startIndex + 1 };
+            return block;
         }
         return null;
     }
@@ -102,7 +104,7 @@ class BlockSchemaParser {
     /**
      * 解析代码块
      */
-    private parseCodeBlock(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseCodeBlock(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith("```")) {
             let i = startIndex + 1;
@@ -114,7 +116,7 @@ class BlockSchemaParser {
                 i++;
             }
             const block = this.createBlock(this.lines, startIndex, i, BlockType.Code);
-            return { block, nextIndex: i };
+            return block;
         }
         return null;
     }
@@ -122,7 +124,7 @@ class BlockSchemaParser {
     /**
      * 解析块级 LaTeX
      */
-    private parseBlockLatex(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseBlockLatex(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim() === "$$") {
             let i = startIndex + 1;
@@ -134,7 +136,7 @@ class BlockSchemaParser {
                 i++;
             }
             const block = this.createBlock(this.lines, startIndex, i, BlockType.Latex);
-            return { block, nextIndex: i };
+            return block;
         }
         return null;
     }
@@ -142,7 +144,7 @@ class BlockSchemaParser {
     /**
      * 解析表格
      */
-    private parseTable(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseTable(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (
             typeof line === "string" &&
@@ -155,7 +157,7 @@ class BlockSchemaParser {
                 i++;
             }
             const block = this.createBlock(this.lines, startIndex, i - 1, BlockType.Table);
-            return { block, nextIndex: i - 1 };
+            return block;
         }
         return null;
     }
@@ -174,7 +176,7 @@ class BlockSchemaParser {
     /**
      * 解析无序列表
      */
-    private parseList(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseList(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         const listMatch = typeof line === "string" ? line.match(/^[-*+]\s+(.*)$/) : null;
         if (listMatch) {
@@ -188,7 +190,7 @@ class BlockSchemaParser {
                 }
             }
             const block = this.createBlock(this.lines, startIndex, j - 1, BlockType.List);
-            return { block, nextIndex: j - 1 };
+            return block;
         }
         return null;
     }
@@ -196,14 +198,14 @@ class BlockSchemaParser {
     /**
      * 解析 TODO 块
      */
-    private parseTodoBlock(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseTodoBlock(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (
             typeof line === "string" &&
             (line.trim().startsWith("[✓]") || line.trim().startsWith("[ ]"))
         ) {
             const block = this.createBlock(this.lines, startIndex, startIndex + 1, BlockType.Todo);
-            return { block, nextIndex: startIndex + 1 };
+            return block;
         }
         return null;
     }
@@ -211,7 +213,7 @@ class BlockSchemaParser {
     /**
      * 解析引用块
      */
-    private parseReferenceBlock(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseReferenceBlock(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith(">")) {
             let i = startIndex + 1;
@@ -229,7 +231,7 @@ class BlockSchemaParser {
                 }
             }
             const block = this.createBlock(this.lines, startIndex, i - 1, BlockType.Reference);
-            return { block, nextIndex: i - 1 };
+            return block;
         }
         return null;
     }
@@ -237,7 +239,7 @@ class BlockSchemaParser {
     /**
      * 解析 Excalidraw 块
      */
-    private parseExcalidrawBlock(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseExcalidrawBlock(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (
             typeof line === "string" &&
@@ -246,7 +248,7 @@ class BlockSchemaParser {
         ) {
             const refer = ExcalidrawUtil.extractReferFromLine(line);
             const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Excalidraw, refer || "");
-            return { block, nextIndex: startIndex + 1 };
+            return block;
         }
         return null;
     }
@@ -254,7 +256,7 @@ class BlockSchemaParser {
     /**
      * 解析信息块
      */
-    private parseInfoBlock(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseInfoBlock(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith(":::")) {
             let i = startIndex + 1;
@@ -266,7 +268,7 @@ class BlockSchemaParser {
                 i++;
             }
             const block = this.createBlock(this.lines, startIndex, i, BlockType.Alert);
-            return { block, nextIndex: i };
+            return block;
         }
         return null;
     }
@@ -274,13 +276,13 @@ class BlockSchemaParser {
     /**
      * 解析 iframe
      */
-    private parseIframe(startIndex: number): { block: Block; nextIndex: number } | null {
+    private parseIframe(startIndex: number): Block | null {
         const line = this.lines[startIndex];
         if (typeof line === "string" && line.trim().startsWith("<iframe")) {
             const iframeMatch = line.match(/<iframe[^>]*src=["']([^"']+)["'][^>]*>/);
             if (iframeMatch) {
                 const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Iframe);
-                return { block, nextIndex: startIndex + 1 };
+                return block;
             }
         }
         return null;
@@ -310,43 +312,43 @@ class BlockSchemaParser {
             // Frontmatter
             const frontmatterResult = this.parseFrontmatter(i);
             if (frontmatterResult) {
-                i = frontmatterResult.nextIndex;
+                i = frontmatterResult.endIndex;
                 continue;
             }
 
             const dividerResult = this.parseDivider(i);
             if (dividerResult) {
-                i = dividerResult.nextIndex;
+                i = dividerResult.endIndex;
                 continue;
             }
 
             const todoResult = this.parseTodoBlock(i);
             if (todoResult) {
-                i = todoResult.nextIndex;
+                i = todoResult.endIndex;
                 continue;
             }
 
             const referenceResult = this.parseReferenceBlock(i);
             if (referenceResult) {
-                i = referenceResult.nextIndex;
+                i = referenceResult.endIndex;
                 continue;
             }
 
             const excalidrawResult = this.parseExcalidrawBlock(i);
             if (excalidrawResult) {
-                i = excalidrawResult.nextIndex;
+                i = excalidrawResult.endIndex;
                 continue;
             }
 
             const codeBlockResult = this.parseCodeBlock(i);
             if (codeBlockResult) {
-                i = codeBlockResult.nextIndex;
+                i = codeBlockResult.endIndex;
                 continue;
             }
 
             const tableResult = this.parseTable(i);
             if (tableResult) {
-                i = tableResult.nextIndex;
+                i = tableResult.endIndex;
                 continue;
             }
 
@@ -359,19 +361,19 @@ class BlockSchemaParser {
 
             const listResult = this.parseList(i);
             if (listResult) {
-                i = listResult.nextIndex;
+                i = listResult.endIndex;
                 continue;
             }
 
             const infoBlockResult = this.parseInfoBlock(i);
             if (infoBlockResult) {
-                i = infoBlockResult.nextIndex;
+                i = infoBlockResult.endIndex;
                 continue;
             }
 
             const iframeResult = this.parseIframe(i);
             if (iframeResult) {
-                i = iframeResult.nextIndex;
+                i = iframeResult.endIndex;
                 continue;
             }
 
@@ -381,7 +383,7 @@ class BlockSchemaParser {
 
             const blockLatexResult = this.parseBlockLatex(i);
             if (blockLatexResult) {
-                i = blockLatexResult.nextIndex;
+                i = blockLatexResult.endIndex;
                 continue;
             }
 
