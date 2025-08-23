@@ -162,7 +162,6 @@ const FileMetadataView: React.FC = () => {
 
   return (
     <div className="p-6">
-      {JSON.stringify(filter)}
       {/* 已保存的视图 */}
       {pinnedQueries.length > 0 && (
         <div className="mb-4">
