@@ -12,12 +12,11 @@ const MarkdownRenderer: React.FC = () => {
     const [searchType, setSearchType] = useState<string>("all");
     const filteredMarkdown = useMemo(() => {
         const filteredBlocks = blocks.filter(block => block.type !== BlockType.Divider);
-        const view = filteredBlocks.map(block => renderBlockView(block));
+        const view = filteredBlocks.map(block => ({ block, element: renderBlockView(block) }));
         if (!searchText && searchType === "all") {
             return view;
         }
-        return view.filter((_, index) => {
-            const block = blocks[index];
+        return view.filter(({ block }) => {
             // 按类型筛选
             if (searchType !== "all" && block.type !== searchType) {
                 return false;
@@ -120,7 +119,11 @@ const MarkdownRenderer: React.FC = () => {
             <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
                 {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "文件名"}
             </div>
-            {filteredMarkdown}
+            {filteredMarkdown.map(({ block, element }) => (
+                <React.Fragment key={block.id}>
+                    {element}
+                </React.Fragment>
+            ))}
         </div>
     );
 };

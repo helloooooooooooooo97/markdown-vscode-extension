@@ -9,7 +9,7 @@ export { default as BlockIframe } from "./BlockIframe";
 export { default as BlockDivider } from "./BlockDivider";
 export { default as BlockTodo } from "./BlockTodo";
 export { default as BlockWrapper } from "./BlockWrapper";
-export { default as BlockExcalidraw } from "./BlockExcalidraw";
+export { default as BlockExcalidraw } from "./BlockExcalidraw/BlockExcalidraw";
 
 export { default as InlineLink } from "./InlineLink";
 export { default as InlineCode } from "./InlineCode";

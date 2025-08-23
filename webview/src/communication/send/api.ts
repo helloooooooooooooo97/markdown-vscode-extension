@@ -1,5 +1,6 @@
-import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage, ReadFileContentMessage, WriteFileContentMessage } from '@supernode/shared';
+import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage, WriteFileContentMessage, ReadFileContentRequestMessage } from '@supernode/shared';
 import useMarkdownStore from '../../store/markdown/store';
+import { FileType } from '@supernode/shared';
 // VSCode API 接口定义
 export interface VSCodeAPI {
     postMessage: (message: WebviewMessage) => void;
@@ -60,6 +61,7 @@ export class VSCodeAPI {
     }
 
     static showMessage(message: string): void {
+        console.log("showMessage", message)
         const showMessage: ShowMessage = {
             command: CommonCommand.showMessage,
             text: message
@@ -101,10 +103,15 @@ export class VSCodeAPI {
         this.postMessage(setEventSourceMessage);
     }
 
-    static readFileContent(filePath: string): void {
-        const readFileMessage: ReadFileContentMessage = {
+    static readFileContent(filePath: string, fileType: FileType): void {
+        if (!this.instance) {
+            console.warn("VSCode API 未初始化，跳过文件读取请求");
+            return;
+        }
+        const readFileMessage: ReadFileContentRequestMessage = {
             command: WebviewCommand.readFileContentRequest,
-            filePath: filePath
+            filePath: filePath,
+            fileType: fileType
         };
         this.postMessage(readFileMessage);
     }
@@ -116,5 +123,14 @@ export class VSCodeAPI {
             content: content
         };
         this.postMessage(writeFileMessage);
+    }
+
+    // Excalidraw 相关方法
+    static loadExcalidrawData(filePath: string): void {
+        this.readFileContent(filePath, FileType.Excalidraw);
+    }
+
+    static saveExcalidrawData(filePath: string, data: any): void {
+        this.writeFileContent(filePath, JSON.stringify(data, null, 2));
     }
 }

@@ -1,4 +1,4 @@
-import { VSCodeAPI } from '../../communication/send/manual_vscode';
+import { VSCodeAPI } from '../../communication/send/api';
 import { useMarkdownStore } from '../../store/markdown/store';
 
 // 简化的测试功能管理器

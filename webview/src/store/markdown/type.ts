@@ -17,6 +17,9 @@ export interface Block {
   id: string; // block的ID，随机分配，保证映射
   lines: string[]; // block的数据，存的是所有行的数据，可以进行反序列化
   type: BlockType; // block的类型
+  filePath?: string; // block的文件路径
+  storage?: any; // block的存储数据，比如excalidraw的data
+  isLoading?: boolean; // block的加载状态，比如excalidraw的加载状态
 }
 
 export interface Document {

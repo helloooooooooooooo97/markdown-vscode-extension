@@ -26,9 +26,17 @@ export interface UpdateFileMetadataMessage extends WebviewMessage {
 }
 
 // 文件内容响应消息
+
+
+export enum FileType {
+    Markdown = "markdown",
+    Excalidraw = "excalidraw",
+}
+
 export interface ReadFileContentResponseMessage extends WebviewMessage {
     command: ExtensionCommand.readFileContentResponse;
     filePath: string;
+    fileType: FileType;
     content: string;
     success: boolean;
     error?: string;

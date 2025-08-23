@@ -42,6 +42,7 @@ const BlockWrapper: React.FC<BlockWrapperProps> = ({
             onMouseLeave={handleMouseLeave}
             {...customAttributes}
         >
+            {block.id} {block.type}
             {/* 可以在这里添加统一的装饰元素 */}
             <div>
                 {children}

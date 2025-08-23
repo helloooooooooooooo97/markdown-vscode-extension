@@ -35,7 +35,7 @@ export class EventController {
         if (editor) {
             const document = editor.document;
             if (FileManager.isMarkdownFile(document)) {
-                EventSource.set(VscodeEventSource.MARKDOWNFILE);
+                EventSource.set(VscodeEventSource.FILE);
                 MarkdownWebviewProvider.currentPanel?.updateMarkdownContent(FileManager.getFileContent(document), document.fileName);
             } else {
                 MarkdownWebviewProvider.currentPanel?.updateMarkdownContent("", "");

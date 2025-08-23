@@ -12,7 +12,8 @@ import {
     UpdateFileMetadataMessage,
     FileInfo,
     ReadFileContentResponseMessage,
-    WriteFileContentResponseMessage
+    WriteFileContentResponseMessage,
+    FileType
 } from "@supernode/shared";
 import EventSource from "./source";
 
@@ -122,7 +123,7 @@ export class MarkdownWebviewProvider {
     }
 
     updateMarkdownContent(content: string, fileName: string): void {
-        if (EventSource.value === VscodeEventSource.MARKDOWNFILE) {
+        if (EventSource.value === VscodeEventSource.FILE) {
             const message: UpdateMarkdownMessage = {
                 command: ExtensionCommand.updateMarkdownContent,
                 content: content,
@@ -140,12 +141,13 @@ export class MarkdownWebviewProvider {
         this.sendMessage(message);
     }
 
-    readFileContentReponse(filePath: string, content: string, success: boolean): void {
+    readFileContentReponse(filePath: string, content: string, success: boolean, fileType: FileType): void {
         const message: ReadFileContentResponseMessage = {
             command: ExtensionCommand.readFileContentResponse,
             filePath: filePath,
             content: content,
-            success: true,
+            success: success,
+            fileType: fileType,
         };
         this.sendMessage(message);
     }

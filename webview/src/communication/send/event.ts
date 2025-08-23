@@ -1,6 +1,5 @@
-import { VSCodeAPI } from './manual_vscode';
+import { VSCodeAPI } from './api';
 
-// 监听器发送
 export class MessageSendManager {
     init(): void {
         window.addEventListener("error", this.handleError);

@@ -40,13 +40,9 @@ class FrontMatterRenderer extends BlockViewRenderer {
             // 提取 frontmatter 内容（去掉开头的 --- 和结尾的 ---）
             const lines = this.block.lines;
             if (lines.length >= 3 && lines[0].trim() === "---" && lines[lines.length - 1].trim() === "---") {
-                const yamlContent = lines.slice(1, -1).join("\n");
-                console.log("YAML content:", yamlContent);
-
                 // 使用 js-yaml 解析 YAML
+                const yamlContent = lines.slice(1, -1).join("\n");
                 const parsedData = yaml.load(yamlContent) as Record<string, any>;
-                console.log("Parsed YAML data:", parsedData);
-
                 if (parsedData) {
                     // 合并解析的数据和默认数据
                     frontmatterData = { ...frontmatterData, ...parsedData };

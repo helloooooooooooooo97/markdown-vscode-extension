@@ -3,6 +3,7 @@
  * 只负责将 Markdown 文本解析为 Block 数据结构数组。
  */
 
+import ExcalidrawUtil from "../../components/markdown/BlockExcalidraw/Util";
 import { Block, BlockType } from "../../store/markdown/type";
 
 /**
@@ -47,7 +48,9 @@ class BlockSchemaParser {
         lines: string[],
         startIndex: number,
         endIndex: number,
-        type: BlockType
+        type: BlockType,
+        filePath?: string,
+        storage?: any
     ): Block {
         const content = lines.slice(startIndex, endIndex + 1).join('\n');
         const id = this.getBlockID(type, startIndex, this.filePath, content);
@@ -55,6 +58,9 @@ class BlockSchemaParser {
             id,
             lines: lines.slice(startIndex, endIndex + 1),
             type: type,
+            filePath: filePath,
+            storage: storage,
+            isLoading: type === BlockType.Excalidraw ? true : false,
         };
         this.blocks.push(block);
         return block;
@@ -212,7 +218,8 @@ class BlockSchemaParser {
             line.trim().startsWith("<BlockExcalidraw") &&
             line.trim().endsWith(">")
         ) {
-            const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Excalidraw);
+            const refer = ExcalidrawUtil.extractReferFromLine(line);
+            const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Excalidraw, refer || "");
             return { block, nextIndex: startIndex + 1 };
         }
         return null;

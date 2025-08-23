@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Card, Button, Tooltip, Modal } from 'antd';
-import { FullscreenOutlined } from '@ant-design/icons';
+import { CloseOutlined, FullscreenOutlined } from '@ant-design/icons';
 import { useMarkdownStore } from '../../store/markdown/store';
 import { renderBlockView } from '../../components/markdown/BlockViewParser';
 import { Block, BlockType } from '../../store/markdown/type';
@@ -131,8 +131,19 @@ const PresentationView: React.FC = () => {
                 {fullscreenSlide !== null && slidesData.slides[fullscreenSlide] && (
                     <Card
                         key={slidesData.slides[fullscreenSlide].id}
-                        title={`幻灯片 ${fullscreenSlide + 1}`}
-                        className="mb-4"
+                        title={
+                            <div className="flex items-center justify-between">
+                                <span>幻灯片 {fullscreenSlide + 1}</span>
+                                <Tooltip title="退出全屏">
+                                    <Button
+                                        type="text"
+                                        icon={<CloseOutlined />}
+                                        onClick={() => setFullscreenSlide(null)}
+                                    />
+                                </Tooltip>
+                            </div>
+                        }
+                        className="mb-4 h-[95vh] overflow-y-auto"
                     >
                         {slidesData.slides[fullscreenSlide].blocks.map((block) => (
                             <div key={block.id}>

@@ -1,2 +1,2 @@
-export { MessageSendManager } from './auto_send';
-export { VSCodeAPI } from './manual_vscode';
+export { MessageSendManager } from './event';
+export { VSCodeAPI } from './api';

@@ -7,7 +7,7 @@ import { VscodeEventSource } from '@supernode/shared';
 import { testMarkdown } from './factory';
 import BlockSchemaParser from '../../pkg/utils/blockSchemParser';
 export interface MarkdownStore {
-    content: string;
+
     blocks: Block[];
     filePath: string; // 当前文件的路径
     source: VscodeEventSource; // 事件来源
@@ -20,7 +20,6 @@ export type Setter = (fn: (state: useMarkdownStoreType) => void) => void;
 // 使用 immer 中间件，分离 mutation 和 queries
 export const useMarkdownStore = create<useMarkdownStoreType>()(
     immer((set, get) => ({
-        content: testMarkdown,
         blocks: new BlockSchemaParser(testMarkdown).parse(),
         filePath: "", // 当前文件的路径
         isLoading: true, // 加载状态

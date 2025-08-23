@@ -23,3 +23,5 @@ export interface OpenLocalFileMessage extends WebviewMessage {
     path: string;
 }
 
+
+

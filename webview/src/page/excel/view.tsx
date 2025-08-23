@@ -8,7 +8,6 @@ import {
   Switch,
   Row,
   Col,
-  Statistic,
   DatePicker,
   message,
   Tooltip,
@@ -21,9 +20,6 @@ import {
   SearchOutlined,
   FilterOutlined,
   ClearOutlined,
-  FileTextOutlined,
-  ClockCircleOutlined,
-  FileOutlined,
   NodeIndexOutlined,
   RadarChartOutlined,
   PushpinOutlined,
@@ -32,7 +28,7 @@ import dayjs from "dayjs";
 import { useFileStore } from "../../store/file/store";
 import { usePinStore } from "../../store/pin/store";
 import { WebviewCommand } from "@supernode/shared";
-import { VSCodeAPI } from "../../communication/send/manual_vscode";
+import { VSCodeAPI } from "../../communication/send/api";
 import { ViewMode } from "../../store/file/type";
 import ViewTable from "./ViewTable";
 import ViewCard from "./ViewCard";
@@ -162,52 +158,6 @@ const FileMetadataView: React.FC = () => {
 
   return (
     <div className="p-6">
-      {/* 标题和统计 */}
-      <div style={{ marginBottom: 24 }}>
-        <Card
-          bordered
-          title="筛选结果统计"
-          extra={
-            <Tooltip title="显示当前筛选条件下的文件统计信息">
-              <span style={{ fontSize: 12, color: '#666' }}>基于筛选条件</span>
-            </Tooltip>
-          }
-        >
-          <Row gutter={16}>
-            <Col span={6}>
-              <Statistic
-                title="符合条件的文件数"
-                value={totalStats.totalFiles}
-                prefix={<FileTextOutlined />}
-              />
-            </Col>
-            <Col span={6}>
-              <Statistic
-                title="符合条件的文件总大小"
-                value={(totalStats.totalSize / 1024 / 1024).toFixed(2)}
-                suffix="MB"
-                prefix={<FileOutlined />}
-              />
-            </Col>
-            <Col span={6}>
-              <Statistic
-                title="符合条件的文件总字数"
-                value={totalStats.totalWords}
-                prefix={<FileTextOutlined />}
-              />
-            </Col>
-            <Col span={6}>
-              <Statistic
-                title="符合条件的文件总阅读时间"
-                value={totalStats.totalReadingTime}
-                suffix="分钟"
-                prefix={<ClockCircleOutlined />}
-              />
-            </Col>
-          </Row>
-        </Card>
-      </div>
-
       {/* 已保存的视图 */}
       {pinnedQueries.length > 0 && (
         <div className="mb-4">
@@ -280,6 +230,22 @@ const FileMetadataView: React.FC = () => {
             />
           </Tooltip>
         </Space>
+      </div>
+
+      {/* 简化的统计信息（用Tag展示） */}
+      <div className="mb-4 flex items-center text-sm text-gray-600">
+        <Tag color="default">
+          <span className="mr-2">📄</span>文件数 {totalStats.totalFiles} 个
+        </Tag>
+        <Tag color="blue">
+          <span className="mr-2">📊</span>总大小 {(totalStats.totalSize / 1024 / 1024).toFixed(1)} MB
+        </Tag>
+        <Tag color="green">
+          <span className="mr-2">📝</span>总字数 {totalStats.totalWords.toLocaleString()} 字
+        </Tag>
+        <Tag color="orange">
+          <span className="mr-2">⏱️</span>阅读时长 {totalStats.totalReadingTime} 分钟
+        </Tag>
       </div>
 
       {/* 筛选面板 */}

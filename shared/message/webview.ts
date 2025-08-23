@@ -53,7 +53,7 @@ export interface GetFileMetadataMessage extends WebviewMessage {
 }
 
 // 读取文件内容消息
-export interface ReadFileContentMessage extends WebviewMessage {
+export interface ReadFileContentRequestMessage extends WebviewMessage {
     command: WebviewCommand.readFileContentRequest;
     filePath: string;
 }

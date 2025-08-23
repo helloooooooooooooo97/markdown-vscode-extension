@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage, CommonCommand, WebviewCommand, ExtensionCommand } from "@supernode/shared";
+import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage, CommonCommand, WebviewCommand, ReadFileContentRequestMessage } from "@supernode/shared";
 import { FileManager } from "../service/file";
 import { MarkdownFileScannerService } from "../service/markdown_file_analyzer";
 import EventSource from "../event/source";
@@ -46,7 +46,7 @@ export class MessageHandler {
                     await this.handleGetFileMetadata(message);
                     break;
                 case WebviewCommand.readFileContentRequest:
-                    await this.handleReadFileContent(message);
+                    await this.handleReadFileContent(message as ReadFileContentRequestMessage);
                     break;
                 case WebviewCommand.writeFileContentRequest:
                     await this.handleWriteFileContent(message);
@@ -115,7 +115,7 @@ export class MessageHandler {
         }
     }
 
-    private async handleReadFileContent(message: any): Promise<void> {
+    private async handleReadFileContent(message: ReadFileContentRequestMessage): Promise<void> {
         try {
             const filePath = message.filePath;
             console.log("读取文件内容:", filePath);
@@ -127,7 +127,7 @@ export class MessageHandler {
             if (!fs.existsSync(filePath)) {
                 console.error("文件不存在:", filePath);
                 if (this.webviewProvider) {
-                    this.webviewProvider.readFileContentReponse(filePath, "", false);
+                    this.webviewProvider.readFileContentReponse(filePath, "", false, message.fileType);
                 }
                 return;
             }
@@ -138,7 +138,7 @@ export class MessageHandler {
 
             // 发送响应到 webview
             if (this.webviewProvider) {
-                this.webviewProvider.readFileContentReponse(filePath, content, true);
+                this.webviewProvider.readFileContentReponse(filePath, content, true, message.fileType);
             } else {
                 console.error("webview提供者未设置，无法发送响应");
             }
@@ -146,7 +146,7 @@ export class MessageHandler {
         } catch (error) {
             console.error("读取文件内容失败:", error);
             if (this.webviewProvider) {
-                this.webviewProvider.readFileContentReponse(message.filePath, "", false);
+                this.webviewProvider.readFileContentReponse(message.filePath, "", false, message.fileType);
             }
         }
     }
@@ -156,21 +156,14 @@ export class MessageHandler {
             const filePath = message.filePath;
             const content = message.content;
             console.log("写入文件内容:", filePath);
-
-            // 使用 fs 模块写入文件
             const fs = require('fs');
             const path = require('path');
-
-            // 确保目录存在
             const dir = path.dirname(filePath);
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });
             }
-
             // 写入文件内容
             fs.writeFileSync(filePath, content, 'utf-8');
-            console.log("文件内容写入成功");
-
             // 发送响应到 webview
             if (this.webviewProvider) {
                 this.webviewProvider.writeFileContentResponse(filePath, true);
