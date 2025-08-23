@@ -4,10 +4,13 @@ import { HashRouter as Router } from "react-router-dom";
 import { VSCodeAPI } from "./communication/send/api";
 import { MessageReceiveHandler } from "./communication/receive";
 import { MessageSendManager } from "./communication/send/event";
+import { usePinStore } from "./store/pin/store";
 import MenuRouter from "./page/index";
 import "./App.css";
 
 function App() {
+  const { initialize } = usePinStore();
+
   useEffect(() => {
     // 初始化 VSCode API
     VSCodeAPI.initialize();
@@ -20,11 +23,14 @@ function App() {
     const messageSendManager = new MessageSendManager();
     messageSendManager.init();
 
+    // 初始化PIN store
+    initialize();
+
     return () => {
       messageReceiveHandler.destroy();
       messageSendManager.destroy();
     };
-  }, []);
+  }, [initialize]);
 
   return (
     <ConfigProvider

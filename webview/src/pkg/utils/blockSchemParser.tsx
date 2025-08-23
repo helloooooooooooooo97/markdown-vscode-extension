@@ -209,6 +209,32 @@ class BlockSchemaParser {
     }
 
     /**
+     * 解析引用块
+     */
+    private parseReferenceBlock(startIndex: number): { block: Block; nextIndex: number } | null {
+        const line = this.lines[startIndex];
+        if (typeof line === "string" && line.trim().startsWith(">")) {
+            let i = startIndex + 1;
+            // 继续查找连续的引用行
+            while (i < this.lines.length) {
+                const currentLine = this.lines[i];
+                if (typeof currentLine === "string" && currentLine.trim().startsWith(">")) {
+                    i++;
+                } else if (typeof currentLine === "string" && currentLine.trim() === "") {
+                    // 空行可以分隔引用块
+                    break;
+                } else {
+                    // 非引用行，结束引用块
+                    break;
+                }
+            }
+            const block = this.createBlock(this.lines, startIndex, i - 1, BlockType.Reference);
+            return { block, nextIndex: i - 1 };
+        }
+        return null;
+    }
+
+    /**
      * 解析 Excalidraw 块
      */
     private parseExcalidrawBlock(startIndex: number): { block: Block; nextIndex: number } | null {
@@ -297,6 +323,12 @@ class BlockSchemaParser {
             const todoResult = this.parseTodoBlock(i);
             if (todoResult) {
                 i = todoResult.nextIndex;
+                continue;
+            }
+
+            const referenceResult = this.parseReferenceBlock(i);
+            if (referenceResult) {
+                i = referenceResult.nextIndex;
                 continue;
             }
 

@@ -11,6 +11,7 @@ export enum BlockType {
   Divider = "divider",
   Todo = "todo",
   Excalidraw = "excalidraw",
+  Reference = "reference",
 }
 
 export interface Block {

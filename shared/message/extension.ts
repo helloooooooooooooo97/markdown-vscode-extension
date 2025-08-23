@@ -10,6 +10,7 @@ export enum ExtensionCommand {
     updateFileMetadata = "updateFileMetadata",
     readFileContentResponse = "readFileContentResponse",
     writeFileContentResponse = "writeFileContentResponse",
+    loadPinnedQueriesResponse = "loadPinnedQueriesResponse",
 }
 
 // 更新 Markdown 内容消息
@@ -46,6 +47,14 @@ export interface ReadFileContentResponseMessage extends WebviewMessage {
 export interface WriteFileContentResponseMessage extends WebviewMessage {
     command: ExtensionCommand.writeFileContentResponse;
     filePath: string;
+    success: boolean;
+    error?: string;
+}
+
+// 加载PIN查询响应消息
+export interface LoadPinnedQueriesResponseMessage extends WebviewMessage {
+    command: ExtensionCommand.loadPinnedQueriesResponse;
+    queries: any[];
     success: boolean;
     error?: string;
 }

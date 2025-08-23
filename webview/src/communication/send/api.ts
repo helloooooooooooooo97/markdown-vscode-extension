@@ -1,4 +1,4 @@
-import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage, WriteFileContentMessage, ReadFileContentRequestMessage } from '@supernode/shared';
+import { VscodeEventSource, WebviewMessage, WebviewCommand, WebviewReadyMessage, UpdateMarkdownContentFromWebviewMessage, CommonCommand, ShowMessage, OpenLocalFileMessage, DebugInfoMessage, WebviewErrorMessage, SetEventSourceMessage, WriteFileContentMessage, ReadFileContentRequestMessage, SavePinnedQueriesMessage, LoadPinnedQueriesMessage } from '@supernode/shared';
 import useMarkdownStore from '../../store/markdown/store';
 import { FileType } from '@supernode/shared';
 // VSCode API 接口定义
@@ -132,5 +132,21 @@ export class VSCodeAPI {
 
     static saveExcalidrawData(filePath: string, data: any): void {
         this.writeFileContent(filePath, JSON.stringify(data, null, 2));
+    }
+
+    // PIN 相关方法
+    static savePinnedQueries(queries: any[]): void {
+        const saveMessage: SavePinnedQueriesMessage = {
+            command: WebviewCommand.savePinnedQueries,
+            queries: queries
+        };
+        this.postMessage(saveMessage);
+    }
+
+    static loadPinnedQueries(): void {
+        const loadMessage: LoadPinnedQueriesMessage = {
+            command: WebviewCommand.loadPinnedQueries
+        };
+        this.postMessage(loadMessage);
     }
 }

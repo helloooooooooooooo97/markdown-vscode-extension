@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage, CommonCommand, WebviewCommand, ReadFileContentRequestMessage } from "@supernode/shared";
+import { WebviewMessage, ShowMessage, OpenLocalFileMessage, UpdateMarkdownContentFromWebviewMessage, VscodeEventSource, SetEventSourceMessage, CommonCommand, WebviewCommand, ReadFileContentRequestMessage, SavePinnedQueriesMessage, LoadPinnedQueriesMessage } from "@supernode/shared";
 import { FileManager } from "../service/file";
 import { MarkdownFileScannerService } from "../service/markdown_file_analyzer";
 import EventSource from "../event/source";
@@ -50,6 +50,12 @@ export class MessageHandler {
                     break;
                 case WebviewCommand.writeFileContentRequest:
                     await this.handleWriteFileContent(message);
+                    break;
+                case WebviewCommand.savePinnedQueries:
+                    await this.handleSavePinnedQueries(message as SavePinnedQueriesMessage);
+                    break;
+                case WebviewCommand.loadPinnedQueries:
+                    await this.handleLoadPinnedQueries(message as LoadPinnedQueriesMessage);
                     break;
                 default:
                     console.log("未知消息类型:", message.command);
@@ -175,6 +181,76 @@ export class MessageHandler {
             console.error("写入文件内容失败:", error);
             if (this.webviewProvider) {
                 this.webviewProvider.writeFileContentResponse(message.filePath, false, error instanceof Error ? error.message : String(error));
+            }
+        }
+    }
+
+    private async handleSavePinnedQueries(message: SavePinnedQueriesMessage): Promise<void> {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+
+            // 获取工作区根目录
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                console.error("没有找到工作区");
+                return;
+            }
+
+            const workspaceRoot = workspaceFolders[0].uri.fsPath;
+            const supernodeDir = path.join(workspaceRoot, '.supernode');
+            const pinsFilePath = path.join(supernodeDir, 'pins.json');
+
+            // 确保.supernode目录存在
+            if (!fs.existsSync(supernodeDir)) {
+                fs.mkdirSync(supernodeDir, { recursive: true });
+            }
+
+            // 保存PIN数据
+            const content = JSON.stringify(message.queries, null, 2);
+            fs.writeFileSync(pinsFilePath, content, 'utf-8');
+            console.log("PIN数据已保存到:", pinsFilePath);
+
+        } catch (error) {
+            console.error("保存PIN数据失败:", error);
+        }
+    }
+
+    private async handleLoadPinnedQueries(message: LoadPinnedQueriesMessage): Promise<void> {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+
+            // 获取工作区根目录
+            const workspaceFolders = vscode.workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                console.error("没有找到工作区");
+                return;
+            }
+
+            const workspaceRoot = workspaceFolders[0].uri.fsPath;
+            const pinsFilePath = path.join(workspaceRoot, '.supernode', 'pins.json');
+
+            let queries = [];
+
+            // 如果文件存在，读取PIN数据
+            if (fs.existsSync(pinsFilePath)) {
+                const content = fs.readFileSync(pinsFilePath, 'utf-8');
+                queries = JSON.parse(content);
+                console.log("PIN数据已从文件加载:", pinsFilePath);
+            } else {
+                console.log("PIN文件不存在，使用空数组");
+            }
+
+            // 发送响应到webview
+            if (this.webviewProvider) {
+                this.webviewProvider.loadPinnedQueriesResponse(queries, true);
+            }
+
+        } catch (error) {
+            console.error("加载PIN数据失败:", error);
+            if (this.webviewProvider) {
+                this.webviewProvider.loadPinnedQueriesResponse([], false, error instanceof Error ? error.message : String(error));
             }
         }
     }

@@ -15,6 +15,7 @@ import {
     BlockDivider,
     BlockTodo,
     BlockExcalidraw,
+    BlockReference,
     BlockWrapper,
 } from ".";
 import InlineParser from "../../pkg/utils/inlineParser";
@@ -239,8 +240,8 @@ class AlertRenderer extends BlockViewRenderer {
         const typeMatch = typeLine.match(/^:::\s*(\w+)/);
         const type = typeMatch ? typeMatch[1] : "info";
 
-        // 解析信息块内的每一行内容（跳过第一行的类型标识）
-        const contentLines = this.block.lines.slice(1);
+        // 解析信息块内的每一行内容（跳过第一行的类型标识和最后一行结束标识）
+        const contentLines = this.block.lines.slice(1, -1);
         const parsedContent = contentLines.map((line, lineIndex) => {
             const inlineParts = InlineParser.parseInlineElements(line);
             return (
@@ -307,6 +308,30 @@ class IframeRenderer extends BlockViewRenderer {
     }
 }
 
+// Reference 渲染器
+class ReferenceRenderer extends BlockViewRenderer {
+    render() {
+        // 解析引用块内容，格式为 > xxx
+        const lines = this.block.lines;
+        const referenceContent = lines.map((line, index) => {
+            // 移除开头的 > 符号并解析行内元素
+            const content = line.replace(/^>\s*/, "");
+            const parsedContent = InlineParser.parseInlineElements(content);
+            return (
+                <div key={`reference-line-${this.block.id}-${index}`}>
+                    {parsedContent}
+                </div>
+            );
+        });
+
+        return (
+            <BlockReference key={this.block.id} blockId={this.block.id}>
+                {referenceContent}
+            </BlockReference>
+        );
+    }
+}
+
 // 默认兜底渲染器
 class DefaultRenderer extends BlockViewRenderer {
     render() {
@@ -334,6 +359,7 @@ const blockTypeToRenderer: Record<BlockType, new (block: Block) => BlockViewRend
     [BlockType.Alert]: AlertRenderer,
     [BlockType.Excalidraw]: ExcalidrawRenderer,
     [BlockType.Iframe]: IframeRenderer,
+    [BlockType.Reference]: ReferenceRenderer,
 };
 
 export function renderBlockView(block: Block): React.ReactNode {

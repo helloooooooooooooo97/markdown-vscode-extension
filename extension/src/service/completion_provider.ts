@@ -82,13 +82,12 @@ export class MarkdownCompletionProvider implements vscode.CompletionItemProvider
         // 代码
         items.push(this.createCompletionItem('/codeblock', '代码块', 'codeblock', '代码块', '```\n\n```', range));
         items.push(this.createCompletionItem('/js', 'JavaScript 代码块', 'js', 'JavaScript 代码块', '```javascript\n\n```', range));
+        items.push(this.createCompletionItem('/go', 'Go 代码块', 'go', 'Go 代码块', '```go\n\n```', range));
         items.push(this.createCompletionItem('/ts', 'TypeScript 代码块', 'ts', 'TypeScript 代码块', '```typescript\n\n```', range));
         items.push(this.createCompletionItem('/py', 'Python 代码块', 'py', 'Python 代码块', '```python\n\n```', range));
         items.push(this.createCompletionItem('/java', 'Java 代码块', 'java', 'Java 代码块', '```java\n\n```', range));
         items.push(this.createCompletionItem('/cpp', 'C++ 代码块', 'cpp', 'C++ 代码块', '```cpp\n\n```', range));
         items.push(this.createCompletionItem('/c', 'C 代码块', 'c', 'C 代码块', '```c\n\n```', range));
-        items.push(this.createCompletionItem('/html', 'HTML 代码块', 'html', 'HTML 代码块', '```html\n\n```', range));
-        items.push(this.createCompletionItem('/css', 'CSS 代码块', 'css', 'CSS 代码块', '```css\n\n```', range));
         items.push(this.createCompletionItem('/json', 'JSON 代码块', 'json', 'JSON 代码块', '```json\n\n```', range));
 
         // 链接和图片
@@ -120,7 +119,16 @@ export class MarkdownCompletionProvider implements vscode.CompletionItemProvider
         const items: vscode.CompletionItem[] = [];
 
         // Excalidraw 图表
-        items.push(this.createCompletionItem('/excalidraw', 'Excalidraw 图表', 'excalidraw', 'Excalidraw 图表', '<BlockExcalidraw refer="./diagram.excalidraw">', range));
+        // 生成一个随机文件名，避免覆盖
+        const randomExcalidrawFileName = `ref_${Math.random().toString(36).substring(2, 10)}.excalidraw`;
+        items.push(this.createCompletionItem(
+            '/excalidraw',
+            'Excalidraw 图表',
+            'excalidraw',
+            'Excalidraw 图表',
+            `<BlockExcalidraw refer="./excalidraw/${randomExcalidrawFileName}"/>`,
+            range
+        ));
 
         // 警告框
         items.push(this.createCompletionItem('/alert', '警告框', 'alert', '警告框', ':::warning\n警告内容\n:::', range));
@@ -161,7 +169,7 @@ export class MarkdownCompletionProvider implements vscode.CompletionItemProvider
         ];
 
         console.log(`Created completion item: ${trigger} -> "${insertText}"`);
-        console.log(`Range to delete:`, range.start.character, 'to', range.end.character);
+        console.log(`Range to delete: `, range.start.character, 'to', range.end.character);
 
         // 设置图标
         switch (detail) {

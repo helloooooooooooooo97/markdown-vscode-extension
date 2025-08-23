@@ -14,6 +14,7 @@ import FileView from "./excel/view";
 import PresentationView from "./presentation/view";
 import useMarkdownStore from "../store/markdown/store";
 import { PinnedQuery, usePinStore } from "../store/pin/store";
+import { PinUtil } from "../store/pin/utils";
 import { useFileStore } from "../store/file/store";
 import { VscodeEventSource } from "@supernode/shared";
 const { Sider, Content } = Layout;
@@ -109,7 +110,10 @@ const Router: React.FC = () => {
     const handleSidebarQueryClick = (queryId: string) => {
         const query = pinnedQueries.find(q => q.id === queryId);
         if (query) {
-            setFilter(query.filter);
+            // 使用PinUtil修复PIN的filter，确保Date对象正确转换
+            const fixedFilter = PinUtil.fixPinnedQueryFilter(query.filter);
+
+            setFilter(fixedFilter);
             setSort(query.sort);
             setViewMode(query.viewMode);
             updateLastUsed(query.id);

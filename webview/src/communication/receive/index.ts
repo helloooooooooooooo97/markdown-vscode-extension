@@ -1,6 +1,8 @@
-import { joinPath, ExtensionCommand, FileType, ReadFileContentResponseMessage, UpdateFileMetadataMessage, UpdateMarkdownMessage, VscodeEventSource } from '@supernode/shared';
+import { joinPath, ExtensionCommand, FileType, ReadFileContentResponseMessage, UpdateFileMetadataMessage, UpdateMarkdownMessage, VscodeEventSource, LoadPinnedQueriesResponseMessage } from '@supernode/shared';
 import { useMarkdownStore } from '../../store/markdown/store';
 import { useFileStore } from '../../store/file/store';
+import { usePinStore } from '../../store/pin/store';
+import { PinUtil } from '../../store/pin/utils';
 import BlockSchemaParser from '../../pkg/utils/blockSchemParser';
 import { ExcalidrawUtil } from '../../components/markdown/BlockExcalidraw/Util';
 import { BlockType } from '../../store/markdown/type';
@@ -27,6 +29,9 @@ export class MessageReceiveHandler {
                 break;
             case ExtensionCommand.readFileContentResponse:
                 this.handleReadFileContentResponse(message);
+                break;
+            case ExtensionCommand.loadPinnedQueriesResponse:
+                this.handleLoadPinnedQueriesResponse(message);
                 break;
             default:
                 console.warn(`未处理的命令: ${JSON.stringify(message)}`);
@@ -103,6 +108,20 @@ export class MessageReceiveHandler {
                     setSource(VscodeEventSource.WEBVIEW);
                 }, 100);
             }
+        }
+    }
+
+    private handleLoadPinnedQueriesResponse = (message: LoadPinnedQueriesResponseMessage) => {
+        const { setPinnedQueries } = usePinStore.getState();
+        if (message.success) {
+            console.log("PIN数据加载成功:", message.queries);
+
+            // 使用工具函数修复反序列化后的数据
+            const fixedQueries = message.queries.map((query: any) => PinUtil.fixPinnedQuery(query));
+
+            setPinnedQueries(fixedQueries);
+        } else {
+            console.error("PIN数据加载失败:", message.error);
         }
     }
 }

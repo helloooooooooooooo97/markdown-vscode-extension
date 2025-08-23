@@ -13,6 +13,7 @@ import {
     FileInfo,
     ReadFileContentResponseMessage,
     WriteFileContentResponseMessage,
+    LoadPinnedQueriesResponseMessage,
     FileType
 } from "@supernode/shared";
 import EventSource from "./source";
@@ -156,6 +157,16 @@ export class MarkdownWebviewProvider {
         const message: WriteFileContentResponseMessage = {
             command: ExtensionCommand.writeFileContentResponse,
             filePath: filePath,
+            success: success,
+            error: error,
+        };
+        this.sendMessage(message);
+    }
+
+    loadPinnedQueriesResponse(queries: any[], success: boolean, error?: string): void {
+        const message: LoadPinnedQueriesResponseMessage = {
+            command: ExtensionCommand.loadPinnedQueriesResponse,
+            queries: queries,
             success: success,
             error: error,
         };

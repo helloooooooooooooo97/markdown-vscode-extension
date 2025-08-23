@@ -11,6 +11,8 @@ export enum WebviewCommand {
     getFileMetadata = "getFileMetadata",
     readFileContentRequest = "readFileContentRequest",
     writeFileContentRequest = "writeFileContentRequest",
+    savePinnedQueries = "savePinnedQueries",
+    loadPinnedQueries = "loadPinnedQueries",
 }
 
 // 从 WebView 更新 Markdown 内容消息
@@ -63,4 +65,15 @@ export interface WriteFileContentMessage extends WebviewMessage {
     command: WebviewCommand.writeFileContentRequest;
     filePath: string;
     content: string;
+}
+
+// 保存PIN查询消息
+export interface SavePinnedQueriesMessage extends WebviewMessage {
+    command: WebviewCommand.savePinnedQueries;
+    queries: any[];
+}
+
+// 加载PIN查询消息
+export interface LoadPinnedQueriesMessage extends WebviewMessage {
+    command: WebviewCommand.loadPinnedQueries;
 }

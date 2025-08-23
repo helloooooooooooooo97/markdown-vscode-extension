@@ -27,6 +27,7 @@ import {
 import dayjs from "dayjs";
 import { useFileStore } from "../../store/file/store";
 import { usePinStore } from "../../store/pin/store";
+import { PinUtil } from "../../store/pin/utils";
 import { WebviewCommand } from "@supernode/shared";
 import { VSCodeAPI } from "../../communication/send/api";
 import { ViewMode } from "../../store/file/type";
@@ -97,8 +98,11 @@ const FileMetadataView: React.FC = () => {
 
   // 处理视图点击
   const handleViewClick = (pinnedQuery: any) => {
+    // 使用PinUtil修复PIN的filter，确保Date对象正确转换
+    const fixedFilter = PinUtil.fixPinnedQueryFilter(pinnedQuery.filter);
+
     // 应用视图的筛选条件和排序
-    setFilter(pinnedQuery.filter);
+    setFilter(fixedFilter);
     setSort(pinnedQuery.sort);
     setViewMode(pinnedQuery.viewMode);
     setCurrentQuery(pinnedQuery);
@@ -158,6 +162,7 @@ const FileMetadataView: React.FC = () => {
 
   return (
     <div className="p-6">
+      {JSON.stringify(filter)}
       {/* 已保存的视图 */}
       {pinnedQueries.length > 0 && (
         <div className="mb-4">
