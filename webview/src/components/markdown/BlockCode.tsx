@@ -99,7 +99,6 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, blockId })
                 }}
             />
         </div>
-
     );
 };
 
