@@ -7,6 +7,7 @@ import { AutoPreviewService } from "./service/auto_preview";
 import { MarkdownWebviewProvider } from "./event/webview";
 import { MarkdownFileScannerService } from "./service/markdown_file_analyzer";
 import { EventController } from "./controller/listener";
+import { MarkdownCompletionProvider } from "./service/completion_provider";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("Supernode Markdown Extension is now active!");
@@ -32,12 +33,38 @@ export function activate(context: vscode.ExtensionContext) {
   // 启动文件监听服务
   eventController.startFileWatching();
 
+  // 注册 Markdown 自动完成提供者
+  console.log('Registering completion providers...');
+  const completionProvider = vscode.languages.registerCompletionItemProvider(
+    { scheme: 'file', language: 'markdown' },
+    MarkdownCompletionProvider.getInstance(),
+    '/'
+  );
+
+  const mdxCompletionProvider = vscode.languages.registerCompletionItemProvider(
+    { scheme: 'file', language: 'mdx' },
+    MarkdownCompletionProvider.getInstance(),
+    '/'
+  );
+
+  // 也注册为通用文本文件，以防万一
+  const textCompletionProvider = vscode.languages.registerCompletionItemProvider(
+    { scheme: 'file', language: 'plaintext' },
+    MarkdownCompletionProvider.getInstance(),
+    '/'
+  );
+
+  console.log('Completion providers registered successfully');
+
   // 将所有可释放资源添加到上下文
   context.subscriptions.push(
     ...commandDisposables,
     ...eventDisposables,
     StatusBarManager.getStatusBarItem(),
-    eventController // 添加事件控制器到订阅列表，确保在扩展停用时正确释放资源
+    eventController, // 添加事件控制器到订阅列表，确保在扩展停用时正确释放资源
+    completionProvider,
+    mdxCompletionProvider,
+    textCompletionProvider
   );
 }
 
