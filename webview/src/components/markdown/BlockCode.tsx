@@ -85,6 +85,18 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, blockId })
                     highlightActiveLineGutter: true,
                 }}
                 extensions={[getLanguageExtension(language)]}
+                onKeyDown={(event) => {
+                    // 防止方向键、Tab、Enter 等按键冒泡
+                    if (event.key === 'ArrowUp' ||
+                        event.key === 'ArrowDown' ||
+                        event.key === 'ArrowLeft' ||
+                        event.key === 'ArrowRight' ||
+                        event.key === 'Tab' ||
+                        event.key === 'Enter' ||
+                        event.key === 'Escape') {
+                        event.stopPropagation();
+                    }
+                }}
             />
         </div>
 
