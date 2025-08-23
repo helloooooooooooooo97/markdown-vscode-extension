@@ -23,6 +23,7 @@ import {
   NodeIndexOutlined,
   RadarChartOutlined,
   PushpinOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useFileStore } from "../../store/file/store";
@@ -58,19 +59,30 @@ const FileMetadataView: React.FC = () => {
     getUniqueComplexities,
   } = useFileStore();
 
-  const { addPinnedQuery, pinnedQueries, setCurrentQuery, updateLastUsed, removePinnedQuery } = usePinStore();
+  const { addPinnedQuery, pinnedQueries, setCurrentQuery, updateLastUsed, removePinnedQuery, updatePinnedQuery } = usePinStore();
 
   const [showFilters, setShowFilters] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [pinQueryName, setPinQueryName] = useState('');
   const [pinSidebarIcon, setPinSidebarIcon] = useState('📌');
   const [pinShowInSidebar, setPinShowInSidebar] = useState(true);
+  const [editingQuery, setEditingQuery] = useState<any>(null);
 
   // 快速保存当前查询
   const handleQuickPin = () => {
     setPinQueryName('');
     setPinSidebarIcon('📌');
     setPinShowInSidebar(true);
+    setEditingQuery(null);
+    setShowPinModal(true);
+  };
+
+  // 编辑查询
+  const handleEditQuery = (pinnedQuery: any) => {
+    setPinQueryName(pinnedQuery.name);
+    setPinSidebarIcon(pinnedQuery.sidebarIcon);
+    setPinShowInSidebar(pinnedQuery.showInSidebar);
+    setEditingQuery(pinnedQuery);
     setShowPinModal(true);
   };
 
@@ -90,10 +102,23 @@ const FileMetadataView: React.FC = () => {
       sidebarOrder: 0,
     };
 
-    addPinnedQuery(newQuery);
+    if (editingQuery) {
+      // 编辑现有查询
+      const updatedQuery = {
+        ...editingQuery,
+        ...newQuery,
+      };
+      updatePinnedQuery(editingQuery.id, updatedQuery);
+      message.success('查询已更新');
+    } else {
+      // 创建新查询
+      addPinnedQuery(newQuery);
+      message.success(pinShowInSidebar ? '查询已保存到侧边栏' : '查询已保存');
+    }
+
     setPinQueryName('');
     setShowPinModal(false);
-    message.success(pinShowInSidebar ? '查询已保存到侧边栏' : '查询已保存');
+    setEditingQuery(null);
   };
 
   // 处理视图点击
@@ -172,14 +197,20 @@ const FileMetadataView: React.FC = () => {
             {pinnedQueries.map((pinnedQuery) => (
               <Tag
                 key={pinnedQuery.id}
-                closable
-                onClose={(e) => handleDeleteView(e, pinnedQuery)}
                 onClick={() => handleViewClick(pinnedQuery)}
-                style={{ cursor: 'pointer' }}
-                className="flex items-center gap-1"
+                className="flex items-center gap-2 cursor-pointer"
               >
                 <span>{pinnedQuery.sidebarIcon}</span>
                 <span>{pinnedQuery.name}</span>
+                <div className="flex items-center justify-center">
+                  <MoreOutlined
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditQuery(pinnedQuery);
+                    }}
+                  />
+                </div>
               </Tag>
             ))}
           </div>
@@ -385,15 +416,45 @@ const FileMetadataView: React.FC = () => {
 
       {/* Pin Modal */}
       <Modal
-        title="视图"
+        title={editingQuery ? "编辑视图" : "新建视图"}
         open={showPinModal}
         onOk={handleSavePin}
         onCancel={() => {
           setShowPinModal(false);
           setPinQueryName('');
+          setEditingQuery(null);
         }}
-        okText="保存"
-        cancelText="取消"
+        footer={editingQuery ? [
+          <Button
+            key="delete"
+            danger
+            onClick={() => {
+              handleDeleteView(undefined, editingQuery);
+              setShowPinModal(false);
+              setPinQueryName('');
+              setEditingQuery(null);
+            }}
+          >
+            删除
+          </Button>,
+          <Button
+            key="cancel"
+            onClick={() => {
+              setShowPinModal(false);
+              setPinQueryName('');
+              setEditingQuery(null);
+            }}
+          >
+            取消
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleSavePin}
+          >
+            更新
+          </Button>
+        ] : undefined}
       >
         <div className="mb-4">
           <div className="mb-2 text-sm font-medium">名称</div>
