@@ -9,11 +9,13 @@ export interface ExcalidrawData {
 
 type ExcalidrawElement = any;
 
+// 增加 theme 字段，支持存储夜间/日间模式
 export interface ExcalidrawAppState {
     viewBackgroundColor: string;
     gridSize: number;
     gridStep: number;
     gridModeEnabled: boolean;
+    theme?: "light" | "dark"; // 可选，支持日间/夜间模式
 }
 
 export interface ExcalidrawFiles {
@@ -40,7 +42,8 @@ export class ExcalidrawUtil {
                 viewBackgroundColor: "#ffffff",
                 gridSize: 20,
                 gridStep: 5,
-                gridModeEnabled: true
+                gridModeEnabled: true,
+                theme: "light" // 默认日间模式
             },
             files: {}
         };
@@ -56,7 +59,8 @@ export class ExcalidrawUtil {
                 viewBackgroundColor: parsed.appState?.viewBackgroundColor || "#ffffff",
                 gridSize: parsed.appState?.gridSize || 20,
                 gridStep: parsed.appState?.gridStep || 5,
-                gridModeEnabled: parsed.appState?.gridModeEnabled || true
+                gridModeEnabled: parsed.appState?.gridModeEnabled ?? true,
+                theme: parsed.appState?.theme || "light" // 读取 theme，默认为 light
             },
         };
     }
@@ -70,7 +74,8 @@ export class ExcalidrawUtil {
                 viewBackgroundColor: appState?.viewBackgroundColor || "#ffffff",
                 gridSize: appState?.gridSize || 20,
                 gridStep: appState?.gridStep || 5,
-                gridModeEnabled: appState?.gridModeEnabled || true
+                gridModeEnabled: appState?.gridModeEnabled ?? true,
+                theme: appState?.theme || "light" // 存储 theme，默认为 light
             }
         }
     }

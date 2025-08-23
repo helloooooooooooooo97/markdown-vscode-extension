@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useCallback } from 'react';
 import { Card } from 'antd';
 import { ExcalidrawElement } from '@excalidraw/excalidraw/element/types';
 import { debounce, isEqual } from 'lodash';
-
 import { VSCodeAPI } from '../../../communication/send/api';
 import { Excalidraw } from "@excalidraw/excalidraw";
 import { joinPath } from '@supernode/shared';
