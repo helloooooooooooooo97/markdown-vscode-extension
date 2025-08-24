@@ -264,6 +264,7 @@ class BlockSchemaParser {
         return null;
     }
 
+
     /**
      * 解析信息块
      */
@@ -306,6 +307,9 @@ class BlockSchemaParser {
     parse(): Block[] {
         this.blocks = [];
         this.headingNumberGenerator.reset(); // 重置标题序号生成器
+        const fileName = this.filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") || "欢迎使用SUPERNODE";
+        this.createBlock([fileName], 0, 0, BlockType.Title);
+
         let hasFrontmatter = false;
         if (this.lines.length > 0) {
             const firstLine = this.lines[0];

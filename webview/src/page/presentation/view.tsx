@@ -25,14 +25,14 @@ const PresentationView: React.FC = () => {
         if (blocks.length > 0) {
             slides.push({
                 id: `slide-${slideIndex}`,
-                blocks: [blocks[0]],
+                blocks: [blocks[0], blocks[1]],
             });
             slideIndex++;
         }
 
         // 处理剩余的块，按分隔符分割
         let currentBlocks: any[] = [];
-        for (let i = 1; i < blocks.length; i++) {
+        for (let i = 2; i < blocks.length; i++) {
             const block = blocks[i];
             // Divider 作为分隔符
             if (block.type === BlockType.Divider) {

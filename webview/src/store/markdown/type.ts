@@ -12,6 +12,7 @@ export enum BlockType {
   Todo = "todo",
   Excalidraw = "excalidraw",
   Reference = "reference",
+  Title = "title",
 }
 
 export interface Block {

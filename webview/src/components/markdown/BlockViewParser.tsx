@@ -18,6 +18,7 @@ import {
     BlockReference,
     BlockWrapper,
 } from ".";
+import BlockTitle from "./BlockTitle";
 import InlineParser from "../../pkg/utils/inlineParser";
 import { Block, BlockType } from "../../store/markdown/type";
 import { getDefaultFrontmatterData } from "./BlockFrontMatter/const";
@@ -322,6 +323,17 @@ class IframeRenderer extends BlockViewRenderer {
     }
 }
 
+// Title 渲染器
+class TitleRenderer extends BlockViewRenderer {
+    render() {
+        // 从 BlockTitle 标签中提取 refer 属性
+        const fileName = this.block.lines[0]
+        return (
+            <BlockTitle key={this.block.id} blockId={this.block.id} fileName={fileName} />
+        );
+    }
+}
+
 // Reference 渲染器
 class ReferenceRenderer extends BlockViewRenderer {
     render() {
@@ -364,6 +376,7 @@ const blockTypeToRenderer: Record<BlockType, new (block: Block) => BlockViewRend
     [BlockType.FrontMatter]: FrontMatterRenderer,
     [BlockType.Divider]: DividerRenderer,
     [BlockType.Heading]: HeadingRenderer,
+    [BlockType.Title]: TitleRenderer,
     [BlockType.Paragraph]: ParagraphRenderer,
     [BlockType.List]: ListRenderer,
     [BlockType.Todo]: TodoRenderer,
