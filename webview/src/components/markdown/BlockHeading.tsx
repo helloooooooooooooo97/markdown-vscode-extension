@@ -1,8 +1,12 @@
+import React from "react";
+
 export const Heading: React.FC<{
     level: number;
     children: React.ReactNode;
     blockId: string;
-}> = ({ level, children }) => {
+    showNumber?: boolean; // 是否显示序号
+    number?: string; // 标题序号
+}> = ({ level, children, showNumber = true, number }) => {
     const Tag = `h${level}` as keyof JSX.IntrinsicElements;
 
     // 为不同级别的标题定义样式
@@ -25,10 +29,31 @@ export const Heading: React.FC<{
         }
     };
 
+    // 生成序号
+    const generateNumber = () => {
+        if (!showNumber || !number) return null;
+        return (
+            <>
+                {
+                    level === 1 ?
+                        <span className=" font-bold  select-none">
+                            {number + "、"}
+                        </span>
+                        :
+                        <span className=" font-bold mr-3 select-none">
+                            {number}
+                        </span>
+                }
+            </>
+        );
+    };
+
     return (
         <Tag className={getHeadingStyles(level)}>
+            {generateNumber()}
             {children}
         </Tag>
     );
 };
+
 export default Heading;
