@@ -2,8 +2,8 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useMarkdownStore } from "../../store/markdown/store";
 import { renderBlockView } from "../../components/markdown/BlockViewParser";
 import { BlockType } from "../../store/markdown/type";
-import { Input, Select, Space, Button, Tooltip } from "antd";
-import { SearchOutlined, CloseOutlined, MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
+import { Input, Select, Space, Button } from "antd";
+import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
 import * as yaml from "js-yaml";
 
 const MarkdownRenderer: React.FC = () => {
@@ -11,7 +11,6 @@ const MarkdownRenderer: React.FC = () => {
     const [showSearch, setShowSearch] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [searchType, setSearchType] = useState<string>("all");
-    const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
 
     // 获取header背景设置
     const headerBackground = useMemo(() => {
@@ -59,53 +58,6 @@ const MarkdownRenderer: React.FC = () => {
         return {};
     };
 
-    // 处理折叠逻辑
-    const processCollapsedContent = (view: Array<{ block: any; element: React.ReactNode }>) => {
-        const result: Array<{ block: any; element: React.ReactNode; isCollapsed?: boolean }> = [];
-        let shouldSkip = false;
-        let skipUntilLevel = 0;
-
-        for (const item of view) {
-            const block = item.block;
-
-            // 检查是否是标题块（H1-H6）
-            if (block.type === BlockType.Heading) {
-                const headingText = block.lines?.join(' ') || '';
-                const headingLevel = headingText.match(/^#{1,6}/)?.[0]?.length || 0;
-
-                // 检查当前标题是否被折叠
-                const isCollapsed = collapsedSections.has(headingText);
-
-                if (isCollapsed) {
-                    // 开始跳过内容，直到遇到同级或更高级的标题
-                    shouldSkip = true;
-                    skipUntilLevel = headingLevel;
-                    result.push({ ...item, isCollapsed: true });
-                } else if (shouldSkip && headingLevel <= skipUntilLevel) {
-                    // 遇到同级或更高级的标题，停止跳过
-                    shouldSkip = false;
-                    result.push({ ...item, isCollapsed: false });
-                } else if (shouldSkip) {
-                    // 仍在跳过范围内，跳过这个标题
-                    continue;
-                } else {
-                    // 正常显示
-                    result.push({ ...item, isCollapsed: false });
-                }
-            } else {
-                // 非标题块
-                if (shouldSkip) {
-                    // 跳过被折叠的内容
-                    continue;
-                } else {
-                    result.push(item);
-                }
-            }
-        }
-
-        return result;
-    };
-
     const filteredMarkdown = useMemo(() => {
         const filteredBlocks = blocks.filter(block => block.type !== BlockType.Divider);
         const view = filteredBlocks.map(block => ({ block, element: renderBlockView(block) }));
@@ -113,6 +65,31 @@ const MarkdownRenderer: React.FC = () => {
         let filteredView = view;
         if (!searchText && searchType === "all") {
             filteredView = view;
+            const result: typeof view = [];
+            let minLevel = Infinity;
+            let isExpanded = true;
+            for (let view of filteredView) {
+                console.log(view.block.attrs);
+                const currentLevel = view.block.attrs?.level ?? Infinity;
+
+                // 成功结果
+                if (currentLevel <= minLevel || (currentLevel > minLevel && isExpanded == true)) {
+                    result.push(view);
+                }
+
+                // 更新状态
+                minLevel = Math.min(minLevel, currentLevel);
+
+                // isExpanded从false到true的转换
+                if (view.block.type === BlockType.Heading && isExpanded == false && currentLevel <= minLevel) {
+                    isExpanded = view.block.attrs?.isExpanded ?? true;
+                }
+                // isExpanded从true到false的转换
+                if (view.block.type === BlockType.Heading && isExpanded == true) {
+                    isExpanded = view.block.attrs?.isExpanded ?? true;
+                }
+            }
+            filteredView = result;
         } else {
             filteredView = view.filter(({ block }) => {
                 // 按类型筛选
@@ -129,21 +106,10 @@ const MarkdownRenderer: React.FC = () => {
                 return true;
             });
         }
+        return filteredView;
+    }, [blocks, searchText, searchType]);
 
-        // 应用折叠逻辑
-        return processCollapsedContent(filteredView);
-    }, [blocks, searchText, searchType, collapsedSections]);
 
-    // 处理折叠/展开
-    const handleToggleCollapse = (sectionTitle: string) => {
-        const newCollapsedSections = new Set(collapsedSections);
-        if (newCollapsedSections.has(sectionTitle)) {
-            newCollapsedSections.delete(sectionTitle);
-        } else {
-            newCollapsedSections.add(sectionTitle);
-        }
-        setCollapsedSections(newCollapsedSections);
-    };
 
     // 键盘事件处理
     useEffect(() => {
@@ -239,48 +205,6 @@ const MarkdownRenderer: React.FC = () => {
                     {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "欢迎使用SUPERNODE"}
                 </div>
                 {filteredMarkdown.map(({ block, element }) => {
-                    // 检查是否是标题块（H1-H6）
-                    const isHeading = block.type === BlockType.Heading;
-
-                    if (isHeading) {
-                        const headingText = block.lines?.join(' ') || '';
-                        const headingLevel = headingText.match(/^#{1,6}/)?.[0]?.length || 1;
-                        const isCollapsedSection = collapsedSections.has(headingText);
-
-                        // 根据标题级别调整按钮位置
-                        const leftOffset = -40;
-                        return (
-                            <div key={block.id} className="relative">
-                                {/* 悬浮折叠按钮 */}
-                                <div
-                                    className="absolute top-2 z-10"
-                                    style={{ left: `${leftOffset}px` }}
-                                >
-                                    <Tooltip title={isCollapsedSection ? "展开" : "折叠"}>
-                                        <Button
-                                            type="text"
-                                            size="small"
-                                            icon={isCollapsedSection ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-                                            onClick={() => handleToggleCollapse(headingText)}
-                                            className={
-                                                isCollapsedSection
-                                                    ? "opacity-100"
-                                                    : "opacity-0 hover:opacity-100 transition-opacity duration-200"
-                                            }
-                                            style={{
-                                                color: '#D4D4D4',
-                                                backgroundColor: 'rgba(30, 30, 30, 0.8)',
-                                                border: '1px solid #404040',
-                                                fontSize: Math.max(10, 14 - headingLevel) + 'px'
-                                            }}
-                                        />
-                                    </Tooltip>
-                                </div>
-                                {element}
-                            </div>
-                        );
-                    }
-
                     return (
                         <React.Fragment key={block.id}>
                             {element}

@@ -23,7 +23,7 @@ export interface Block {
   isLoading?: boolean; // block的加载状态，比如excalidraw的加载状态
   startIndex: number; // block的开始索引
   endIndex: number; // block的结束索引
-  attrs?: Record<string, any>; // 块的属性，比如标题的level和number
+  attrs?: Record<string, any>; // 块的属性，比如标题的level和number，是否展开
 }
 
 export interface Document {

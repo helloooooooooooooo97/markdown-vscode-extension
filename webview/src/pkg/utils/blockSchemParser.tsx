@@ -173,13 +173,12 @@ class BlockSchemaParser {
         if (headingMatch) {
             const level = headingMatch[1].length;
             const number = this.headingNumberGenerator.generateNumber(level);
-
             const block = this.createBlock(this.lines, index, index, BlockType.Heading);
             block.attrs = {
                 level: level,
-                number: number
+                number: number,
+                isExpanded: true
             };
-
             return block;
         }
         return null;
