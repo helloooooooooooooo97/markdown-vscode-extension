@@ -248,8 +248,7 @@ const MarkdownRenderer: React.FC = () => {
                         const isCollapsedSection = collapsedSections.has(headingText);
 
                         // 根据标题级别调整按钮位置
-                        const leftOffset = -40 - (headingLevel - 1) * 10;
-
+                        const leftOffset = -40;
                         return (
                             <div key={block.id} className="relative">
                                 {/* 悬浮折叠按钮 */}
@@ -263,7 +262,11 @@ const MarkdownRenderer: React.FC = () => {
                                             size="small"
                                             icon={isCollapsedSection ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                                             onClick={() => handleToggleCollapse(headingText)}
-                                            className="opacity-0 hover:opacity-100 transition-opacity duration-200"
+                                            className={
+                                                isCollapsedSection
+                                                    ? "opacity-100"
+                                                    : "opacity-0 hover:opacity-100 transition-opacity duration-200"
+                                            }
                                             style={{
                                                 color: '#D4D4D4',
                                                 backgroundColor: 'rgba(30, 30, 30, 0.8)',
