@@ -4,7 +4,7 @@ import { renderBlockView } from "../../components/markdown/BlockViewParser";
 import { BlockType } from "../../store/markdown/type";
 import { Input, Select, Space, Button } from "antd";
 import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
-import * as yaml from "js-yaml";
+import HeaderBackground from "../../components/common/HeaderBackground";
 
 const MarkdownRenderer: React.FC = () => {
     const { filePath, blocks } = useMarkdownStore();
@@ -12,51 +12,6 @@ const MarkdownRenderer: React.FC = () => {
     const [searchText, setSearchText] = useState("");
     const [searchType, setSearchType] = useState<string>("all");
 
-    // 获取header背景设置
-    const headerBackground = useMemo(() => {
-        const frontmatterBlock = blocks.find(block => block.type === BlockType.FrontMatter);
-        if (frontmatterBlock && frontmatterBlock.lines) {
-            try {
-                // 提取 frontmatter 内容（去掉开头的 --- 和结尾的 ---）
-                const lines = frontmatterBlock.lines;
-                if (lines.length >= 3 && lines[0].trim() === "---" && lines[lines.length - 1].trim() === "---") {
-                    const yamlContent = lines.slice(1, -1).join("\n");
-                    const parsedData = yaml.load(yamlContent) as Record<string, any>;
-                    return parsedData?.headerBackground || { type: 'color', value: '#1e1e1e', opacity: 0.8 };
-                }
-            } catch (error) {
-                console.error("解析header背景设置失败:", error);
-            }
-        }
-        return { type: 'color', value: '#1e1e1e', opacity: 0.8 };
-    }, [blocks]);
-
-    // 生成header背景样式
-    const getHeaderBackgroundStyle = () => {
-        if (headerBackground.type === 'color') {
-            return {
-                background: headerBackground.value,
-                opacity: headerBackground.opacity || 0.8
-            };
-        } else if (headerBackground.type === 'image') {
-            return {
-                backgroundImage: `url(${headerBackground.value})`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                opacity: headerBackground.opacity || 0.8
-            };
-        } else if (headerBackground.type === 'dag' || headerBackground.type === 'graph') {
-            // 对于DAG/Graph背景，这里可以生成特定的背景样式
-            // 这里暂时使用渐变背景作为示例
-            return {
-                background: `linear-gradient(135deg, #667eea 0%, #764ba2 100%)`,
-                opacity: headerBackground.opacity || 0.8,
-                position: 'relative' as const
-            };
-        }
-        return {};
-    };
 
     const filteredMarkdown = useMemo(() => {
         const filteredBlocks = blocks.filter(block => block.type !== BlockType.Divider);
@@ -155,10 +110,7 @@ const MarkdownRenderer: React.FC = () => {
     return (
         <div>
             {/* Header背景栏 */}
-            <div
-                className="w-full h-[260px] mb-6"
-                style={getHeaderBackgroundStyle()}
-            />
+            <HeaderBackground />
             <div className="p-6 pl-10 relative z-10">
                 {/* 搜索框 */}
                 {showSearch && (

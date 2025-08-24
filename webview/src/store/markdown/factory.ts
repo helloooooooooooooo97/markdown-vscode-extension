@@ -3,10 +3,7 @@ title: "欢迎使用 Supernode"
 author: "Supernode 团队"
 date: "2024-12-19"
 tags: ["Supernode", "VSCode扩展", "Markdown", "文档工具"]
-headerBackground:
-  type: "image"
-  value: "/images/space1.jpg"
-  opacity: 1
+headerBackground: "excalidraw"
 ---
 
 # 欢迎使用 Supernode
@@ -213,6 +210,10 @@ print("斐波那契数列前10项:")
 for i in range(10):
     print(f"F({i}) = {fibonacci(i)}")
 \`\`\`
+
+
+### excalidraw
+<BlockExcalidraw refer="./excalidraw/ref_ilf564l7.excalidraw"/>
 
 ---
 

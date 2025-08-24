@@ -16,6 +16,8 @@ export interface MarkdownMutations {
     setHeadingExpanded: (blockId: string, isExpanded: boolean) => void;
     toggleHeadingExpanded: (blockId: string) => void;
     setAllHeadingsExpanded: (isExpanded: boolean) => void;
+    // 头部背景类型管理
+    setHeaderBackgroundType: (type: string) => void;
 }
 
 // Mutations 操作实现
@@ -120,6 +122,13 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
                     block.attrs.isExpanded = isExpanded;
                 }
             });
+        });
+    },
+
+    // 设置头部背景类型
+    setHeaderBackgroundType: (type: string) => {
+        set((state) => {
+            state.headerBackgroundType = type;
         });
     }
 }); 
