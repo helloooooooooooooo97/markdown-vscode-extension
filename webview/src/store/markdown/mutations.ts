@@ -12,6 +12,10 @@ export interface MarkdownMutations {
     setCurrentFileName: (fileName: string) => void;
     setSource: (source: VscodeEventSource) => void;
     updateBlockIsLoading: (id: string, isLoading: boolean) => void;
+    // 折叠状态管理
+    setHeadingExpanded: (blockId: string, isExpanded: boolean) => void;
+    toggleHeadingExpanded: (blockId: string) => void;
+    setAllHeadingsExpanded: (isExpanded: boolean) => void;
 }
 
 // Mutations 操作实现
@@ -76,6 +80,46 @@ export const createMutations = (set: Setter, _: Getter): MarkdownMutations => ({
             if (block) {
                 block.isLoading = isLoading;
             }
+        });
+    },
+
+    // 设置标题的展开状态
+    setHeadingExpanded: (blockId: string, isExpanded: boolean) => {
+        set((state) => {
+            const block = state.blocks.find((b: Block) => b.id === blockId);
+            if (block && block.type === BlockType.Heading) {
+                if (!block.attrs) {
+                    block.attrs = {};
+                }
+                block.attrs.isExpanded = isExpanded;
+            }
+        });
+    },
+
+    // 切换标题的展开状态
+    toggleHeadingExpanded: (blockId: string) => {
+        set((state) => {
+            const block = state.blocks.find((b: Block) => b.id === blockId);
+            if (block && block.type === BlockType.Heading) {
+                if (!block.attrs) {
+                    block.attrs = {};
+                }
+                block.attrs.isExpanded = !(block.attrs.isExpanded ?? true);
+            }
+        });
+    },
+
+    // 设置所有标题的展开状态
+    setAllHeadingsExpanded: (isExpanded: boolean) => {
+        set((state) => {
+            state.blocks.forEach((block) => {
+                if (block.type === BlockType.Heading) {
+                    if (!block.attrs) {
+                        block.attrs = {};
+                    }
+                    block.attrs.isExpanded = isExpanded;
+                }
+            });
         });
     }
 }); 

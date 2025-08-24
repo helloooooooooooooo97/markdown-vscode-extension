@@ -2,7 +2,7 @@
 export const InlineCode: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => (
-  <span className="bg-[#151111] rounded px-1 py-1 text-red-800">
+  <span className="bg-[#252525] rounded px-1 py-1 text-[#BC4A47]">
     {children}
   </span>
 );

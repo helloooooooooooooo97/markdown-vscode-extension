@@ -5,6 +5,7 @@
 
 import ExcalidrawUtil from "../../components/markdown/BlockExcalidraw/Util";
 import { Block, BlockType } from "../../store/markdown/type";
+import { HeadingNumberGenerator } from "./HeadingNumberGenerator";
 
 /**
  * 块级 Schema 解析器
@@ -14,12 +15,14 @@ class BlockSchemaParser {
     blocks: Block[];
     filePath: string;
     blockIDSet: Set<string>;
+    headingNumberGenerator: HeadingNumberGenerator;
 
     constructor(text: string, filePath: string = "") {
         this.lines = text.split("\n");
         this.blocks = [];
         this.filePath = filePath;
         this.blockIDSet = new Set();
+        this.headingNumberGenerator = new HeadingNumberGenerator();
     }
 
     /**
@@ -168,7 +171,15 @@ class BlockSchemaParser {
     private parseHeading(line: string, index: number): Block | null {
         const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
         if (headingMatch) {
-            return this.createBlock(this.lines, index, index, BlockType.Heading);
+            const level = headingMatch[1].length;
+            const number = this.headingNumberGenerator.generateNumber(level);
+            const block = this.createBlock(this.lines, index, index, BlockType.Heading);
+            block.attrs = {
+                level: level,
+                number: number,
+                isExpanded: true
+            };
+            return block;
         }
         return null;
     }
@@ -204,7 +215,7 @@ class BlockSchemaParser {
             typeof line === "string" &&
             (line.trim().startsWith("[✓]") || line.trim().startsWith("[ ]"))
         ) {
-            const block = this.createBlock(this.lines, startIndex, startIndex + 1, BlockType.Todo);
+            const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Todo);
             return block;
         }
         return null;
@@ -294,6 +305,7 @@ class BlockSchemaParser {
      */
     parse(): Block[] {
         this.blocks = [];
+        this.headingNumberGenerator.reset(); // 重置标题序号生成器
         let hasFrontmatter = false;
         if (this.lines.length > 0) {
             const firstLine = this.lines[0];

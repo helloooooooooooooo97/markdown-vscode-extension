@@ -7,7 +7,6 @@ import { VscodeEventSource } from '@supernode/shared';
 import { testMarkdown } from './factory';
 import BlockSchemaParser from '../../pkg/utils/blockSchemParser';
 export interface MarkdownStore {
-
     blocks: Block[];
     filePath: string; // 当前文件的路径
     source: VscodeEventSource; // 事件来源

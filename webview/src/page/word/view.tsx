@@ -4,33 +4,67 @@ import { renderBlockView } from "../../components/markdown/BlockViewParser";
 import { BlockType } from "../../store/markdown/type";
 import { Input, Select, Space, Button } from "antd";
 import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
+import HeaderBackground from "../../components/common/HeaderBackground";
 
 const MarkdownRenderer: React.FC = () => {
     const { filePath, blocks } = useMarkdownStore();
     const [showSearch, setShowSearch] = useState(false);
     const [searchText, setSearchText] = useState("");
     const [searchType, setSearchType] = useState<string>("all");
+
+
     const filteredMarkdown = useMemo(() => {
         const filteredBlocks = blocks.filter(block => block.type !== BlockType.Divider);
         const view = filteredBlocks.map(block => ({ block, element: renderBlockView(block) }));
+
+        let filteredView = view;
         if (!searchText && searchType === "all") {
-            return view;
+            filteredView = view;
+            const result: typeof view = [];
+            let minLevel = Infinity;
+            let isExpanded = true;
+            for (let view of filteredView) {
+                console.log(view.block.attrs);
+                const currentLevel = view.block.attrs?.level ?? Infinity;
+
+                // 成功结果
+                if (currentLevel <= minLevel || (currentLevel > minLevel && isExpanded == true)) {
+                    result.push(view);
+                }
+
+                // 更新状态
+                minLevel = Math.min(minLevel, currentLevel);
+
+                // isExpanded从false到true的转换
+                if (view.block.type === BlockType.Heading && isExpanded == false && currentLevel <= minLevel) {
+                    isExpanded = view.block.attrs?.isExpanded ?? true;
+                }
+                // isExpanded从true到false的转换
+                if (view.block.type === BlockType.Heading && isExpanded == true) {
+                    isExpanded = view.block.attrs?.isExpanded ?? true;
+                }
+            }
+            filteredView = result;
+        } else {
+            filteredView = view.filter(({ block }) => {
+                // 按类型筛选
+                if (searchType !== "all" && block.type !== searchType) {
+                    return false;
+                }
+                // 按文本筛选
+                if (searchText) {
+                    // 从 block 的 lines 中搜索文本
+                    const blockLines = block.lines || [];
+                    const blockText = blockLines.join(' ').toLowerCase();
+                    return blockText.includes(searchText.toLowerCase());
+                }
+                return true;
+            });
         }
-        return view.filter(({ block }) => {
-            // 按类型筛选
-            if (searchType !== "all" && block.type !== searchType) {
-                return false;
-            }
-            // 按文本筛选
-            if (searchText) {
-                // 从 block 的 lines 中搜索文本
-                const blockLines = block.lines || [];
-                const blockText = blockLines.join(' ').toLowerCase();
-                return blockText.includes(searchText.toLowerCase());
-            }
-            return true;
-        });
+        return filteredView;
     }, [blocks, searchText, searchType]);
+
+
 
     // 键盘事件处理
     useEffect(() => {
@@ -74,56 +108,62 @@ const MarkdownRenderer: React.FC = () => {
     }, []);
 
     return (
-        <div className="p-6">
-            {/* 搜索框 */}
-            {showSearch && (
-                <div className="fixed top-4 right-4 z-10 bg-[#0E2A35] rounded-lg shadow-lg px-3 py-2">
-                    <Space>
-                        <Select
-                            value={searchType}
-                            onChange={setSearchType}
-                            style={{ width: 120 }}
-                            options={[
-                                { value: "all", label: "全部类型" },
-                                { value: BlockType.Paragraph, label: "段落" },
-                                { value: BlockType.Heading, label: "标题" },
-                                { value: BlockType.List, label: "列表" },
-                                { value: BlockType.Code, label: "代码" },
-                                { value: BlockType.Table, label: "表格" },
-                                { value: BlockType.Todo, label: "待办事项" },
-                                { value: BlockType.Latex, label: "LaTeX" },
-                                { value: BlockType.Excalidraw, label: "Excalidraw" },
-                                { value: BlockType.Iframe, label: "Iframe" },
-                                { value: BlockType.FrontMatter, label: "Front Matter" },
-                                { value: BlockType.Alert, label: "警告" },
-                                { value: BlockType.Divider, label: "分隔符" }
-                            ]}
-                        />
-                        <Input
-                            placeholder="搜索文本..."
-                            value={searchText}
-                            onChange={(e) => setSearchText(e.target.value)}
-                            prefix={<SearchOutlined />}
-                            style={{ width: 200 }}
-                        />
-                        <Button
-                            type="text"
-                            icon={<CloseOutlined />}
-                            onClick={() => setShowSearch(false)}
-                            style={{ color: 'white' }}
-                        />
-                    </Space>
-                </div>
-            )}
+        <div>
+            {/* Header背景栏 */}
+            <HeaderBackground />
+            <div className="p-6 pl-10 relative z-10">
+                {/* 搜索框 */}
+                {showSearch && (
+                    <div className="fixed top-4 right-4 z-10 bg-[#0E2A35] rounded-lg shadow-lg px-3 py-2">
+                        <Space>
+                            <Select
+                                value={searchType}
+                                onChange={setSearchType}
+                                style={{ width: 120 }}
+                                options={[
+                                    { value: "all", label: "全部类型" },
+                                    { value: BlockType.Paragraph, label: "段落" },
+                                    { value: BlockType.Heading, label: "标题" },
+                                    { value: BlockType.List, label: "列表" },
+                                    { value: BlockType.Code, label: "代码" },
+                                    { value: BlockType.Table, label: "表格" },
+                                    { value: BlockType.Todo, label: "待办事项" },
+                                    { value: BlockType.Latex, label: "LaTeX" },
+                                    { value: BlockType.Excalidraw, label: "Excalidraw" },
+                                    { value: BlockType.Iframe, label: "Iframe" },
+                                    { value: BlockType.FrontMatter, label: "Front Matter" },
+                                    { value: BlockType.Alert, label: "警告" },
+                                    { value: BlockType.Divider, label: "分隔符" }
+                                ]}
+                            />
+                            <Input
+                                placeholder="搜索文本..."
+                                value={searchText}
+                                onChange={(e) => setSearchText(e.target.value)}
+                                prefix={<SearchOutlined />}
+                                style={{ width: 200 }}
+                            />
+                            <Button
+                                type="text"
+                                icon={<CloseOutlined />}
+                                onClick={() => setShowSearch(false)}
+                                style={{ color: 'white' }}
+                            />
+                        </Space>
+                    </div>
+                )}
 
-            <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
-                {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "文件名"}
+                <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
+                    {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "欢迎使用SUPERNODE"}
+                </div>
+                {filteredMarkdown.map(({ block, element }) => {
+                    return (
+                        <React.Fragment key={block.id}>
+                            {element}
+                        </React.Fragment>
+                    );
+                })}
             </div>
-            {filteredMarkdown.map(({ block, element }) => (
-                <React.Fragment key={block.id}>
-                    {element}
-                </React.Fragment>
-            ))}
         </div>
     );
 };

@@ -21,6 +21,7 @@ import {
 import InlineParser from "../../pkg/utils/inlineParser";
 import { Block, BlockType } from "../../store/markdown/type";
 import { getDefaultFrontmatterData } from "./BlockFrontMatter/const";
+import { useMarkdownStore } from "../../store/markdown/store";
 
 // 抽象基类
 abstract class BlockViewRenderer {
@@ -76,12 +77,25 @@ class HeadingRenderer extends BlockViewRenderer {
     render() {
         const line = this.block.lines[0] || "";
         const match = line.match(/^(#{1,6})\s+(.*)$/);
-        const level = match ? match[1].length : 1;
+        const level = this.block.attrs?.level || (match ? match[1].length : 1);
+        const number = this.block.attrs?.number || '';
+        const isExpanded = this.block.attrs?.isExpanded ?? true;
         const text = match ? match[2] : this.block.lines.join(" ");
         // 参考 blockParser.tsx，解析标题内容的行内元素
         const headingContent = InlineParser.parseInlineElements(text);
+
+        // 导入store来获取toggleHeadingExpanded方法
+        const { toggleHeadingExpanded } = useMarkdownStore.getState();
+
         return (
-            <BlockHeading key={this.block.id} blockId={this.block.id} level={level}>
+            <BlockHeading
+                key={this.block.id}
+                blockId={this.block.id}
+                level={level}
+                number={number}
+                isExpanded={isExpanded}
+                onToggleExpand={() => toggleHeadingExpanded(this.block.id)}
+            >
                 {headingContent}
             </BlockHeading>
         );

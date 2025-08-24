@@ -2,7 +2,6 @@ interface defaultFrontmatterType {
     prev: string[];
     next: string[];
     tags: string[];
-    image: string;
 }
 
 export const getDefaultFrontmatterData = (): defaultFrontmatterType => {
@@ -10,6 +9,5 @@ export const getDefaultFrontmatterData = (): defaultFrontmatterType => {
         prev: [],
         next: [],
         tags: [],
-        image: "",
     };
 };

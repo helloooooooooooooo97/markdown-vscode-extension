@@ -4,9 +4,11 @@ import {
     CalendarOutlined,
     FileTextOutlined,
     NumberOutlined,
+    BgColorsOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ArrayInput, BooleanInput, DateInput, NumberInput, ObjectInput, StringInput } from './input';
+import HeaderBackgroundInput from './input/HeaderBackground';
 import { Typography } from 'antd';
 const { Text } = Typography;
 
@@ -17,11 +19,18 @@ enum DataType {
     DATE = 'date',
     STRING = 'string',
     NUMBER = 'number',
-    OBJECT = 'object'
+    OBJECT = 'object',
+    HEADER_BACKGROUND = 'headerBackground'
 }
 
 // 获取数据类型
 export const getDataType = (value: any): DataType => {
+    // 检查是否为HeaderBackground对象
+    if (typeof value === 'object' && value !== null &&
+        (value.type === 'color' || value.type === 'dag' || value.type === 'graph' || value.type === 'image')) {
+        return DataType.HEADER_BACKGROUND;
+    }
+
     if (Array.isArray(value)) return DataType.ARRAY;
     if (typeof value === 'boolean') return DataType.BOOLEAN;
     if (typeof value === 'number') return DataType.NUMBER;
@@ -44,7 +53,8 @@ export const getTypeIcon = (type: DataType) => {
         [DataType.DATE]: <CalendarOutlined />,
         [DataType.STRING]: <FileTextOutlined />,
         [DataType.NUMBER]: <NumberOutlined />,
-        [DataType.OBJECT]: <FileTextOutlined />
+        [DataType.OBJECT]: <FileTextOutlined />,
+        [DataType.HEADER_BACKGROUND]: <BgColorsOutlined />
     };
     return iconMap[type];
 };
@@ -120,6 +130,17 @@ export const renderInputComponentByValueType = (
                 <ObjectInput
                     value={value}
                     isEditing={isEditing}
+                    onValueChange={onValueChange}
+                    onEditStart={onEditStart}
+                    onEditEnd={onEditEnd}
+                />
+            );
+
+        case DataType.HEADER_BACKGROUND:
+            return (
+                <HeaderBackgroundInput
+                    value={value}
+                    isEditing={false}
                     onValueChange={onValueChange}
                     onEditStart={onEditStart}
                     onEditEnd={onEditEnd}
