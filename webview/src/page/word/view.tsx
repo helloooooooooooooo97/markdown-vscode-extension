@@ -117,7 +117,7 @@ const MarkdownRenderer: React.FC = () => {
             )}
 
             <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
-                {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "文件名"}
+                {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "欢迎使用SUPERNODE"}
             </div>
             {filteredMarkdown.map(({ block, element }) => (
                 <React.Fragment key={block.id}>
