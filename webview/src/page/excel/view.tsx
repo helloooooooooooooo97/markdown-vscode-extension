@@ -132,7 +132,6 @@ const FileMetadataView: React.FC = () => {
     setViewMode(pinnedQuery.viewMode);
     setCurrentQuery(pinnedQuery);
     updateLastUsed(pinnedQuery.id);
-    message.success(`已切换到视图: ${pinnedQuery.name}`);
   };
 
   // 处理删除视图

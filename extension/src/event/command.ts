@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { openPreviewCommand, scanMarkdownFilesCommand, startFileWatchingCommand, stopFileWatchingCommand, refreshProblemsPanelCommand, clearAllDiagnosticsCommand } from "../controller/command";
+import { openPreviewCommand, scanMarkdownFilesCommand, startFileWatchingCommand, stopFileWatchingCommand, refreshProblemsPanelCommand, clearAllDiagnosticsCommand, validatePathsCommand } from "../controller/command";
 
 export class CommandManager {
     private static disposables: vscode.Disposable[] = [];
@@ -10,7 +10,8 @@ export class CommandManager {
             startFileWatchingCommand,
             stopFileWatchingCommand,
             refreshProblemsPanelCommand,
-            clearAllDiagnosticsCommand
+            clearAllDiagnosticsCommand,
+            validatePathsCommand
         );
         return [
             openPreviewCommand,
@@ -18,7 +19,8 @@ export class CommandManager {
             startFileWatchingCommand,
             stopFileWatchingCommand,
             refreshProblemsPanelCommand,
-            clearAllDiagnosticsCommand
+            clearAllDiagnosticsCommand,
+            validatePathsCommand
         ];
     }
 

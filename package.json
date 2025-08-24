@@ -1,8 +1,15 @@
 {
-  "name": "supernode-vscode-extension-new",
+  "name": "supernode-markdown-extension",
   "version": "1.0.0",
   "description": "重构后的 VSCode 扩展，具有更好的架构设计",
-  "private": true,
+  "main": "./extension/dist/index.js",
+  "publisher": "supernode",
+  "displayName": "Supernode Markdown Extension",
+  "workspaces": [
+    "shared",
+    "extension",
+    "webview"
+  ],
   "scripts": {
     "build": "npm run build:shared && npm run build:extension && npm run build:webview",
     "build:shared": "cd shared && npm run build",
@@ -25,6 +32,92 @@
   },
   "engines": {
     "node": ">=16.0.0",
-    "npm": ">=8.0.0"
+    "npm": ">=8.0.0",
+    "vscode": "^1.74.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/helloooooooooooooo97/markdown-vscode-extension"
+  },
+  "license": "MIT-NC",
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "configuration": {
+      "title": "Supernode Markdown Extension",
+      "properties": {
+        "supernode.autoOpenPreview": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否在扩展激活时自动开启预览面板"
+        },
+        "supernode.previewPosition": {
+          "type": "string",
+          "enum": [
+            "beside",
+            "active",
+            "second"
+          ],
+          "default": "beside",
+          "description": "预览面板的显示位置"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "supernode.openPreview",
+        "title": "打开 Markdown 预览",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.scanMarkdownFiles",
+        "title": "扫描 Markdown 文件",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.startFileWatching",
+        "title": "启动文件监听",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.stopFileWatching",
+        "title": "停止文件监听",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.refreshProblemsPanel",
+        "title": "刷新 Problems 面板",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.clearAllDiagnostics",
+        "title": "清除所有诊断",
+        "category": "Supernode"
+      },
+      {
+        "command": "supernode.validatePaths",
+        "title": "验证路径配置",
+        "category": "Supernode"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "supernode.openPreview",
+          "when": "editorLangId == markdown || editorLangId == mdx"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "supernode.openPreview",
+          "when": "editorLangId == markdown || editorLangId == mdx",
+          "group": "navigation"
+        }
+      ]
+    }
   }
 }

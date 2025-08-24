@@ -8,9 +8,20 @@ import { MarkdownWebviewProvider } from "./event/webview";
 import { MarkdownFileScannerService } from "./service/markdown_file_analyzer";
 import { EventController } from "./controller/listener";
 import { MarkdownCompletionProvider } from "./service/completion_provider";
+import { PathConfig } from "./service/path_config";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log("Supernode Markdown Extension is now active!");
+
+  // 初始化路径配置
+  PathConfig.initialize(context);
+
+  // 验证关键路径
+  if (!PathConfig.validatePaths()) {
+    console.error("❌ 关键路径验证失败，扩展可能无法正常工作");
+  } else {
+    console.log("✅ 所有关键路径验证通过");
+  }
 
   // 初始化事件控制器
   const eventController = new EventController(context);

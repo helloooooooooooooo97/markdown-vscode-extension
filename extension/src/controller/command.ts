@@ -1,5 +1,6 @@
 import { MarkdownWebviewProvider } from "../event/webview";
 import { MarkdownFileScannerService } from "../service/markdown_file_analyzer";
+import { PathConfig } from "../service/path_config";
 import * as vscode from "vscode";
 
 export const openPreviewCommand = vscode.commands.registerCommand(
@@ -46,6 +47,18 @@ export const clearAllDiagnosticsCommand = vscode.commands.registerCommand(
     () => {
         MarkdownFileScannerService.clearAllDiagnostics();
         vscode.window.showInformationMessage("已清除所有诊断信息");
+    }
+);
+
+export const validatePathsCommand = vscode.commands.registerCommand(
+    "supernode.validatePaths",
+    () => {
+        const isValid = PathConfig.validatePaths();
+        if (isValid) {
+            vscode.window.showInformationMessage("✅ 所有路径验证通过");
+        } else {
+            vscode.window.showErrorMessage("❌ 路径验证失败，请检查控制台输出");
+        }
     }
 );
 

@@ -12,7 +12,7 @@
     "vscode": "^1.74.0"
   },
   "dependencies": {
-    "@supernode/shared": "file:../shared",
+    "@supernode/shared": "*",
     "gray-matter": "^4.0.3",
     "mdast": "^2.3.2",
     "remark-parse": "^11.0.0",
@@ -24,81 +24,5 @@
     "@types/vscode": "^1.74.0",
     "rimraf": "^5.0.0",
     "typescript": "^5.0.0"
-  },
-  "publisher": "supernode",
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "contributes": {
-    "configuration": {
-      "title": "Supernode Markdown Extension",
-      "properties": {
-        "supernode.autoOpenPreview": {
-          "type": "boolean",
-          "default": true,
-          "description": "是否在扩展激活时自动开启预览面板"
-        },
-        "supernode.previewPosition": {
-          "type": "string",
-          "enum": [
-            "beside",
-            "active",
-            "second"
-          ],
-          "default": "beside",
-          "description": "预览面板的显示位置"
-        }
-      }
-    },
-    "commands": [
-      {
-        "command": "supernode.openPreview",
-        "title": "打开 Markdown 预览",
-        "category": "Supernode"
-      },
-      {
-        "command": "supernode.scanMarkdownFiles",
-        "title": "扫描 Markdown 文件",
-        "category": "Supernode"
-      },
-      {
-        "command": "supernode.startFileWatching",
-        "title": "启动文件监听",
-        "category": "Supernode"
-      },
-      {
-        "command": "supernode.stopFileWatching",
-        "title": "停止文件监听",
-        "category": "Supernode"
-      },
-      {
-        "command": "supernode.refreshProblemsPanel",
-        "title": "刷新 Problems 面板",
-        "category": "Supernode"
-      },
-      {
-        "command": "supernode.clearAllDiagnostics",
-        "title": "清除所有诊断",
-        "category": "Supernode"
-      }
-    ],
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "supernode.openPreview",
-          "when": "editorLangId == markdown || editorLangId == mdx"
-        }
-      ],
-      "editor/title": [
-        {
-          "command": "supernode.openPreview",
-          "when": "editorLangId == markdown || editorLangId == mdx",
-          "group": "navigation"
-        }
-      ]
-    }
   }
 }
