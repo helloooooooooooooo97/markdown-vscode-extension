@@ -4,9 +4,13 @@
   "description": "VSCode 扩展核心",
   "main": "./dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w",
-    "clean": "rimraf dist"
+    "build": "node esbuild.config.js",
+    "build:dev": "node esbuild.config.js dev",
+    "build:prod": "node esbuild.config.js prod",
+    "build:watch": "node esbuild.config.js watch",
+    "clean": "rimraf dist",
+    "dev": "npm run build:dev && code --extensionDevelopmentPath=.",
+    "package": "npm run build:prod && vsce package"
   },
   "engines": {
     "vscode": "^1.74.0"
@@ -22,7 +26,9 @@
     "@types/mdast": "^4.0.4",
     "@types/node": "^18.0.0",
     "@types/vscode": "^1.74.0",
+    "esbuild": "^0.19.0",
     "rimraf": "^5.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "@vscode/vsce": "^2.15.0"
   }
 }
