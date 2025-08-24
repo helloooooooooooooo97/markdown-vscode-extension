@@ -15,7 +15,7 @@ export interface ExcalidrawAppState {
     gridSize: number;
     gridStep: number;
     gridModeEnabled: boolean;
-    theme?: "light" | "dark"; // 可选，支持日间/夜间模式
+    theme?: "light" | "dark";
 }
 
 export interface ExcalidrawFiles {
@@ -39,11 +39,11 @@ export class ExcalidrawUtil {
             source: "localfile",
             elements: [],
             appState: {
-                viewBackgroundColor: "#ffffff",
+                viewBackgroundColor: "#f8f9fa",
                 gridSize: 20,
                 gridStep: 5,
                 gridModeEnabled: true,
-                theme: "light" // 默认日间模式
+                theme: "dark" // 默认夜间模式
             },
             files: {}
         };
@@ -56,11 +56,11 @@ export class ExcalidrawUtil {
             elements: parsed.elements || [],
             files: parsed.files || {},
             appState: {
-                viewBackgroundColor: parsed.appState?.viewBackgroundColor || "#ffffff",
+                viewBackgroundColor: parsed.appState?.viewBackgroundColor || "#f8f9fa",
                 gridSize: parsed.appState?.gridSize || 20,
                 gridStep: parsed.appState?.gridStep || 5,
                 gridModeEnabled: parsed.appState?.gridModeEnabled ?? true,
-                theme: parsed.appState?.theme || "light" // 读取 theme，默认为 light
+                theme: parsed.appState?.theme || "dark"
             },
         };
     }
@@ -71,11 +71,11 @@ export class ExcalidrawUtil {
             elements: elements || [],
             files: files || {},
             appState: {
-                viewBackgroundColor: appState?.viewBackgroundColor || "#ffffff",
+                viewBackgroundColor: appState?.viewBackgroundColor || "#f8f9fa",
                 gridSize: appState?.gridSize || 20,
                 gridStep: appState?.gridStep || 5,
-                gridModeEnabled: appState?.gridModeEnabled ?? true,
-                theme: appState?.theme || "light" // 存储 theme，默认为 light
+                gridModeEnabled: appState?.gridModeEnabled !== undefined ? appState.gridModeEnabled : true,
+                theme: appState?.theme || "dark"
             }
         }
     }

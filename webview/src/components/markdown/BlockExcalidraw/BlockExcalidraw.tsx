@@ -79,20 +79,21 @@ const BlockExcalidraw: React.FC<BlockExcalidrawProps> = ({ refer, blockId }) => 
                 </div>
             }
         >
-            <div className="min-h-[400px] border border-gray-200 rounded-md overflow-hidden relative">
-                <div style={{ height: '600px' }}>
+            <div className="min-h-[70vh] rounded-md overflow-hidden relative">
+                <div style={{ height: '70vh' }}>
                     {currentBlock?.isLoading ?
                         <Excalidraw
                             key={`excalidraw-loading-${blockId}`}
+                            initialData={ExcalidrawUtil.emptyExcalidrawData}
                             onChange={onChangeHandler}
                         />
                         :
                         <Excalidraw
                             key={`excalidraw-${blockId}`}
                             initialData={{
-                                elements: excalidrawData.elements as any,
-                                appState: excalidrawData.appState,
-                                files: excalidrawData.files
+                                elements: excalidrawData.elements || ExcalidrawUtil.emptyExcalidrawData.elements,
+                                appState: excalidrawData.appState || ExcalidrawUtil.emptyExcalidrawData.appState,
+                                files: excalidrawData.files || ExcalidrawUtil.emptyExcalidrawData.files,
                             }}
                             onChange={onChangeHandler}
                         />
