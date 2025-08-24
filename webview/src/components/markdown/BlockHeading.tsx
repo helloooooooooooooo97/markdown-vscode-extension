@@ -17,19 +17,13 @@ export const Heading: React.FC<{
     const getHeadingStyles = (level: number) => {
         switch (level) {
             case 1:
-                return "text-4xl font-bold mt-6 mb-4";
+                return "text-[1.875em] font-bold mt-6 mb-4";
             case 2:
-                return "text-3xl font-bold mt-5 mb-3 ";
+                return "text-[1.5em] font-bold mt-5 mb-3 ";
             case 3:
-                return "text-2xl font-semibold mt-4 mb-2 ";
-            case 4:
-                return "text-xl font-semibold mt-4 mb-2 ";
-            case 5:
-                return "text-lg font-medium mt-3 mb-2 ";
-            case 6:
-                return "text-base font-medium mt-3 mb-2 ";
+                return "text-[1.25em] font-semibold mt-4 mb-2 ";
             default:
-                return "text-2xl font-semibold mt-4 mb-2 ";
+                return "text-[1em] font-semibold mt-4 mb-2 ";
         }
     };
 

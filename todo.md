@@ -83,3 +83,5 @@ TODO
 81. 对ppt的临时的绘版
 82. word view：树形模式、word模式、自动标题模式、折叠模式、脑图模式
 83. 一键导出成word和pdf
+84. cursor mapping，捕获在markdown的cursor，实时映射到渲染上面去？有点难度
+85. 预留一定的下拉空间，不要让内容撑满，不然不好下拉

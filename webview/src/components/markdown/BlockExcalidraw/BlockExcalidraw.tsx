@@ -69,38 +69,27 @@ const BlockExcalidraw: React.FC<BlockExcalidrawProps> = ({ refer, blockId }) => 
     }, [handleChange]);
 
     return (
-        <Card
-            size="small"
-            className="mb-4"
-            title={
-                <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">📊 Excalidraw 图表</span>
-                    <span className="text-xs text-gray-500">({refer})</span>
-                </div>
-            }
-        >
-            <div className="min-h-[70vh] rounded-md overflow-hidden relative">
-                <div style={{ height: '70vh' }}>
-                    {currentBlock?.isLoading ?
-                        <Excalidraw
-                            key={`excalidraw-loading-${blockId}`}
-                            initialData={ExcalidrawUtil.emptyExcalidrawData}
-                            onChange={onChangeHandler}
-                        />
-                        :
-                        <Excalidraw
-                            key={`excalidraw-${blockId}`}
-                            initialData={{
-                                elements: excalidrawData.elements || ExcalidrawUtil.emptyExcalidrawData.elements,
-                                appState: excalidrawData.appState || ExcalidrawUtil.emptyExcalidrawData.appState,
-                                files: excalidrawData.files || ExcalidrawUtil.emptyExcalidrawData.files,
-                            }}
-                            onChange={onChangeHandler}
-                        />
-                    }
-                </div>
+        <div className="min-h-[70vh] rounded-md overflow-hidden relative">
+            <div style={{ height: '70vh' }}>
+                {currentBlock?.isLoading ?
+                    <Excalidraw
+                        key={`excalidraw-loading-${blockId}`}
+                        initialData={ExcalidrawUtil.emptyExcalidrawData}
+                        onChange={onChangeHandler}
+                    />
+                    :
+                    <Excalidraw
+                        key={`excalidraw-${blockId}`}
+                        initialData={{
+                            elements: excalidrawData.elements || ExcalidrawUtil.emptyExcalidrawData.elements,
+                            appState: excalidrawData.appState || ExcalidrawUtil.emptyExcalidrawData.appState,
+                            files: excalidrawData.files || ExcalidrawUtil.emptyExcalidrawData.files,
+                        }}
+                        onChange={onChangeHandler}
+                    />
+                }
             </div>
-        </Card>
+        </div>
     );
 };
 
