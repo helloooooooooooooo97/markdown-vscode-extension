@@ -1,9 +1,3 @@
----
-prev: []
-next: []
-tags: []
-image: ''
----
 # Supernode Markdown VSCode Extension
 一个功能强大的 VSCode Markdown 预览扩展，提供实时预览、智能文件管理和丰富的配置选项。
 ## ✨ 主要功能

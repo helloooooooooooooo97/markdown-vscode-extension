@@ -25,7 +25,7 @@ const ViewTable: React.FC<ViewTableProps> = ({
   // 表格列定义
   const columns = [
     {
-      title: "欢迎使用SUPERNODE",
+      title: "文件名",
       dataIndex: "fileName",
       key: "fileName",
       sorter: true,
