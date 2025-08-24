@@ -238,7 +238,7 @@ const MarkdownRenderer: React.FC = () => {
                 <div className="text-4xl font-semibold pb-4 text-[#D4D4D4]">
                     {filePath ? filePath.split(/[\\/]/).pop()?.replace(/\.[^/.]+$/, "") : "欢迎使用SUPERNODE"}
                 </div>
-                {filteredMarkdown.map(({ block, element, isCollapsed }) => {
+                {filteredMarkdown.map(({ block, element }) => {
                     // 检查是否是标题块（H1-H6）
                     const isHeading = block.type === BlockType.Heading;
 

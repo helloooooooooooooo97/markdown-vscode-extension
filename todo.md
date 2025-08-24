@@ -83,3 +83,5 @@ URGENT
 16. notion的style样式对齐
 17. graph展示也是相关的文件
 18. 对ppt的临时的绘版
+19. word view：树形模式、word模式、自动标题模式、折叠模式、脑图模式
+20. 导出成pdf？
