@@ -42,14 +42,14 @@ const GRAPH_OPTIONS = [
 
 // 预定义的图片背景选项
 const IMAGE_OPTIONS = [
-    { label: '火箭发射', value: '/images/rockets/rocket1.jpg' },
-    { label: '太空星系', value: '/images/rockets/space1.jpg' },
-    { label: '海洋风景', value: '/images/rockets/ocean1.jpg' },
-    { label: '森林自然', value: '/images/rockets/forest1.jpg' },
-    { label: '日落美景', value: '/images/rockets/sunset1.jpg' },
-    { label: '抽象艺术', value: '/images/rockets/abstract1.jpg' },
-    { label: '山脉风景', value: '/images/rockets/mountain1.jpg' },
-    { label: '自然风光', value: '/images/rockets/nature1.jpg' }
+    { label: '火箭发射', value: '/images/rocket1.jpg' },
+    { label: '太空星系', value: '/images/space1.jpg' },
+    { label: '海洋风景', value: '/images/ocean1.jpg' },
+    { label: '森林自然', value: '/images/forest1.jpg' },
+    { label: '日落美景', value: '/images/sunset1.jpg' },
+    { label: '抽象艺术', value: '/images/abstract1.jpg' },
+    { label: '山脉风景', value: '/images/mountain1.jpg' },
+    { label: '自然风光', value: '/images/nature1.jpg' }
 ];
 
 const HeaderBackground: React.FC<HeaderBackgroundProps> = ({

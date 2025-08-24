@@ -5,7 +5,7 @@ date: "2024-12-19"
 tags: ["Supernode", "VSCode扩展", "Markdown", "文档工具"]
 headerBackground:
   type: "image"
-  value: "/images/rockets/space1.jpg"
+  value: "/images/space1.jpg"
   opacity: 1
 ---
 

@@ -193,7 +193,7 @@ const MarkdownRenderer: React.FC = () => {
                 className="w-full h-[260px] mb-6"
                 style={getHeaderBackgroundStyle()}
             />
-            <div className="p-6 pl-16 relative z-10">
+            <div className="p-6 pl-10 relative z-10">
                 {/* 搜索框 */}
                 {showSearch && (
                     <div className="fixed top-4 right-4 z-10 bg-[#0E2A35] rounded-lg shadow-lg px-3 py-2">

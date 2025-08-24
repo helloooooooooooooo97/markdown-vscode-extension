@@ -18,7 +18,7 @@ export const getDefaultFrontmatterData = (): defaultFrontmatterType => {
         image: "",
         headerBackground: {
             type: 'image',
-            value: '/images/rockets/space1.jpg',
+            value: '/images/space1.jpg',
             opacity: 1
         }
     };
