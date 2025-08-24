@@ -204,7 +204,7 @@ class BlockSchemaParser {
             typeof line === "string" &&
             (line.trim().startsWith("[✓]") || line.trim().startsWith("[ ]"))
         ) {
-            const block = this.createBlock(this.lines, startIndex, startIndex + 1, BlockType.Todo);
+            const block = this.createBlock(this.lines, startIndex, startIndex, BlockType.Todo);
             return block;
         }
         return null;
