@@ -27,7 +27,7 @@
     "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/lang-yaml": "^6.1.2",
     "@excalidraw/excalidraw": "^0.18.0",
-    "@supernode/shared": "*",
+    "@supernode/shared": "file:../shared",
     "@types/js-yaml": "^4.0.9",
     "@types/katex": "^0.16.7",
     "@types/react-router-dom": "^5.3.3",

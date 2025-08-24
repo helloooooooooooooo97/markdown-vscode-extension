@@ -2,29 +2,22 @@
   "name": "supernode-markdown-extension",
   "version": "1.0.0",
   "description": "重构后的 VSCode 扩展，具有更好的架构设计",
-  "main": "./extension/dist/index.js",
+  "main": "./vscode/dist/index.js",
   "publisher": "supernode",
   "displayName": "Supernode Markdown Extension",
-  "workspaces": [
-    "shared",
-    "extension",
-    "webview"
-  ],
   "scripts": {
-    "build": "npm run build:shared && npm run build:extension && npm run build:webview",
+    "build": "npm run build:shared && npm run build:vscode && npm run build:webview",
     "build:shared": "cd shared && npm run build",
-    "build:extension": "cd extension && npm run build",
+    "build:vscode": "cd vscode && npm run build",
     "build:webview": "cd webview && npm run build",
-    "dev": "concurrently \"npm run dev:extension\" \"npm run dev:webview\"",
-    "dev:extension": "cd extension && npm run watch",
-    "dev:webview": "cd webview && npm run build:watch",
-    "clean": "npm run clean:shared && npm run clean:extension && npm run clean:webview",
+    "dev": "concurrently \"npm run dev:vscode\"",
+    "dev:vscode": "cd vscode && npm run watch",
+    "clean": "npm run clean:shared && npm run clean:vscode",
     "clean:shared": "cd shared && npm run clean",
-    "clean:extension": "cd extension && npm run clean",
-    "clean:webview": "cd webview && npm run clean",
-    "install:all": "npm install && npm run install:shared && npm run install:extension && npm run install:webview",
+    "clean:vscode": "cd vscode && npm run clean",
+    "install:all": "npm install && npm run install:shared && npm run install:vscode && npm run install:webview",
     "install:shared": "cd shared && npm install",
-    "install:extension": "cd extension && npm install",
+    "install:vscode": "cd vscode && npm install",
     "install:webview": "cd webview && npm install"
   },
   "devDependencies": {
@@ -44,7 +37,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onLanguage:markdown",
+    "onLanguage:mdx"
   ],
   "contributes": {
     "configuration": {

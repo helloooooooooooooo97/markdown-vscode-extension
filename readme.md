@@ -1,316 +1,77 @@
 # Supernode Markdown VSCode Extension
 
-一个基于面向对象设计（OOD）原则构建的 VSCode Markdown 预览扩展，提供实时预览、文件操作和智能配置管理功能。
+一个功能强大的 VSCode Markdown 预览扩展，提供实时预览、智能文件管理和丰富的配置选项。
 
-## 🏗️ 整体架构
+## ✨ 主要功能
 
-### 架构设计原则
+### 🎯 实时 Markdown 预览
+- **智能预览**：自动检测 Markdown 文件并开启预览
+- **多位置显示**：支持在编辑器旁边、当前位置或第二列显示预览
+- **实时更新**：文件内容变化时自动刷新预览
+- **响应式布局**：适配不同屏幕尺寸和编辑器布局
 
-本项目采用**面向对象设计（OOD）**原则，遵循以下核心设计模式：
+### 📁 智能文件管理
+- **自动扫描**：启动时自动扫描工作目录下的所有 Markdown 文件
+- **文件统计**：生成详细的文件统计报告（文件数量、大小、修改时间等）
+- **JSON 导出**：将扫描结果导出为 JSON 格式，便于数据分析
+- **文件监听**：实时监听文件变化，自动更新统计信息
 
-- **单一职责原则（SRP）**: 每个类只负责一个特定功能
-- **开闭原则（OCP）**: 对扩展开放，对修改封闭
-- **依赖倒置原则（DIP）**: 依赖抽象而非具体实现
-- **单例模式**: 确保全局唯一实例
-- **策略模式**: 灵活的消息处理策略
+### ⚙️ 灵活配置
+- **自动预览开关**：可选择是否在扩展激活时自动开启预览
+- **预览位置设置**：自定义预览面板的显示位置
+- **路径验证**：内置路径验证工具，确保扩展正常运行
 
-### 目录结构
+## 🚀 快速开始
 
-```
-extension/src/
-├── types/                    # 类型定义
-│   └── messages.ts          # 消息接口定义
-├── managers/                # 管理器层
-│   ├── ConfigurationManager.ts  # 配置管理
-│   ├── FileManager.ts           # 文件操作管理
-│   └── StatusBarManager.ts      # 状态栏管理
-├── commands/                # 命令层
-│   └── CommandManager.ts    # 命令注册管理
-├── listeners/               # 监听器层
-│   └── EventListeners.ts    # 事件监听管理
-├── providers/               # 提供者层
-│   └── MarkdownWebviewProvider.ts  # WebView 提供者
-├── services/                # 服务层
-│   └── AutoPreviewService.ts      # 自动预览服务
-└── extension.ts             # 主入口文件
-```
+### 安装扩展
+1. 在 VSCode 中打开扩展面板 (`Ctrl+Shift+X`)
+2. 搜索 "Supernode Markdown Extension"
+3. 点击安装
 
-## 🔧 核心模块详解
+### 基本使用
+1. **打开 Markdown 文件**：扩展会自动检测并显示预览
+2. **手动开启预览**：使用命令面板 (`Ctrl+Shift+P`) 执行 `Supernode: 打开 Markdown 预览`
+3. **查看文件统计**：执行 `Supernode: 扫描 Markdown 文件` 查看工作目录统计
 
-### 1. 类型定义层 (`types/`)
+## 📋 命令列表
 
-**职责**: 定义所有消息接口和数据结构
+| 命令 | 功能 | 快捷键 |
+|------|------|--------|
+| `Supernode: 打开 Markdown 预览` | 手动开启预览面板 | - |
+| `Supernode: 扫描 Markdown 文件` | 扫描并统计 Markdown 文件 | - |
+| `Supernode: 启动文件监听` | 开始监听文件变化 | - |
+| `Supernode: 停止文件监听` | 停止文件监听 | - |
+| `Supernode: 刷新 Problems 面板` | 刷新诊断信息 | - |
+| `Supernode: 清除所有诊断` | 清除所有诊断信息 | - |
+| `Supernode: 验证路径配置` | 验证扩展路径配置 | - |
 
-```typescript
-// messages.ts - 消息类型定义
-interface WebviewMessage {
-  command: string;
-  [key: string]: any;
-}
+## ⚙️ 配置选项
 
-interface UpdateMarkdownMessage extends WebviewMessage {
-  command: "updateMarkdownContent";
-  content: string;
-  fileName: string;
-}
-```
-
-**优势**:
-- 类型安全，减少运行时错误
-- 清晰的接口契约
-- 便于IDE智能提示
-
-### 2. 管理器层 (`managers/`)
-
-#### ConfigurationManager
-**职责**: 统一管理扩展配置
-
-```typescript
-export class ConfigurationManager {
-  public getAutoOpenPreview(): boolean
-  public getPreviewPosition(): string
-  public setAutoOpenPreview(value: boolean): Thenable<void>
+### 自动预览设置
+```json
+{
+  "supernode.autoOpenPreview": true
 }
 ```
+- `true`：扩展激活时自动开启预览
+- `false`：需要手动开启预览
 
-**特性**:
-- 单例模式确保全局唯一
-- 封装配置读写逻辑
-- 提供类型安全的配置访问
-
-#### FileManager
-**职责**: 处理所有文件相关操作
-
-```typescript
-export class FileManager {
-  public isMarkdownFile(document: vscode.TextDocument): boolean
-  public async openLocalFile(relativePath: string, basePath?: string): Promise<void>
-  public async updateMarkdownContent(filePath: string, content: string): Promise<boolean>
+### 预览位置设置
+```json
+{
+  "supernode.previewPosition": "beside"
 }
 ```
+- `"beside"`：在活动编辑器旁边显示（默认）
+- `"active"`：在当前活动编辑器位置显示
+- `"second"`：在第二个编辑器组显示
 
-**特性**:
-- 统一文件操作接口
-- 异步操作处理
-- 错误处理和日志记录
+## 📊 文件扫描功能
 
-#### StatusBarManager
-**职责**: 管理状态栏显示
+### 自动扫描
+扩展启动时会自动扫描工作目录下的所有 `.md` 和 `.mdx` 文件，生成详细的统计报告。
 
-```typescript
-export class StatusBarManager {
-  public show(): void
-  public hide(): void
-  public updateText(text: string): void
-  public updateTooltip(tooltip: string): void
-}
-```
-
-**特性**:
-- 状态栏生命周期管理
-- 动态内容更新
-- 资源自动清理
-
-### 3. 命令层 (`commands/`)
-
-#### CommandManager
-**职责**: 注册和管理所有VSCode命令
-
-```typescript
-export class CommandManager {
-  public registerCommands(): vscode.Disposable[]
-  public dispose(): void
-}
-```
-
-**特性**:
-- 统一命令注册入口
-- 自动资源管理
-- 便于扩展新命令
-
-### 4. 监听器层 (`listeners/`)
-
-#### EventListeners
-**职责**: 处理各种VSCode事件监听
-
-```typescript
-export class EventListeners {
-  public registerFileChangeListener(
-    onMarkdownUpdate: (message: UpdateMarkdownMessage) => void
-  ): vscode.Disposable
-  
-  public registerDocumentChangeListener(
-    onMarkdownUpdate: (message: UpdateMarkdownMessage) => void
-  ): vscode.Disposable
-}
-```
-
-**特性**:
-- 事件驱动的架构
-- 回调函数解耦
-- 自动资源清理
-
-### 5. 提供者层 (`providers/`)
-
-#### MarkdownWebviewProvider
-**职责**: 管理WebView面板和消息处理
-
-```typescript
-export class MarkdownWebviewProvider {
-  public static createOrShow(): void
-  public sendMessage(message: WebviewMessage): void
-  private handleWebviewMessage(message: WebviewMessage): void
-}
-```
-
-**特性**:
-- WebView生命周期管理
-- 消息路由和处理
-- HTML内容生成
-
-### 6. 服务层 (`services/`)
-
-#### AutoPreviewService
-**职责**: 处理自动预览逻辑
-
-```typescript
-export class AutoPreviewService {
-  public start(): void
-  private openPreviewWithSmartLogic(): void
-}
-```
-
-**特性**:
-- 智能预览开启逻辑
-- 配置驱动的行为
-- 错误处理机制
-
-#### MarkdownFileScannerService
-**职责**: 扫描和统计工作目录下的Markdown文件
-
-```typescript
-export class MarkdownFileScannerService {
-  public async scanMarkdownFiles(): Promise<MarkdownFileStats>
-  public async exportToJson(stats: MarkdownFileStats): Promise<string>
-  public displayStatsInOutput(stats: MarkdownFileStats): void
-  public async startScanAndExport(): Promise<void>
-}
-```
-
-**特性**:
-- 自动扫描工作目录下的所有 `.md` 和 `.mdx` 文件
-- 生成详细的文件统计信息
-- 导出JSON格式的报告
-- 在输出面板显示统计结果
-- 支持文件大小、修改时间等详细信息
-
-## 🔄 数据流架构
-
-```mermaid
-graph TD
-    A[VSCode Extension] --> B[EventListeners]
-    B --> C[FileManager]
-    C --> D[MarkdownWebviewProvider]
-    D --> E[WebView]
-    
-    F[ConfigurationManager] --> G[AutoPreviewService]
-    G --> D
-    
-    H[CommandManager] --> D
-    
-    I[StatusBarManager] --> A
-```
-
-### 消息流转过程
-
-1. **文件变化** → `EventListeners` 监听
-2. **事件触发** → `FileManager` 处理文件操作
-3. **数据更新** → `MarkdownWebviewProvider` 发送消息
-4. **界面更新** → WebView 接收并渲染
-
-## 🎯 设计模式应用
-
-### 1. 单例模式
-```typescript
-export class ConfigurationManager {
-  private static instance: ConfigurationManager;
-  
-  public static getInstance(): ConfigurationManager {
-    if (!ConfigurationManager.instance) {
-      ConfigurationManager.instance = new ConfigurationManager();
-    }
-    return ConfigurationManager.instance;
-  }
-}
-```
-
-### 2. 策略模式
-```typescript
-// 消息处理策略
-private handleWebviewMessage(message: WebviewMessage): void {
-  switch (message.command) {
-    case "showMessage":
-      this.handleShowMessage(message as ShowMessage);
-      break;
-    case "openLocalFile":
-      this.handleOpenLocalFile(message as OpenLocalFileMessage);
-      break;
-    // ... 其他策略
-  }
-}
-```
-
-### 3. 观察者模式
-```typescript
-// 事件监听
-const fileChangeDisposable = eventListeners.registerFileChangeListener(
-  (message: UpdateMarkdownMessage) => {
-    if (MarkdownWebviewProvider.currentPanel) {
-      MarkdownWebviewProvider.currentPanel.sendMessage(message);
-    }
-  }
-);
-```
-
-## 🚀 扩展指南
-
-### 添加新功能
-
-1. **新增配置项**
-   ```typescript
-   // 在 ConfigurationManager 中添加
-   public getNewFeature(): boolean {
-     return this.config.get<boolean>('newFeature', false);
-   }
-   ```
-
-2. **新增文件类型支持**
-   ```typescript
-   // 在 FileManager 中修改
-   public isMarkdownFile(document: vscode.TextDocument): boolean {
-     return document.languageId === "markdown" || 
-            document.languageId === "mdx" ||
-            document.languageId === "newFormat"; // 新增
-   }
-   ```
-
-3. **新增命令**
-   ```typescript
-   // 在 CommandManager 中添加
-   const newCommand = vscode.commands.registerCommand(
-     "supernode.newCommand",
-     () => {
-       // 新命令逻辑
-     }
-   );
-   ```
-
-### Markdown文件扫描功能
-
-扩展启动时会自动扫描工作目录下的所有Markdown文件，并生成JSON报告。
-
-#### 扫描结果示例
-
+### 扫描结果示例
 ```json
 {
   "totalFiles": 5,
@@ -334,94 +95,104 @@ const fileChangeDisposable = eventListeners.registerFileChangeListener(
 }
 ```
 
-#### 手动触发扫描
+### 输出位置
+- **JSON 文件**：工作区根目录下的 `markdown-files-{timestamp}.json`
+- **控制台输出**：VSCode 输出面板中的 "Markdown Files Scanner" 频道
+- **通知消息**：扫描完成后会显示通知
 
-使用命令面板（`Ctrl+Shift+P`）执行：
-- `Supernode: 扫描 Markdown 文件`
+## 🎨 界面说明
 
-#### 输出位置
+### 预览面板
+- **标题栏**：显示 "Markdown 预览"
+- **内容区域**：渲染 Markdown 内容
+- **响应式设计**：自动适配编辑器布局
 
-- **JSON文件**: 工作区根目录下的 `markdown-files-{timestamp}.json`
-- **控制台输出**: VSCode 输出面板中的 "Markdown Files Scanner" 频道
-- **通知**: 扫描完成后会显示通知消息
+### 状态栏
+- **扩展状态**：显示扩展运行状态
+- **文件信息**：显示当前文件的基本信息
 
-### 测试策略
+### 输出面板
+- **扫描结果**：显示文件扫描统计信息
+- **错误日志**：显示扩展运行时的错误信息
 
-```typescript
-// 单元测试示例
-describe('ConfigurationManager', () => {
-  it('should return correct auto open preview setting', () => {
-    const configManager = ConfigurationManager.getInstance();
-    expect(configManager.getAutoOpenPreview()).toBe(true);
-  });
-});
-```
+## 🔧 故障排除
 
-## 📊 性能优化
+### 预览不显示
+1. 检查文件是否为 `.md` 或 `.mdx` 格式
+2. 使用 `Supernode: 验证路径配置` 命令检查路径设置
+3. 查看扩展主机控制台的错误信息
 
-### 1. 资源管理
-- 自动清理事件监听器
-- 及时释放WebView资源
-- 避免内存泄漏
+### 文件扫描失败
+1. 确保工作目录有读取权限
+2. 检查是否有足够的磁盘空间
+3. 查看输出面板中的详细错误信息
 
-### 2. 异步处理
-- 文件操作异步化
-- 非阻塞UI更新
-- 错误处理机制
+### 配置不生效
+1. 重启 VSCode
+2. 检查配置文件语法是否正确
+3. 使用命令面板重新加载窗口
 
-### 3. 缓存策略
-- 配置缓存
-- 文件内容缓存
-- 减少重复计算
+## 📈 性能优化
 
-## 🔧 开发环境
+### 推荐设置
+- **自动预览**：对于大型项目，建议关闭自动预览以提高启动速度
+- **文件监听**：在不需要实时更新时，可以停止文件监听以节省资源
+- **定期清理**：定期使用清除诊断命令清理缓存
 
-### 依赖要求
-- Node.js >= 16
-- TypeScript >= 4.5
-- VSCode Extension API
+### 内存管理
+- 扩展会自动管理资源，及时释放不需要的内存
+- 关闭预览面板时会自动清理相关资源
+- 文件监听器会在扩展停用时自动清理
 
-### 构建命令
-```bash
-npm install
-npm run compile
-npm run package
-```
+## 🤝 贡献指南
 
-### 调试配置
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Run Extension",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"]
-    }
-  ]
-}
-```
+### 报告问题
+如果遇到问题，请：
+1. 查看故障排除部分
+2. 检查扩展主机控制台的错误信息
+3. 在 GitHub 上提交 issue，并附上详细的错误信息
 
-## 📈 架构优势
+### 功能建议
+欢迎提出新功能建议：
+1. 在 GitHub 上提交 feature request
+2. 详细描述功能需求和预期效果
+3. 提供使用场景示例
 
-| 特性 | 传统架构 | 当前架构 |
-|------|----------|----------|
-| 代码组织 | 单文件混合 | 模块化分离 |
-| 维护性 | 困难 | 简单 |
-| 可测试性 | 困难 | 容易 |
-| 可扩展性 | 有限 | 高度可扩展 |
-| 团队协作 | 容易冲突 | 并行开发 |
-| 代码复用 | 困难 | 高度复用 |
+## 📄 许可证
 
-## 🎉 总结
+本项目采用 MIT-NC 许可证，详见 [LICENSE](LICENSE) 文件。
 
-这个架构设计体现了现代软件工程的最佳实践：
+## 🏗️ 技术架构
 
-- **模块化**: 清晰的职责分离
-- **可维护**: 易于理解和修改
-- **可扩展**: 支持功能扩展
-- **可测试**: 便于单元测试
-- **高性能**: 优化的资源管理
+### 设计原则
+- **面向对象设计（OOD）**：遵循 SOLID 原则
+- **模块化架构**：清晰的职责分离
+- **事件驱动**：响应式的事件处理机制
+- **资源管理**：自动化的资源清理
 
-通过这种架构，我们构建了一个**企业级**的VSCode扩展，为后续的功能扩展和维护奠定了坚实的基础。
+### 核心模块
+- **配置管理**：统一的配置读写接口
+- **文件操作**：安全的文件处理机制
+- **事件监听**：高效的事件处理系统
+- **WebView 管理**：稳定的预览面板管理
+- **路径配置**：智能的路径管理和验证
+
+### 性能特性
+- **异步处理**：非阻塞的文件操作
+- **缓存策略**：智能的缓存机制
+- **内存优化**：自动化的内存管理
+- **错误处理**：完善的错误恢复机制
+
+## 🎉 更新日志
+
+### v1.0.0
+- ✨ 初始版本发布
+- 🎯 实时 Markdown 预览功能
+- 📁 智能文件扫描和统计
+- ⚙️ 灵活的配置选项
+- 🔧 路径配置管理系统
+- 📊 详细的文件统计报告
+
+---
+
+**享受高效的 Markdown 编辑体验！** 🚀
