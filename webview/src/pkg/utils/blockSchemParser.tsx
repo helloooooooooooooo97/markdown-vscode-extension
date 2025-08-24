@@ -390,6 +390,8 @@ class BlockSchemaParser {
             }
 
             if (typeof line === "string" && line.trim() === "") {
+                // 空行解析成paragraphBlock
+                this.createBlock(this.lines, i, i, BlockType.Paragraph);
                 continue;
             }
 

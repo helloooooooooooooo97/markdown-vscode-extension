@@ -9,7 +9,7 @@ makefile
 todo.md
 
 # 排除源码目录（只保留编译后的文件）
-extension/src/
+vscode/src/
 shared/src/
 webview/src/
 
@@ -51,3 +51,5 @@ out/
 !package.json
 !readme.md
 !LICENSE
+
+.supernode/

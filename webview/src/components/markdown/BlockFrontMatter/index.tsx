@@ -64,8 +64,20 @@ export const FrontmatterComponent: React.FC<{
 
     // 监听 editingData 的变化
     useEffect(() => {
+        // 过滤掉空值
+        const filteredData = Object.fromEntries(
+            Object.entries(editingData).filter(([_, value]) => {
+                // 过滤掉 null、undefined、空字符串、空数组、空对象
+                if (value === null || value === undefined) return false;
+                if (typeof value === 'string' && value.trim() === '') return false;
+                if (Array.isArray(value) && value.length === 0) return false;
+                if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) return false;
+                return true;
+            })
+        );
+
         // 使用 js-yaml 将 JSON 转换为 YAML 字符串
-        const yamlString = yaml.dump(editingData);
+        const yamlString = yaml.dump(filteredData);
         // 构建完整的 frontmatter 字符串（包含分隔符）
         const frontmatterString = `---\n${yamlString}---`;
         // 按行分割 frontmatter 字符串
