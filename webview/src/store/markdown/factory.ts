@@ -3,6 +3,10 @@ title: "欢迎使用 Supernode"
 author: "Supernode 团队"
 date: "2024-12-19"
 tags: ["Supernode", "VSCode扩展", "Markdown", "文档工具"]
+headerBackground:
+  type: "image"
+  value: "/images/rockets/space1.jpg"
+  opacity: 1
 ---
 
 # 欢迎使用 Supernode
@@ -91,6 +95,41 @@ Supernode 启动时会自动扫描工作目录下的所有 Markdown 文件，生
 - 支持完整的 Markdown 语法
 - 实时预览和编辑
 - 语法高亮和格式化
+- **Header背景栏**：支持自定义颜色和DAG/Graph背景
+
+### Header背景栏功能
+Word 视图提供了强大的 Header 背景栏功能，让您可以为文档添加个性化的背景：
+
+#### 背景类型
+- **颜色背景**：支持纯色和渐变背景
+- **图片背景**：内置高质量风景和太空图片
+- **DAG背景**：显示文档的依赖关系图
+- **Graph背景**：展示文档的网络关系图
+
+#### 配置选项
+- **背景类型选择**：颜色、DAG、Graph
+- **背景样式**：预定义样式和自定义选项
+- **透明度调节**：10%-100% 可调节
+- **实时修改**：Modal中实时修改背景效果
+- **取消功能**：可以取消修改恢复到原始设置
+
+#### 配置示例
+\`\`\`yaml
+headerBackground:
+  type: "image"  # 或 "color", "dag", "graph"
+  value: "/images/rockets/rocket1.jpg"
+  opacity: 0.8
+\`\`\`
+
+#### 内置图片选项
+- **火箭发射**：震撼的火箭发射场景
+- **太空星系**：美丽的星系和星云
+- **海洋风景**：宁静的海滩和波浪
+- **森林自然**：茂密的森林和自然风光
+- **日落美景**：绚丽的日落和晚霞
+- **抽象艺术**：现代抽象艺术背景
+- **山脉风景**：雄伟的山脉和峰峦
+- **自然风光**：优美的自然景观
 
 ### 适用场景
 - 编写技术文档

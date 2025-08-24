@@ -3,6 +3,11 @@ interface defaultFrontmatterType {
     next: string[];
     tags: string[];
     image: string;
+    headerBackground?: {
+        type: 'color' | 'dag' | 'graph' | 'image';
+        value: string;
+        opacity?: number;
+    };
 }
 
 export const getDefaultFrontmatterData = (): defaultFrontmatterType => {
@@ -11,5 +16,10 @@ export const getDefaultFrontmatterData = (): defaultFrontmatterType => {
         next: [],
         tags: [],
         image: "",
+        headerBackground: {
+            type: 'image',
+            value: '/images/rockets/space1.jpg',
+            opacity: 1
+        }
     };
 };
