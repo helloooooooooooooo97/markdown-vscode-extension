@@ -239,20 +239,9 @@ export class MarkdownWebviewProvider {
                 vscode.Uri.file(PathConfig.webviewStylePath)
             );
 
-            // 修复：更精确地替换资源文件路径，处理绝对路径和相对路径
             htmlContent = htmlContent
-                .replace(/src="\/assets\/index\.js"/g, `src="${scriptUri.toString()}"`)
-                .replace(/href="\/assets\/index\.css"/g, `href="${styleUri.toString()}"`)
-                .replace(/src="assets\/index\.js"/g, `src="${scriptUri.toString()}"`)
-                .replace(/href="assets\/index\.css"/g, `href="${styleUri.toString()}"`)
-                .replace(/src='\/assets\/index\.js'/g, `src='${scriptUri.toString()}'`)
-                .replace(/href='\/assets\/index\.css'/g, `href='${styleUri.toString()}'`)
-                .replace(/src='assets\/index\.js'/g, `src='${scriptUri.toString()}'`)
-                .replace(/href='assets\/index\.css'/g, `href='${styleUri.toString()}'`);
-
-            console.log("Webview HTML 处理完成");
-            console.log("脚本URI:", scriptUri.toString());
-            console.log("样式URI:", styleUri.toString());
+                .replace("/assets/index.js", scriptUri.toString())
+                .replace("/assets/index.css", styleUri.toString());
 
             return htmlContent;
         } catch (error) {

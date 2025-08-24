@@ -11,9 +11,6 @@
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 "--disable-extensions" // 禁用其他扩展，加快启动
             ],
-            "outFiles": [
-                "${workspaceFolder}/extension/dist/**/*.js"
-            ],
             "sourceMaps": true,
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -27,9 +24,6 @@
                 "--disable-extensions",
                 "--disable-gpu" // 禁用GPU加速
             ],
-            "outFiles": [
-                "${workspaceFolder}/extension/dist/**/*.js"
-            ],
             "sourceMaps": true,
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -40,9 +34,6 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}"
-            ],
-            "outFiles": [
-                "${workspaceFolder}/extension/dist/**/*.js"
             ],
             "preLaunchTask": "npm: build", // 启动前自动构建
             "sourceMaps": true,

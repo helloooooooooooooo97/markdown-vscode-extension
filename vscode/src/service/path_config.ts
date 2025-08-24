@@ -63,15 +63,14 @@ export class PathConfig {
      * 获取 webview 脚本文件路径
      */
     public static get webviewScriptPath(): string {
-        // 修复：根据实际的构建输出，主脚本文件是 index.js
-        return path.join(this.webviewDistPath, "assets", "index.js");
+        return path.join(this.webviewDistPath, "assets/index.js");
     }
 
     /**
      * 获取 webview 样式文件路径
      */
     public static get webviewStylePath(): string {
-        return path.join(this.webviewDistPath, "assets", "index.css");
+        return path.join(this.webviewDistPath, "assets/index.css");
     }
 
     /**
