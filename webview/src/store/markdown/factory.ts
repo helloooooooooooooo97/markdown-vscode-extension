@@ -3,7 +3,6 @@ title: "欢迎使用 Supernode"
 author: "Supernode 团队"
 date: "2024-12-19"
 tags: ["Supernode", "VSCode扩展", "Markdown", "文档工具"]
-headerBackground: "excalidraw"
 ---
 
 # 欢迎使用 Supernode
